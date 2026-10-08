@@ -1,0 +1,30 @@
+# Fichiers de travail internes (jamais suivis par git)
+ROADMAP.md
+CLAUDE.md
+MEMOIRE.md
+
+# Dépendances et sorties de build
+node_modules/
+dist/
+
+# Fichiers générés
+public/catalogue.json
+
+# Journaux
+*.log
+npm-debug.log*
+
+# Variables d'environnement et secrets
+.env
+.env.*
+
+# Tests
+coverage/
+playwright-report/
+test-results/
+
+# Éditeurs et système
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

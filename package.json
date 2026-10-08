@@ -1,0 +1,39 @@
+{
+  "name": "ap3x-records",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AP3X Records - static music listening site",
+  "author": "AP3X Records <ap3x.records@proton.me>",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "homepage": "https://github.com/ap3demak-rgb/Ap3X",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ap3demak-rgb/Ap3X.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ap3demak-rgb/Ap3X/issues",
+    "email": "ap3x.records@proton.me"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.4",
+    "@types/three": "^0.186.0",
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "vite": "^8.3.4"
+  }
+}
