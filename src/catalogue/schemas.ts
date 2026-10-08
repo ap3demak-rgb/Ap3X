@@ -43,6 +43,8 @@ export const FichePisteSchema = z
     artiste: TexteSchema.optional(),
     description: z.string().optional(),
     hashtags: HashtagsSchema,
+    /** Catégories supplémentaires (nom ou identifiant d'un dossier existant). */
+    categories: HashtagsSchema,
     pochette: TexteSchema.optional(),
     date: DateSchema.optional(),
     visible: z.boolean().default(true),
@@ -85,6 +87,8 @@ export const PisteSchema = z.object({
   pochette: TexteSchema.optional(),
   date: DateSchema.optional(),
   categorie: TexteSchema,
+  /** Autres catégories de la piste (en plus de celle de son dossier). */
+  autresCategories: z.array(TexteSchema).optional(),
   album: TexteSchema.optional(),
   numero: z.number().int().min(1).optional(),
   disque: z.number().int().min(1).optional(),
@@ -153,6 +157,9 @@ export const CatalogueSchema = z
     if (albums.size !== catalogue.albums.length) signaler("Identifiants d'albums en double");
     for (const piste of catalogue.pistes) {
       if (!categories.has(piste.categorie)) signaler(`Piste ${piste.id} : catégorie inconnue`);
+      for (const autre of piste.autresCategories ?? []) {
+        if (!categories.has(autre)) signaler(`Piste ${piste.id} : catégorie inconnue « ${autre} »`);
+      }
       if (piste.album !== undefined && !albums.has(piste.album)) {
         signaler(`Piste ${piste.id} : album inconnu`);
       }

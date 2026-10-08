@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
+import { chargerCatalogue } from '../catalogue/charger';
+import { CATEGORIE_FAVORIS, CATEGORIE_TOUT } from '../catalogue/navigation';
 import { EMAIL_CONTACT } from '../constantes';
 import { LANGUES, definirLangue, obtenirLangue, t, type Langue } from '../i18n';
+import { lienCategorie, routeCourante } from '../routeur';
 
 /** Noms des langues dans leur propre langue : volontairement non traduits. */
 export const NOMS_LANGUES: Record<Langue, string> = {
@@ -42,6 +45,45 @@ function lien(href: string, libelle: string): HTMLAnchorElement {
   return a;
 }
 
+/** Filtre par catégorie : liste déroulante qui ouvre la page de la catégorie choisie. */
+function selecteurCategorie(): HTMLElement {
+  const liste = document.createElement('select');
+  liste.className = 'selecteur-categorie';
+  liste.setAttribute('aria-label', t('categorie.filtre'));
+  const route = routeCourante();
+  const actuelle = route.nom === 'categorie' ? route.id : '';
+
+  const ajouter = (valeur: string, texte: string): void => {
+    const option = document.createElement('option');
+    option.value = valeur;
+    option.textContent = texte;
+    option.selected = valeur === actuelle;
+    liste.append(option);
+  };
+  ajouter('', t('categorie.filtre'));
+  ajouter(CATEGORIE_TOUT, t('categorie.tout'));
+  ajouter(CATEGORIE_FAVORIS, t('categorie.favoris'));
+
+  // Les catégories du catalogue s'insèrent entre « Tout » et « Favoris » dès qu'il est chargé.
+  chargerCatalogue()
+    .then((catalogue) => {
+      const favorisOption = [...liste.options].find((o) => o.value === CATEGORIE_FAVORIS);
+      for (const categorie of catalogue.categories) {
+        const option = document.createElement('option');
+        option.value = categorie.slug;
+        option.textContent = categorie.nom;
+        option.selected = categorie.slug === actuelle;
+        liste.insertBefore(option, favorisOption ?? null);
+      }
+    })
+    .catch(() => undefined);
+
+  liste.addEventListener('change', () => {
+    if (liste.value !== '') window.location.hash = lienCategorie(liste.value);
+  });
+  return liste;
+}
+
 export function evitement(cible: HTMLElement): HTMLElement {
   const bouton = document.createElement('button');
   bouton.type = 'button';
@@ -68,8 +110,10 @@ export function entete(): HTMLElement {
   navigation.setAttribute('aria-label', t('nav.principale'));
   navigation.append(
     lien('#/', t('nav.accueil')),
+    lien('#/categories', t('nav.categories')),
     lien('#/albums', t('nav.albums')),
     lien('#/licences', t('nav.licences')),
+    selecteurCategorie(),
   );
 
   en.append(marque, navigation, selecteurLangue());

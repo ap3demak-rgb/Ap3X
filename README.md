@@ -58,10 +58,12 @@ Put MP3 files in `public/musique/`: **one subfolder = one category** (`public/mu
 - Album: a subfolder of a category with an `album.json` (`titre` and the ordered list `pistes`, each a file name or `{ "fichier": "x.mp3", "disque": 2 }`; optional `artiste`, `type` = single / ep / lp / compilation, `date`, `description`, `pochette`, `hashtags`, `licence`, `copyright`, `reference`, `visible`). Without `type`: 1 track = single, 2 to 6 = ep, 7 or more = lp.
 - A file named `cover.png`, `cover.jpg`, `cover.webp` (or `pochette.*`) in a category or album folder is used as its cover. Covers embedded in MP3 files are extracted to `public/pochettes/`.
 - Hashtags come from the sheet and from `#words` in the description.
+- A track belongs to the category of its folder and can join others: list them in its sheet (`"categories": ["techno"]`, by name or identifier) or give it an ID3 genre that matches an existing category. An unknown category in a sheet is reported; an unknown genre is ignored.
+- The category names `tout` and `favoris` are reserved for the "All" and "Favorites" pages.
 
 ## Pages
 
-Home (latest tracks and albums, categories), albums grid with filters (type, category, year) and sort, album page (`#/album/<id>`, tracks grouped by disc, total duration, license), track page (`#/piste/<id>`, large waveform, similar tracks, download if allowed) and licenses. Every track has a waveform (200 bars computed at build time from the MP3 and cached in `.cache/`) that can be clicked or driven with the keyboard to seek.
+Home (latest tracks and albums, categories, popular hashtags cloud), categories (`#/categories`, `#/categorie/<slug>`: albums then standalone tracks, "Play all", sort by newest, oldest, title, duration or artist; `tout` lists everything and `favoris` the tracks you liked, stored in the browser), hashtag pages (`#/tag/<name>`), a category filter in the navigation bar, albums grid with filters (type, category, year) and sort, album page (`#/album/<id>`, tracks grouped by disc, total duration, license), track page (`#/piste/<id>`, large waveform, similar tracks, download if allowed) and licenses. Every track has a waveform (200 bars computed at build time from the MP3 and cached in `.cache/`) that can be clicked or driven with the keyboard to seek.
 
 ## 3D rendering
 

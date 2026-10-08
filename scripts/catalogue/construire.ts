@@ -20,6 +20,7 @@ import {
   type FichePiste,
   type Piste,
 } from '../../src/catalogue/schemas.ts';
+import { CATEGORIES_RESERVEES, categoriesSupplementaires } from './categories.ts';
 import { CalculateurPics } from './pics.ts';
 import {
   arrondir,
@@ -55,6 +56,8 @@ interface Contexte {
   /** Identifiant → chemin source, pour détecter les collisions. */
   identifiants: Map<string, string>;
   pics: CalculateurPics;
+  /** Catégories supplémentaires demandées par piste, résolues quand toutes les catégories sont connues. */
+  supplementaires: Map<string, { chemin: string; demandees: string[]; genres: string[] }>;
 }
 
 const estMp3 = (nom: string): boolean => extname(nom).toLowerCase() === '.mp3';
@@ -198,6 +201,12 @@ async function lirePiste(
       pochette = `pochettes/${urlRelative(`${identifiant}.${extension}`)}`;
     }
   }
+
+  contexte.supplementaires.set(identifiant, {
+    chemin,
+    demandees: fiche.categories,
+    genres: common.genre ?? [],
+  });
 
   let pics: number[] = [];
   try {
@@ -346,6 +355,7 @@ export async function construireCatalogue(options: Options): Promise<Resultat> {
     avertissements: [],
     identifiants: new Map(),
     pics: new CalculateurPics(),
+    supplementaires: new Map(),
   };
   const categories: Categorie[] = [];
   const albums: Album[] = [];
@@ -370,6 +380,12 @@ export async function construireCatalogue(options: Options): Promise<Resultat> {
     const slug = slugifier(entree.name);
     if (slug === '') {
       contexte.erreurs.push(`${dossier} : nom de catégorie inutilisable`);
+      continue;
+    }
+    if ((CATEGORIES_RESERVEES as readonly string[]).includes(slug)) {
+      contexte.erreurs.push(
+        `${dossier} : « ${slug} » est un nom de page réservé, renommer la catégorie`,
+      );
       continue;
     }
     reserverIdentifiant(slug, dossier, contexte);
@@ -448,6 +464,30 @@ export async function construireCatalogue(options: Options): Promise<Resultat> {
       nombrePistes,
       nombreAlbums,
     });
+  }
+
+  // Catégories supplémentaires (fiche ou genre ID3), maintenant que toutes les catégories sont connues.
+  const connues = new Set(categories.map((c) => c.slug));
+  for (const piste of pistes) {
+    const demande = contexte.supplementaires.get(piste.id);
+    if (demande === undefined) continue;
+    const { slugs, inconnues } = categoriesSupplementaires({
+      principale: piste.categorie,
+      demandees: demande.demandees,
+      genres: demande.genres,
+      connues,
+    });
+    for (const nom of inconnues) {
+      contexte.avertissements.push(
+        `${demande.chemin} : catégorie inconnue « ${nom} » dans la fiche, ignorée`,
+      );
+    }
+    if (slugs.length > 0) piste.autresCategories = slugs;
+  }
+  for (const categorie of categories) {
+    categorie.nombrePistes = pistes.filter(
+      (p) => p.categorie === categorie.slug || (p.autresCategories ?? []).includes(categorie.slug),
+    ).length;
   }
 
   // Avertit des doublons probables (même titre et même artiste dans une catégorie).

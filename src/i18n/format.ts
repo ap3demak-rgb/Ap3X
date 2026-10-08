@@ -48,10 +48,22 @@ export function formaterDuree(secondes: number): string {
   return `${simple.format(minutes)}:${deuxChiffres.format(reste)}`;
 }
 
+/** Forme plurielle (clé de traduction) adaptée au nombre, pour la langue courante. */
+function formePlurielle(nombre: number): 'one' | 'few' | 'many' | 'other' {
+  const categorie = new Intl.PluralRules(obtenirLangue()).select(nombre);
+  return categorie === 'one' || categorie === 'few' || categorie === 'many' ? categorie : 'other';
+}
+
+function nombreFormate(nombre: number): string {
+  return new Intl.NumberFormat(obtenirLangue()).format(nombre);
+}
+
 /** « 12 pistes », avec l'accord au pluriel de la langue courante. */
 export function comptePistes(nombre: number): string {
-  const categorie = new Intl.PluralRules(obtenirLangue()).select(nombre);
-  const forme =
-    categorie === 'one' || categorie === 'few' || categorie === 'many' ? categorie : 'other';
-  return tv(`compte.pistes.${forme}`, { n: new Intl.NumberFormat(obtenirLangue()).format(nombre) });
+  return tv(`compte.pistes.${formePlurielle(nombre)}`, { n: nombreFormate(nombre) });
+}
+
+/** « 3 albums », avec l'accord au pluriel de la langue courante. */
+export function compteAlbums(nombre: number): string {
+  return tv(`compte.albums.${formePlurielle(nombre)}`, { n: nombreFormate(nombre) });
 }

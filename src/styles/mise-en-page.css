@@ -8,7 +8,7 @@
     min-height: 100vh;
   }
 
-  header {
+  #app > header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -18,14 +18,16 @@
     border-bottom: 1px solid var(--bordure);
   }
 
-  header nav {
+  #app > header nav {
     display: flex;
-    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
     flex: 1;
   }
 
-  header a,
-  header select {
+  #app > header a,
+  #app > header select {
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
@@ -39,7 +41,7 @@
     text-decoration: none;
   }
 
-  header label {
+  #app > header label {
     display: flex;
     align-items: center;
     gap: 0.5rem;

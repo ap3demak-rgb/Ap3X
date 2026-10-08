@@ -7,10 +7,11 @@ import { pistesDeAlbum } from '../catalogue/donnees';
 import type { Album, Piste } from '../catalogue/schemas';
 import { t } from '../i18n';
 import { comptePistes, formaterDuree } from '../i18n/format';
+import { favoris } from '../favoris';
 import { lecteur } from '../lecteur';
 import { icone } from '../lecteur/icones';
 import { fenetre3d } from '../rendu3d';
-import { lienAlbum, lienPiste } from '../routeur';
+import { lienAlbum, lienPiste, lienTag } from '../routeur';
 
 /** Pochette (lazy) ou, à défaut, un cadre neutre avec une icône. Toujours décorative. */
 export function pochette(chemin: string | undefined, classe = ''): HTMLElement {
@@ -82,11 +83,56 @@ function ligneMeta(...morceaux: string[]): HTMLElement {
   return p;
 }
 
+/** Liste de hashtags cliquables (page du hashtag). `max` limite le nombre affiché. */
+export function chipsHashtags(hashtags: readonly string[], max?: number): HTMLElement | undefined {
+  const affiches = max === undefined ? hashtags : hashtags.slice(0, max);
+  if (affiches.length === 0) return undefined;
+  const liste = document.createElement('ul');
+  liste.className = 'chips';
+  liste.setAttribute('aria-label', t('piste.hashtags'));
+  for (const hashtag of affiches) {
+    const element = document.createElement('li');
+    element.append(lien(lienTag(hashtag), `#${hashtag}`));
+    liste.append(element);
+  }
+  return liste;
+}
+
+/**
+ * Bouton « J'aime » d'une piste. L'état est indiqué par la forme du cœur (contour ou plein) et par le
+ * libellé (Ajouter / Retirer des favoris), jamais par la couleur seule.
+ */
+export function boutonJaime(piste: Piste): HTMLButtonElement {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'bouton-icone bouton-jaime';
+  let insere = false;
+  const actualiser = (): void => {
+    // Le bouton se détache lui-même du magasin une fois retiré de la page.
+    if (insere && !b.isConnected) {
+      favoris.removeEventListener('change', actualiser);
+      return;
+    }
+    if (b.isConnected) insere = true;
+    const aime = favoris.estFavori(piste.id);
+    b.replaceChildren(icone(aime ? 'coeurPlein' : 'coeur'));
+    b.setAttribute('aria-label', `${t(aime ? 'jaime.retirer' : 'jaime.ajouter')} : ${piste.titre}`);
+    b.classList.toggle('actif', aime);
+  };
+  b.addEventListener('click', () => {
+    favoris.basculer(piste.id);
+  });
+  favoris.addEventListener('change', actualiser);
+  actualiser();
+  return b;
+}
+
 /** Carte d'une piste : pochette, titre, artiste, catégorie, durée, lecture et ajout à la file. */
 export function cartePiste(
   donnees: Donnees,
   piste: Piste,
   contexte: readonly Piste[],
+  niveauTitre: 'h2' | 'h3' = 'h3',
 ): HTMLElement {
   const carte = document.createElement('article');
   carte.className = 'carte';
@@ -99,7 +145,7 @@ export function cartePiste(
 
   const corps = document.createElement('div');
   corps.className = 'carte-corps';
-  const titre = document.createElement('h3');
+  const titre = document.createElement(niveauTitre);
   titre.className = 'carte-titre';
   titre.append(lien(lienPiste(piste.id), piste.titre));
   const categorie = donnees.categories.get(piste.categorie)?.nom ?? piste.categorie;
@@ -113,15 +159,26 @@ export function cartePiste(
     bouton(t('lecteur.ajouter'), `${t('lecteur.ajouter')} : ${description}`, () =>
       lecteur.ajouter(piste),
     ),
+    boutonJaime(piste),
   );
-  corps.append(titre, ligneMeta(piste.artiste, categorie, formaterDuree(piste.duree)), actions);
+  const chips = chipsHashtags(piste.hashtags, 3);
+  corps.append(
+    titre,
+    ligneMeta(piste.artiste, categorie, formaterDuree(piste.duree)),
+    ...(chips !== undefined ? [chips] : []),
+    actions,
+  );
 
   carte.append(lienPochette, corps);
   return carte;
 }
 
 /** Carte d'un album : pochette, titre, artiste, année, badge de type, nombre de pistes, durée. */
-export function carteAlbum(donnees: Donnees, album: Album): HTMLElement {
+export function carteAlbum(
+  donnees: Donnees,
+  album: Album,
+  niveauTitre: 'h2' | 'h3' = 'h3',
+): HTMLElement {
   const carte = document.createElement('article');
   carte.className = 'carte';
 
@@ -132,7 +189,7 @@ export function carteAlbum(donnees: Donnees, album: Album): HTMLElement {
 
   const corps = document.createElement('div');
   corps.className = 'carte-corps';
-  const titre = document.createElement('h3');
+  const titre = document.createElement(niveauTitre);
   titre.className = 'carte-titre';
   titre.append(lien(lienAlbum(album.id), album.titre));
 

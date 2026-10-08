@@ -8,7 +8,7 @@ import { t } from '../i18n';
 import { formaterDate, formaterDuree } from '../i18n/format';
 import { lecteur } from '../lecteur';
 import { lienAlbum } from '../routeur';
-import { cartePiste, grille, lien, pochette3d } from '../ui/cartes';
+import { boutonJaime, cartePiste, chipsHashtags, grille, lien, pochette3d } from '../ui/cartes';
 import { creerOnde } from '../ui/onde';
 import {
   definirTitrePage,
@@ -64,18 +64,16 @@ function detail(donnees: Donnees, piste: Piste): HTMLElement[] {
     description.textContent = piste.description;
     infos.append(description);
   }
-  if (piste.hashtags.length > 0) {
-    const hashtags = document.createElement('p');
-    hashtags.className = 'hashtags';
-    hashtags.setAttribute('aria-label', t('piste.hashtags'));
-    hashtags.textContent = piste.hashtags.map((h) => `#${h}`).join(' ');
-    infos.append(hashtags);
-  }
-  infos.append(meta, lire);
+  const hashtags = chipsHashtags(piste.hashtags);
+  if (hashtags !== undefined) infos.append(hashtags);
+  const actions = document.createElement('div');
+  actions.className = 'carte-actions';
+  actions.append(lire, boutonJaime(piste));
+  infos.append(meta, actions);
   if (piste.telechargement) {
     const telecharger = lien(urlDuFichier(piste.fichier), t('piste.telecharger'), 'bouton');
     telecharger.setAttribute('download', '');
-    infos.append(telecharger);
+    actions.append(telecharger);
   }
   entete.append(pochette3d(piste.pochette), infos);
 

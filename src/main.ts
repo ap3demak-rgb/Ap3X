@@ -12,8 +12,10 @@ import { demarrerRendu3d } from './rendu3d';
 import { pageAccueil } from './pages/accueil';
 import { pageAlbum } from './pages/album';
 import { pageAlbums } from './pages/albums';
+import { pageCategorie, pageCategories } from './pages/categorie';
 import { pageLicences } from './pages/licences';
 import { pagePiste } from './pages/piste';
+import { pageTag } from './pages/tag';
 import { ecouterRoute, routeCourante, type Route } from './routeur';
 import { annonceur, annoncer } from './ui/annonceur';
 import { bandeau } from './ui/bandeau';
@@ -34,6 +36,12 @@ function page(route: Route): HTMLElement {
       return pageAlbum(route.id);
     case 'piste':
       return pagePiste(route.id);
+    case 'categories':
+      return pageCategories();
+    case 'categorie':
+      return pageCategorie(route.id);
+    case 'tag':
+      return pageTag(route.id);
     case 'accueil':
       return pageAccueil();
   }

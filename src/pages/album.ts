@@ -7,7 +7,7 @@ import { t, tv } from '../i18n';
 import { comptePistes, formaterDate, formaterDuree } from '../i18n/format';
 import { lecteur } from '../lecteur';
 import { lienPiste } from '../routeur';
-import { carteAlbum, grille, lien, pochette } from '../ui/cartes';
+import { boutonJaime, carteAlbum, chipsHashtags, grille, lien, pochette } from '../ui/cartes';
 import { creerOnde } from '../ui/onde';
 import {
   definirTitrePage,
@@ -51,7 +51,7 @@ function listeDePistes(pistes: Piste[], toutes: Piste[]): HTMLElement {
         lecteur.aller(secondes);
       },
     });
-    ligne.append(lire, nom, duree, onde);
+    ligne.append(lire, nom, duree, boutonJaime(piste), onde);
     liste.append(ligne);
   }
   return liste;
@@ -105,13 +105,8 @@ function detail(donnees: Donnees, album: Album): HTMLElement[] {
     description.textContent = album.description;
     infos.append(description);
   }
-  if (album.hashtags.length > 0) {
-    const hashtags = document.createElement('p');
-    hashtags.className = 'hashtags';
-    hashtags.setAttribute('aria-label', t('piste.hashtags'));
-    hashtags.textContent = album.hashtags.map((h) => `#${h}`).join(' ');
-    infos.append(hashtags);
-  }
+  const hashtags = chipsHashtags(album.hashtags);
+  if (hashtags !== undefined) infos.append(hashtags);
   infos.append(meta, lireAlbum);
   entete.append(pochette(album.pochette, 'pochette-grande'), infos);
 

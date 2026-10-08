@@ -2,13 +2,16 @@
 // © 2026 AP3X Records
 
 import { anneeDe, filtrerAlbums, type Donnees, type FiltresAlbums } from '../catalogue/donnees';
+import { trierAlbums } from '../catalogue/navigation';
 import { TYPES_ALBUM } from '../catalogue/schemas';
-import { t, type CleI18n } from '../i18n';
+import { obtenirLangue, t, type CleI18n } from '../i18n';
 import { carteAlbum, grille } from '../ui/cartes';
+import { selecteurTri } from '../ui/tri';
+import { etatTri } from './collection';
 import { definirTitrePage, remplirAvecCatalogue, titrePage } from './commun';
 
 /** Filtres conservés entre deux affichages de la page (changement de langue, navigation). */
-const filtres: FiltresAlbums = { type: '', categorie: '', annee: '', tri: 'recent' };
+const filtres: FiltresAlbums = { type: '', categorie: '', annee: '' };
 
 function selecteur(
   libelle: string,
@@ -34,13 +37,17 @@ function selecteur(
 }
 
 function contenuGrille(donnees: Donnees): HTMLElement {
-  const albums = filtrerAlbums(donnees.catalogue.albums, filtres);
+  const albums = trierAlbums(
+    filtrerAlbums(donnees.catalogue.albums, filtres),
+    etatTri.valeur,
+    obtenirLangue(),
+  );
   if (albums.length === 0) {
     const vide = document.createElement('p');
     vide.textContent = t('albums.vide');
     return vide;
   }
-  return grille(albums.map((album) => carteAlbum(donnees, album)));
+  return grille(albums.map((album) => carteAlbum(donnees, album, 'h2')));
 }
 
 export function pageAlbums(): HTMLElement {
@@ -93,18 +100,10 @@ export function pageAlbums(): HTMLElement {
           rafraichir();
         },
       ),
-      selecteur(
-        t('albums.tri'),
-        filtres.tri,
-        [
-          { valeur: 'recent', texte: t('albums.tri_recent') },
-          { valeur: 'ancien', texte: t('albums.tri_ancien') },
-        ],
-        (v) => {
-          filtres.tri = v === 'ancien' ? 'ancien' : 'recent';
-          rafraichir();
-        },
-      ),
+      selecteurTri(['recent', 'ancien', 'titre', 'duree', 'artiste'], etatTri.valeur, (tri) => {
+        etatTri.valeur = tri;
+        rafraichir();
+      }),
     );
     rafraichir();
     return [barre, zone];

@@ -115,17 +115,12 @@ describe('données du catalogue', () => {
     expect(albumsLies(donnees, b, 5).map((a) => a.id)).toEqual(['rock--a', 'zeta']);
   });
 
-  it('filtre et trie les albums', () => {
-    const tous = { type: '', categorie: '', annee: '', tri: 'recent' as const };
+  it('filtre les albums par type, catégorie et année, sans changer leur ordre', () => {
+    const tous = { type: '', categorie: '', annee: '' };
     expect(filtrerAlbums(catalogue.albums, tous).map((a) => a.id)).toEqual([
-      'techno--b',
-      'rock--a',
-      'zeta',
-    ]);
-    expect(filtrerAlbums(catalogue.albums, { ...tous, tri: 'ancien' }).map((a) => a.id)).toEqual([
-      'zeta',
       'rock--a',
       'techno--b',
+      'zeta',
     ]);
     expect(
       filtrerAlbums(catalogue.albums, { ...tous, categorie: 'techno' }).map((a) => a.id),

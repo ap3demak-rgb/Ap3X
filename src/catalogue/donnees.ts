@@ -78,7 +78,6 @@ export interface FiltresAlbums {
   type: string;
   categorie: string;
   annee: string;
-  tri: 'recent' | 'ancien';
 }
 
 /** Année (AAAA) d'une date ISO partielle. */
@@ -86,13 +85,12 @@ export function anneeDe(date: string | undefined): string | undefined {
   return date === undefined ? undefined : date.slice(0, 4);
 }
 
+/** Albums correspondant aux filtres, dans l'ordre d'origine (le tri est fait par `trierAlbums`). */
 export function filtrerAlbums(albums: readonly Album[], filtres: FiltresAlbums): Album[] {
-  const resultat = albums.filter(
+  return albums.filter(
     (a) =>
       (filtres.type === '' || a.type === filtres.type) &&
       (filtres.categorie === '' || a.categorie === filtres.categorie) &&
       (filtres.annee === '' || anneeDe(a.date) === filtres.annee),
   );
-  const sens = filtres.tri === 'recent' ? -1 : 1;
-  return resultat.sort((a, b) => sens * comparerDates(a.date, b.date) || a.id.localeCompare(b.id));
 }
