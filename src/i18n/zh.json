@@ -1,0 +1,14 @@
+{
+  "site.nom": "AP3X Records",
+  "site.copyright": "© 2026 AP3X Records",
+  "nav.accueil": "首页",
+  "nav.categories": "分类",
+  "nav.albums": "专辑",
+  "nav.favoris": "收藏",
+  "nav.licences": "许可证",
+  "langue.libelle": "语言",
+  "licence.musique": "依据知识共享 CC BY-NC-ND 4.0 许可协议发布",
+  "licence.site": "依据 GPL-3.0-or-later 许可证发布",
+  "pied.contact": "联系方式",
+  "erreur.chargement": "无法加载内容。"
+}

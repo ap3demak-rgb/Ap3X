@@ -1,0 +1,14 @@
+{
+  "site.nom": "AP3X Records",
+  "site.copyright": "© 2026 AP3X Records",
+  "nav.accueil": "홈",
+  "nav.categories": "카테고리",
+  "nav.albums": "앨범",
+  "nav.favoris": "즐겨찾기",
+  "nav.licences": "라이선스",
+  "langue.libelle": "언어",
+  "licence.musique": "크리에이티브 커먼즈 CC BY-NC-ND 4.0 라이선스에 따라 배포",
+  "licence.site": "GPL-3.0-or-later 라이선스에 따라 배포",
+  "pied.contact": "문의",
+  "erreur.chargement": "콘텐츠를 불러올 수 없습니다."
+}

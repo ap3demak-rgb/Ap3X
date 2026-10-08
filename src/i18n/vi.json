@@ -1,0 +1,14 @@
+{
+  "site.nom": "AP3X Records",
+  "site.copyright": "© 2026 AP3X Records",
+  "nav.accueil": "Trang chủ",
+  "nav.categories": "Thể loại",
+  "nav.albums": "Album",
+  "nav.favoris": "Yêu thích",
+  "nav.licences": "Giấy phép",
+  "langue.libelle": "Ngôn ngữ",
+  "licence.musique": "Phân phối theo giấy phép Creative Commons CC BY-NC-ND 4.0",
+  "licence.site": "Phân phối theo giấy phép GPL-3.0-or-later",
+  "pied.contact": "Liên hệ",
+  "erreur.chargement": "Không thể tải nội dung."
+}

@@ -1,0 +1,2 @@
+#!/bin/sh
+npm run verifier && npx tsx scripts/verifier-docs.ts --staged && npx tsx scripts/verifier-documents-locaux.ts && npx eslint . && npx tsc --noEmit

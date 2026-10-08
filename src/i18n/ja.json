@@ -1,0 +1,14 @@
+{
+  "site.nom": "AP3X Records",
+  "site.copyright": "© 2026 AP3X Records",
+  "nav.accueil": "ホーム",
+  "nav.categories": "カテゴリ",
+  "nav.albums": "アルバム",
+  "nav.favoris": "お気に入り",
+  "nav.licences": "ライセンス",
+  "langue.libelle": "言語",
+  "licence.musique": "クリエイティブ・コモンズ CC BY-NC-ND 4.0 ライセンスの下で配布",
+  "licence.site": "GPL-3.0-or-later ライセンスの下で配布",
+  "pied.contact": "お問い合わせ",
+  "erreur.chargement": "コンテンツを読み込めませんでした。"
+}

@@ -8,3 +8,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - 2026-10-08: Project initialization (Phase 0): git repository, `package.json`, Vite, TypeScript (strict), ESLint, Prettier, Three.js, base folder structure, `README.md`.
+- 2026-10-08: Licensing and identity (Phase 0b): `LICENSE`, `COPYING`, `REUSE.toml`, SPDX headers, favicon and app icons, web manifest, `.gitattributes`.
+- 2026-10-08: Internationalization base: nine language files, typed `t()` function, browser language detection with stored choice and English fallback.
+- 2026-10-08: Quality checks: license, i18n, forbidden-mention and documentation scripts, plus Husky `pre-commit` and `commit-msg` hooks.

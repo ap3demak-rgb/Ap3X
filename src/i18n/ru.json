@@ -1,0 +1,14 @@
+{
+  "site.nom": "AP3X Records",
+  "site.copyright": "© 2026 AP3X Records",
+  "nav.accueil": "Главная",
+  "nav.categories": "Категории",
+  "nav.albums": "Альбомы",
+  "nav.favoris": "Избранное",
+  "nav.licences": "Лицензии",
+  "langue.libelle": "Язык",
+  "licence.musique": "Распространяется по лицензии Creative Commons CC BY-NC-ND 4.0",
+  "licence.site": "Распространяется по лицензии GPL-3.0-or-later",
+  "pied.contact": "Контакты",
+  "erreur.chargement": "Не удалось загрузить содержимое."
+}

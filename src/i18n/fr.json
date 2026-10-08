@@ -1,0 +1,14 @@
+{
+  "site.nom": "AP3X Records",
+  "site.copyright": "© 2026 AP3X Records",
+  "nav.accueil": "Accueil",
+  "nav.categories": "Catégories",
+  "nav.albums": "Albums",
+  "nav.favoris": "Favoris",
+  "nav.licences": "Licences",
+  "langue.libelle": "Langue",
+  "licence.musique": "Distribué sous licence Creative Commons CC BY-NC-ND 4.0",
+  "licence.site": "Distribué sous licence GPL-3.0-or-later",
+  "pied.contact": "Contact",
+  "erreur.chargement": "Impossible de charger le contenu."
+}

@@ -1,0 +1,2 @@
+#!/bin/sh
+npx tsx scripts/verifier-message-commit.ts "$1"
