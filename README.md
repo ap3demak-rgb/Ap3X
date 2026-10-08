@@ -18,20 +18,21 @@ npm install
 
 ## npm scripts
 
-| Command                 | Description                                                                                           |
-| ----------------------- | ----------------------------------------------------------------------------------------------------- |
-| `npm run dev`           | Start the Vite development server                                                                     |
-| `npm run build`         | Type-check, then build the site into `dist/`                                                          |
-| `npm run preview`       | Serve the production build locally                                                                    |
-| `npm run typecheck`     | Run the TypeScript compiler without emitting                                                          |
-| `npm run lint`          | Run ESLint                                                                                            |
-| `npm run format`        | Format the project with Prettier                                                                      |
-| `npm run icones`        | Regenerate PNG/ICO icons from `public/icones/favicon.svg`                                             |
-| `npm test`              | Run the unit tests (Vitest); `npx vitest run tests/lecteur.test.ts` runs a single file                |
-| `npm run catalogue`     | Generate `public/catalogue.json` from `public/musique/` (runs automatically before `dev` and `build`) |
-| `npm run tags-id3`      | Write copyright and official URLs into the ID3 tags of every MP3 in `public/musique/`                 |
-| `npm run verifier`      | Run the SPDX, i18n and forbidden-mention checks                                                       |
-| `npm run verifier:docs` | Check that documentation is consistent with staged changes                                            |
+| Command                 | Description                                                                                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`           | Start the Vite development server                                                                                                                    |
+| `npm run build`         | Type-check, then build the site into `dist/`                                                                                                         |
+| `npm run preview`       | Serve the production build locally                                                                                                                   |
+| `npm run typecheck`     | Run the TypeScript compiler without emitting                                                                                                         |
+| `npm run lint`          | Run ESLint                                                                                                                                           |
+| `npm run format`        | Format the project with Prettier                                                                                                                     |
+| `npm run icones`        | Regenerate PNG/ICO icons from `public/icones/favicon.svg`                                                                                            |
+| `npm test`              | Run the unit tests (Vitest); `npx vitest run tests/lecteur.test.ts` runs a single file                                                               |
+| `npm run e2e`           | Build first (`npm run build`), then run the Playwright end-to-end and axe accessibility tests; the first time, run `npx playwright install chromium` |
+| `npm run catalogue`     | Generate `public/catalogue.json` from `public/musique/` (runs automatically before `dev` and `build`)                                                |
+| `npm run tags-id3`      | Write copyright and official URLs into the ID3 tags of every MP3 in `public/musique/`                                                                |
+| `npm run verifier`      | Run the SPDX, i18n and forbidden-mention checks                                                                                                      |
+| `npm run verifier:docs` | Check that documentation is consistent with staged changes                                                                                           |
 
 ## Project structure
 
@@ -41,6 +42,7 @@ npm install
 - `src/styles/`: CSS (single dark theme)
 - `scripts/`: build-time scripts (catalogue generation, checks)
 - `tests/`: unit tests (Vitest)
+- `e2e/`: end-to-end and accessibility tests (Playwright, axe-core)
 - `src/i18n/`: translation files (en, fr, de, ja, es, ru, vi, zh, ko), accessed through `t('key')`
 - `public/icones/`: favicon and app icons
 - `public/musique/`: MP3 files, one subfolder per category
@@ -57,6 +59,10 @@ Put MP3 files in `public/musique/`: **one subfolder = one category** (`public/mu
 - A file named `cover.png`, `cover.jpg`, `cover.webp` (or `pochette.*`) in a category or album folder is used as its cover. Covers embedded in MP3 files are extracted to `public/pochettes/`.
 - Hashtags come from the sheet and from `#words` in the description.
 
+## Pages
+
+Home (latest tracks and albums, categories), albums grid with filters (type, category, year) and sort, album page (`#/album/<id>`, tracks grouped by disc, total duration, license), track page (`#/piste/<id>`, large waveform, similar tracks, download if allowed) and licenses. Every track has a waveform (200 bars computed at build time from the MP3 and cached in `.cache/`) that can be clicked or driven with the keyboard to seek.
+
 ## Player
 
 A fixed bar at the bottom of every page plays the queue: play/pause, previous/next, seek bar, volume and mute, shuffle, repeat (off / queue / track) and a queue panel (reorder, remove). The next track is preloaded, hardware media keys and mobile lock screens are supported (Media Session API), and the volume, shuffle, repeat mode and last played track are remembered in the browser.
@@ -65,7 +71,7 @@ Keyboard shortcuts (when no form control has the focus): `Space` play/pause, `â†
 
 ## Contribution checks
 
-Every source file carries an SPDX header (`GPL-3.0-or-later`). `npm run build` and the `pre-commit` hook run the license, i18n and forbidden-mention checks. Any change to the sources must come with an entry in `CHANGELOG.md`.
+The palette in `src/styles/theme.css` is checked against WCAG 2.2 AAA contrast ratios by `npm run verifier:contrastes`. Every source file carries an SPDX header (`GPL-3.0-or-later`). `npm run build` and the `pre-commit` hook run the license, i18n and forbidden-mention checks. Any change to the sources must come with an entry in `CHANGELOG.md`.
 
 ## Licenses
 

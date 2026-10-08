@@ -13,6 +13,9 @@
     --accent: #ff8a2b;
     --bordure: #8a8a9c;
     --focus: #ffd166;
+    --accent-sombre: #5c2d00;
+    --onde: #6e6e82;
+    --onde-lue: #ffd6a8;
 
     /* Piles de polices couvrant latin étendu (vietnamien), cyrillique, chinois, japonais, coréen. */
     --police:

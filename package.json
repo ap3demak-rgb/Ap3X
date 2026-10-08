@@ -27,14 +27,16 @@
     "verifier:i18n": "tsx scripts/verifier-i18n.ts",
     "verifier:mentions": "tsx scripts/verifier-mentions.ts",
     "verifier:docs": "tsx scripts/verifier-docs.ts",
-    "verifier": "npm run verifier:licences && npm run verifier:i18n && npm run verifier:mentions",
+    "verifier": "npm run verifier:licences && npm run verifier:i18n && npm run verifier:mentions && npm run verifier:contrastes",
     "prepare": "husky",
     "tags-id3": "tsx scripts/ecrire-tags-id3.ts",
     "catalogue": "tsx scripts/generer-catalogue.ts",
     "predev": "npm run catalogue",
     "prebuild": "npm run catalogue",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "verifier:contrastes": "tsx scripts/verifier-contrastes.ts",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "node-id3": "^0.2.9",
@@ -42,11 +44,14 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.0",
     "@types/node": "^26.6.4",
     "@types/three": "^0.186.0",
     "eslint": "^10.12.0",
     "husky": "^9.1.7",
+    "mpg123-decoder": "^1.0.3",
     "music-metadata": "^12.1.0",
     "png-to-ico": "^3.0.2",
     "prettier": "^3.9.9",

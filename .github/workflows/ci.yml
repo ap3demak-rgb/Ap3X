@@ -34,3 +34,7 @@ jobs:
         run: npm run lint
       - name: Types et build
         run: npm run build
+      - name: Navigateur pour les tests de bout en bout
+        run: npx playwright install --with-deps chromium
+      - name: Tests de bout en bout et accessibilité
+        run: npm run e2e

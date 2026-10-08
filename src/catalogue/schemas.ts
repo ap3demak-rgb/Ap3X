@@ -89,6 +89,8 @@ export const PisteSchema = z.object({
   numero: z.number().int().min(1).optional(),
   disque: z.number().int().min(1).optional(),
   duree: z.number().min(0),
+  /** Amplitudes (0 à 100) de la waveform, calculées au build. */
+  pics: z.array(z.number().int().min(0).max(100)).optional(),
   fichier: TexteSchema,
   telechargement: z.boolean(),
   licence: TexteSchema,

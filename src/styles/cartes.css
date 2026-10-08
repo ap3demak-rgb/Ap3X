@@ -1,0 +1,287 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* © 2026 AP3X Records */
+
+@layer composants {
+  main {
+    max-width: 72rem;
+  }
+
+  main section + section {
+    margin-top: 2rem;
+  }
+
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    line-height: 1.2;
+  }
+
+  h2 {
+    margin: 0 0 1rem;
+    font-size: clamp(1.25rem, 2.5vw, 1.625rem);
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.125rem;
+  }
+
+  /* Grille et cartes */
+  .grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: 1rem;
+  }
+
+  .carte {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: 0.75rem;
+    transition:
+      border-color 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  .carte:hover,
+  .carte:focus-within {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .carte-corps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .carte-titre {
+    overflow-wrap: anywhere;
+  }
+
+  .carte-meta {
+    margin: 0;
+    color: var(--texte-secondaire);
+    font-size: 0.9375rem;
+  }
+
+  .carte-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: auto;
+  }
+
+  /* Pochettes */
+  .pochette {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    background: var(--fond);
+  }
+
+  .pochette-vide {
+    display: grid;
+    place-items: center;
+    color: var(--texte-secondaire);
+    border: 1px solid var(--bordure);
+    box-sizing: border-box;
+  }
+
+  .pochette-vide svg {
+    width: 40%;
+    height: 40%;
+  }
+
+  .pochette-grande {
+    width: min(100%, 14rem);
+    flex: none;
+  }
+
+  /* Badge : le type est écrit, jamais indiqué par la seule couleur */
+  .badge {
+    align-self: flex-start;
+    padding: 0.125rem 0.625rem;
+    background: var(--accent-sombre);
+    color: var(--texte);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  /* Fiches (page d'une piste ou d'un album) */
+  .fiche {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .fiche-infos {
+    flex: 1;
+    min-width: min(100%, 18rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .fiche p,
+  .fiche dl {
+    margin: 0;
+  }
+
+  .fiche-artiste {
+    font-size: 1.25rem;
+    color: var(--texte-secondaire);
+  }
+
+  .hashtags {
+    color: var(--accent);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 1rem;
+  }
+
+  .meta dt {
+    color: var(--texte-secondaire);
+  }
+
+  .meta dd {
+    margin: 0;
+  }
+
+  .bouton-principal {
+    background: var(--accent);
+    color: var(--fond);
+    border-color: var(--accent);
+    font-weight: 700;
+  }
+
+  .bouton-principal:hover {
+    border-color: var(--texte);
+  }
+
+  a.bouton {
+    display: inline-flex;
+    align-items: center;
+    color: var(--texte);
+    text-decoration: none;
+  }
+
+  /* Waveform : canvas décoratif + curseur natif transparent par-dessus */
+  .onde {
+    position: relative;
+    flex: 1 1 14rem;
+    height: 3rem;
+    min-width: 10rem;
+    border-radius: 0.375rem;
+  }
+
+  .onde-grande {
+    flex: none;
+    width: 100%;
+    height: clamp(5rem, 14vw, 8rem);
+    margin-top: 1.5rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+  }
+
+  .onde canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .onde-curseur {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .onde:focus-within {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* Listes */
+  .liste-titres li {
+    min-height: 2.75rem;
+  }
+
+  .liste-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .liste-categories li {
+    display: flex;
+    flex-direction: column;
+    min-width: 9rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: 0.75rem;
+  }
+
+  .liste-categories span {
+    color: var(--texte-secondaire);
+  }
+
+  /* Filtres */
+  .filtres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .champ {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: var(--texte-secondaire);
+  }
+
+  .champ select {
+    min-height: 2.75rem;
+  }
+
+  /* Mouvement réduit : plus aucune animation ni déplacement au survol */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+
+    .carte:hover,
+    .carte:focus-within {
+      transform: none;
+    }
+  }
+}

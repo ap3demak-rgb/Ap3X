@@ -66,7 +66,11 @@ export function entete(): HTMLElement {
 
   const navigation = document.createElement('nav');
   navigation.setAttribute('aria-label', t('nav.principale'));
-  navigation.append(lien('#/', t('nav.accueil')), lien('#/licences', t('nav.licences')));
+  navigation.append(
+    lien('#/', t('nav.accueil')),
+    lien('#/albums', t('nav.albums')),
+    lien('#/licences', t('nav.licences')),
+  );
 
   en.append(marque, navigation, selecteurLangue());
   return en;

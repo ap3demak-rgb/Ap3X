@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import en from './en.json';
+import { remplacerVariables } from './variables';
 
 export type CleI18n = keyof typeof en;
 export type Dictionnaire = Record<CleI18n, string>;
@@ -60,6 +61,11 @@ export function definirLangue(langue: Langue): void {
 /** Traduit une clé ; repli sur l'anglais si la clé manque dans la langue courante. */
 export function t(cle: CleI18n): string {
   return dictionnaireDe(langueCourante)[cle] ?? en[cle];
+}
+
+/** Traduit une clé contenant des variables `{nom}` et les remplace. */
+export function tv(cle: CleI18n, variables: Record<string, string | number>): string {
+  return remplacerVariables(t(cle), variables);
 }
 
 document.documentElement.lang = langueCourante;

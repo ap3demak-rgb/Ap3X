@@ -18,3 +18,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - 2026-10-09: Audio player (Phase 2): `Lecteur` class (queue, shuffle, repeat, volume, preloading, remembered settings), fixed player bar with seek, volume, queue panel and screen-reader announcements, Media Session integration, keyboard shortcuts, track list on the home page.
 - 2026-10-09: Vitest unit tests for the player and the catalogue helpers, run by `npm test` and the CI workflow.
 - 2026-10-09: Placeholder check is now case-sensitive and word-based, so common words such as the Spanish "todo" no longer fail it.
+- 2026-10-09: Interface (Phase 3, part 1): single dark theme with an AAA palette checked by `scripts/verifier-contrastes.ts`, cards, home page, albums page with filters, album page, track page, waveform computed at build time and rendered on canvas with a native seek slider, hash router with focus handling, reduced-motion support.
+- 2026-10-09: Playwright end-to-end tests with axe-core (WCAG AAA rules) run in the CI workflow; routing, data helpers and translation variables are covered by unit tests.

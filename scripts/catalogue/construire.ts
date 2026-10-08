@@ -20,6 +20,7 @@ import {
   type FichePiste,
   type Piste,
 } from '../../src/catalogue/schemas.ts';
+import { CalculateurPics } from './pics.ts';
 import {
   arrondir,
   deduireTypeAlbum,
@@ -53,6 +54,7 @@ interface Contexte {
   avertissements: string[];
   /** Identifiant → chemin source, pour détecter les collisions. */
   identifiants: Map<string, string>;
+  pics: CalculateurPics;
 }
 
 const estMp3 = (nom: string): boolean => extname(nom).toLowerCase() === '.mp3';
@@ -197,6 +199,15 @@ async function lirePiste(
     }
   }
 
+  let pics: number[] = [];
+  try {
+    pics = await contexte.pics.pour(chemin);
+  } catch (erreur) {
+    contexte.avertissements.push(
+      `${chemin} : waveform non calculée (${(erreur as Error).message})`,
+    );
+  }
+
   const annee = date !== undefined ? Number(date.slice(0, 4)) : ANNEE_COPYRIGHT_PAR_DEFAUT;
   const piste: Piste = {
     id: identifiant,
@@ -209,6 +220,7 @@ async function lirePiste(
     categorie,
     ...(album !== undefined && { album: album.id }),
     duree: arrondir(format.duration, 2),
+    ...(pics.length > 0 && { pics }),
     fichier: `musique/${urlRelative(...segments, nomFichier)}`,
     telechargement: fiche.telechargement,
     licence: fiche.licence,
@@ -328,7 +340,13 @@ async function lireAlbum(
 }
 
 export async function construireCatalogue(options: Options): Promise<Resultat> {
-  const contexte: Contexte = { options, erreurs: [], avertissements: [], identifiants: new Map() };
+  const contexte: Contexte = {
+    options,
+    erreurs: [],
+    avertissements: [],
+    identifiants: new Map(),
+    pics: new CalculateurPics(),
+  };
   const categories: Categorie[] = [];
   const albums: Album[] = [];
   const pistes: Piste[] = [];
@@ -468,6 +486,7 @@ export async function construireCatalogue(options: Options): Promise<Resultat> {
       contexte.erreurs.push(`catalogue : ${probleme.path.join('.')} ${probleme.message}`);
     }
   }
+  await contexte.pics.enregistrer();
   return {
     catalogue: validation.success ? validation.data : (brut as Catalogue),
     erreurs: contexte.erreurs,
