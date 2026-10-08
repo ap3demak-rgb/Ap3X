@@ -9,6 +9,7 @@ import { t } from '../i18n';
 import { comptePistes, formaterDuree } from '../i18n/format';
 import { lecteur } from '../lecteur';
 import { icone } from '../lecteur/icones';
+import { fenetre3d } from '../rendu3d';
 import { lienAlbum, lienPiste } from '../routeur';
 
 /** Pochette (lazy) ou, à défaut, un cadre neutre avec une icône. Toujours décorative. */
@@ -27,6 +28,33 @@ export function pochette(chemin: string | undefined, classe = ''): HTMLElement {
   image.loading = 'lazy';
   image.decoding = 'async';
   return image;
+}
+
+/**
+ * Grande pochette qui passe en 3D quand le rendu 3D est disponible. L'image plane reste l'alternative
+ * (WebGL absent, mouvement réduit, erreur) ; le canvas 3D est décoratif.
+ */
+export function pochette3d(chemin: string | undefined, classe = 'pochette-grande'): HTMLElement {
+  if (chemin === undefined) return pochette(undefined, classe);
+  const conteneur = document.createElement('div');
+  conteneur.className = `pochette-3d ${classe}`.trim();
+  const image = pochette(chemin);
+  const canvas = document.createElement('canvas');
+  canvas.setAttribute('aria-hidden', 'true');
+  canvas.hidden = true;
+  conteneur.append(image, canvas);
+  fenetre3d(
+    { canvas, type: 'pochette', url: urlDuFichier(chemin) },
+    () => {
+      image.hidden = true;
+      canvas.hidden = false;
+    },
+    () => {
+      image.hidden = false;
+      canvas.hidden = true;
+    },
+  );
+  return conteneur;
 }
 
 export function lien(href: string, texte: string, classe = ''): HTMLAnchorElement {

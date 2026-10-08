@@ -63,6 +63,12 @@ Put MP3 files in `public/musique/`: **one subfolder = one category** (`public/mu
 
 Home (latest tracks and albums, categories), albums grid with filters (type, category, year) and sort, album page (`#/album/<id>`, tracks grouped by disc, total duration, license), track page (`#/piste/<id>`, large waveform, similar tracks, download if allowed) and licenses. Every track has a waveform (200 bars computed at build time from the MP3 and cached in `.cache/`) that can be clicked or driven with the keyboard to seek.
 
+## 3D rendering
+
+Three.js is loaded on demand after the interface is shown (`src/rendu3d/`). One shared WebGL renderer draws an animated GLSL background on a full-screen canvas behind the page, and renders small "windows" (the audio visualizer band under the header and the 3D cover on a track page) before copying each image into a 2D canvas placed in the page. The visualizer shows the active track waveform and a real-time spectrum from a Web Audio `AnalyserNode`.
+
+Text never sits directly on the 3D render: it rests on a semi-opaque panel, and the background shader is clamped to `--fond-3d-max`, so `npm run verifier:contrastes` can guarantee AAA contrast in the worst case. With `prefers-reduced-motion` there is no 3D at all (static gradient, flat cover, no visualizer); without WebGL (or if the context is lost) the visualizer becomes a CSS level bar and covers stay flat. Rendering pauses while the tab is hidden, windows pause when off screen, the pixel ratio is capped at 1.5 and touch devices are limited to 30 frames per second.
+
 ## Player
 
 A fixed bar at the bottom of every page plays the queue: play/pause, previous/next, seek bar, volume and mute, shuffle, repeat (off / queue / track) and a queue panel (reorder, remove). The next track is preloaded, hardware media keys and mobile lock screens are supported (Media Session API), and the volume, shuffle, repeat mode and last played track are remembered in the browser.

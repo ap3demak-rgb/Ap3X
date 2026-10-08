@@ -16,9 +16,12 @@ function stockageLocal(): Storage | undefined {
   }
 }
 
+/** Élément audio unique de l'application (utilisé aussi par l'analyse sonore du rendu 3D). */
+export const elementAudio = new Audio();
+
 /** Lecteur unique de l'application : les pages y chargent leurs pistes (`lecteur.charger(...)`). */
 export const lecteur = new Lecteur({
-  audio: new Audio(),
+  audio: elementAudio,
   prechargeur: new Audio(),
   resoudreUrl: urlDuFichier,
   ...(stockageLocal() !== undefined && { stockage: stockageLocal() as Storage }),

@@ -1,0 +1,66 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* © 2026 AP3X Records */
+
+@layer base {
+  /* L'attribut hidden doit toujours l'emporter sur les display définis par les composants. */
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@layer composants {
+  /* Fond animé : derrière toute la page, jamais interactif. */
+  .fond-3d {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  /* Visualiseur : zone décorative sans texte, sur surface opaque. */
+  .visualiseur {
+    height: clamp(5rem, 12vw, 8rem);
+    background: var(--fond);
+    border-bottom: 1px solid var(--bordure);
+  }
+
+  .visualiseur-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Repli sans WebGL : barre de niveau en CSS. */
+  .niveau-css {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+  }
+
+  .niveau-barre {
+    width: 100%;
+    height: 0.5rem;
+    background: var(--accent);
+    border-radius: 0.25rem;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.08s linear;
+  }
+
+  /* Pochette 3D : le canvas remplace l'image plane quand le rendu est prêt. */
+  .pochette-3d {
+    position: relative;
+  }
+
+  .pochette-3d canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 0.5rem;
+    background: var(--fond);
+  }
+}

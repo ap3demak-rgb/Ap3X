@@ -3,6 +3,7 @@
 
 import { URL_DEPOT } from '../constantes';
 import { t } from '../i18n';
+import { definirTitrePage } from './commun';
 
 function bloc(titre: string, detail: string, mention: string): HTMLElement {
   const section = document.createElement('section');
@@ -17,6 +18,7 @@ function bloc(titre: string, detail: string, mention: string): HTMLElement {
 }
 
 export function pageLicences(): HTMLElement {
+  definirTitrePage(t('nav.licences'));
   const section = document.createElement('section');
   const titre = document.createElement('h1');
   titre.textContent = t('nav.licences');

@@ -5,7 +5,7 @@ import { EMAIL_CONTACT } from '../constantes';
 import { LANGUES, definirLangue, obtenirLangue, t, type Langue } from '../i18n';
 
 /** Noms des langues dans leur propre langue : volontairement non traduits. */
-const NOMS_LANGUES: Record<Langue, string> = {
+export const NOMS_LANGUES: Record<Langue, string> = {
   en: 'English',
   fr: 'Français',
   de: 'Deutsch',

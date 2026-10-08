@@ -8,9 +8,15 @@ import { t } from '../i18n';
 import { formaterDate, formaterDuree } from '../i18n/format';
 import { lecteur } from '../lecteur';
 import { lienAlbum } from '../routeur';
-import { cartePiste, grille, lien, pochette } from '../ui/cartes';
+import { cartePiste, grille, lien, pochette3d } from '../ui/cartes';
 import { creerOnde } from '../ui/onde';
-import { introuvable, remplirAvecCatalogue, sousTitre, titrePage } from './commun';
+import {
+  definirTitrePage,
+  introuvable,
+  remplirAvecCatalogue,
+  sousTitre,
+  titrePage,
+} from './commun';
 
 function detail(donnees: Donnees, piste: Piste): HTMLElement[] {
   const album = piste.album !== undefined ? donnees.albums.get(piste.album) : undefined;
@@ -71,7 +77,7 @@ function detail(donnees: Donnees, piste: Piste): HTMLElement[] {
     telecharger.setAttribute('download', '');
     infos.append(telecharger);
   }
-  entete.append(pochette(piste.pochette, 'pochette-grande'), infos);
+  entete.append(pochette3d(piste.pochette), infos);
 
   const onde = creerOnde({
     piste,
@@ -99,6 +105,7 @@ export function pagePiste(id: string): HTMLElement {
   const page = document.createElement('section');
   remplirAvecCatalogue(page, (donnees) => {
     const piste = donnees.pistes.get(id);
+    definirTitrePage(piste === undefined ? t('piste.introuvable') : piste.titre);
     return piste === undefined ? [introuvable(t('piste.introuvable'))] : detail(donnees, piste);
   });
   return page;

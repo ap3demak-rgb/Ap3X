@@ -3,8 +3,8 @@
 
 @layer composants {
   #app {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
   }
 
@@ -59,7 +59,11 @@
     padding: clamp(1rem, 4vw, 3rem);
     max-width: 60rem;
     width: 100%;
+    margin-inline: auto;
+    flex: 1 0 auto;
     box-sizing: border-box;
+    /* Le texte repose sur ce panneau semi-opaque, jamais directement sur le rendu 3D. */
+    background: color-mix(in srgb, var(--fond) calc(var(--panneau-opacite) * 100%), transparent);
   }
 
   main:focus {

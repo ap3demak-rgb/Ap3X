@@ -5,12 +5,13 @@ import { plusRecents } from '../catalogue/donnees';
 import { t } from '../i18n';
 import { comptePistes } from '../i18n/format';
 import { carteAlbum, cartePiste, grille } from '../ui/cartes';
-import { remplirAvecCatalogue, sousTitre, titrePage } from './commun';
+import { definirTitrePage, remplirAvecCatalogue, sousTitre, titrePage } from './commun';
 
 const NOMBRE_PISTES = 8;
 const NOMBRE_ALBUMS = 6;
 
 export function pageAccueil(): HTMLElement {
+  definirTitrePage(t('site.nom'));
   const page = document.createElement('section');
   const intro = document.createElement('p');
   intro.textContent = t('accueil.intro');

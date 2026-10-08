@@ -5,6 +5,7 @@ import { chargerCatalogue } from '../catalogue/charger';
 import { indexer, type Donnees } from '../catalogue/donnees';
 import type { Catalogue } from '../catalogue/schemas';
 import { t } from '../i18n';
+import { annoncer } from '../ui/annonceur';
 
 const memoire = new WeakMap<Catalogue, Donnees>();
 
@@ -32,6 +33,12 @@ export function remplirAvecCatalogue(
       message.textContent = t('erreur.chargement');
       page.append(message);
     });
+}
+
+/** Définit le titre de l'onglet et l'annonce aux lecteurs d'écran. */
+export function definirTitrePage(titre: string): void {
+  document.title = titre === t('site.nom') ? titre : `${titre} – ${t('site.nom')}`;
+  annoncer(document.title);
 }
 
 export function titrePage(texte: string): HTMLElement {

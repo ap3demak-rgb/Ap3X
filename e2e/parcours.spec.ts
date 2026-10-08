@@ -77,3 +77,23 @@ test('la page des albums affiche son message quand aucun album ne correspond', a
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.getByText(/No album matches|Aucun album/)).toBeVisible();
 });
+
+test("le changement de langue est annoncé aux lecteurs d'écran", async ({ page }) => {
+  await page.goto('./');
+  await expect(page.locator('.carte').first()).toBeVisible();
+  await page.getByLabel(/Language|Langue/).selectOption('de');
+  await expect
+    .poll(async () => page.locator('.annonceur').textContent(), { timeout: 5000 })
+    .toMatch(/Sprache : Deutsch/);
+});
+
+test("le titre de l'onglet suit la page affichée", async ({ page }) => {
+  await page.goto('./');
+  await expect(page).toHaveTitle('AP3X Records');
+  await page.locator('.carte-titre a').first().click();
+  await expect(page).toHaveTitle(/^300 – AP3X Records$/);
+  await page.goto('./#/albums');
+  await expect(page).toHaveTitle(/Albums – AP3X Records$/);
+  await page.goto('./#/licences');
+  await expect(page).toHaveTitle(/(Licenses|Licences) – AP3X Records$/);
+});

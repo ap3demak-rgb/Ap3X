@@ -9,7 +9,13 @@ import { lecteur } from '../lecteur';
 import { lienPiste } from '../routeur';
 import { carteAlbum, grille, lien, pochette } from '../ui/cartes';
 import { creerOnde } from '../ui/onde';
-import { introuvable, remplirAvecCatalogue, sousTitre, titrePage } from './commun';
+import {
+  definirTitrePage,
+  introuvable,
+  remplirAvecCatalogue,
+  sousTitre,
+  titrePage,
+} from './commun';
 
 function definition(terme: string, valeur: string): HTMLElement[] {
   const dt = document.createElement('dt');
@@ -148,6 +154,7 @@ export function pageAlbum(id: string): HTMLElement {
   const page = document.createElement('section');
   remplirAvecCatalogue(page, (donnees) => {
     const album = donnees.albums.get(id);
+    definirTitrePage(album === undefined ? t('album.introuvable') : album.titre);
     return album === undefined ? [introuvable(t('album.introuvable'))] : detail(donnees, album);
   });
   return page;

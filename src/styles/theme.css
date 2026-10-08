@@ -16,6 +16,10 @@
     --accent-sombre: #5c2d00;
     --onde: #6e6e82;
     --onde-lue: #ffd6a8;
+    /* Couleur la plus claire que le fond animé (shader ou dégradé CSS) peut afficher. */
+    --fond-3d-max: #2b2150;
+    /* Opacité du panneau de contenu posé sur le fond animé ; le contraste du texte est vérifié sur le pire cas. */
+    --panneau-opacite: 0.92;
 
     /* Piles de polices couvrant latin étendu (vietnamien), cyrillique, chinois, japonais, coréen. */
     --police:
@@ -53,7 +57,9 @@
 
   body {
     margin: 0;
-    background: var(--fond);
+    background:
+      radial-gradient(ellipse at 15% 0%, var(--fond-3d-max) 0%, var(--fond) 60%), var(--fond);
+    background-attachment: fixed;
     color: var(--texte);
     font-family: var(--police);
     line-height: 1.5;

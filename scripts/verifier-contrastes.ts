@@ -2,7 +2,7 @@
 // © 2026 AP3X Records
 
 import { readFileSync } from 'node:fs';
-import { ratioContraste, SEUILS } from './contrastes.ts';
+import { analyserCouleur, ratioContraste, SEUILS } from './contrastes.ts';
 import { fichiersDuDepot, terminer } from './utilitaires.ts';
 
 /**
@@ -15,6 +15,22 @@ for (const [, nom, valeur] of css.matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{6})\s*;/
   if (nom !== undefined && valeur !== undefined) jetons.set(nom, valeur);
 }
 
+// Pire cas du panneau de contenu : le fond de page à l'opacité du panneau, posé sur la couleur la plus
+// claire que le fond animé (shader ou dégradé CSS) peut afficher.
+const opaciteBrute = /--panneau-opacite:\s*([\d.]+)\s*;/.exec(css)?.[1];
+const opacite = opaciteBrute === undefined ? Number.NaN : Number(opaciteBrute);
+const fondPage = jetons.get('fond');
+const fondAnimeMax = jetons.get('fond-3d-max');
+if (fondPage !== undefined && fondAnimeMax !== undefined && opacite > 0 && opacite <= 1) {
+  const a = analyserCouleur(fondPage);
+  const b = analyserCouleur(fondAnimeMax);
+  const canal = (x: number, y: number): string =>
+    Math.round(opacite * x + (1 - opacite) * y)
+      .toString(16)
+      .padStart(2, '0');
+  jetons.set('panneau-pire', `#${canal(a.r, b.r)}${canal(a.g, b.g)}${canal(a.b, b.b)}`);
+}
+
 interface Paire {
   texte: string;
   fond: string;
@@ -22,7 +38,7 @@ interface Paire {
   usage: string;
 }
 
-const SURFACES = ['fond', 'surface'];
+const SURFACES = ['fond', 'surface', 'panneau-pire'];
 const paires: Paire[] = [];
 for (const fond of SURFACES) {
   paires.push(

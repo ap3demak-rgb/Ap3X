@@ -4,6 +4,11 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
+// Les audits statiques tournent en mouvement réduit : le rendu WebGL logiciel des serveurs de test
+// monopolise le processeur et empêche axe de terminer. Le rendu 3D actif a son propre audit
+// (e2e/rendu3d.spec.ts).
+test.use({ reducedMotion: 'reduce' });
+
 const ETIQUETTES = [
   'wcag2a',
   'wcag2aa',
@@ -100,4 +105,24 @@ test('toutes les commandes visibles font au moins 44 × 44 px', async ({ page })
     return resultat;
   });
   expect(trop_petites).toEqual([]);
+});
+
+test.describe('texte agrandi à 200 %', () => {
+  for (const [nom, adresse] of PAGES) {
+    test(`aucun débordement horizontal sur la page ${nom}`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 720 });
+      await page.goto(adresse);
+      await expect(page.locator('main h1')).toBeVisible();
+      await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+      await page.waitForTimeout(300);
+      const { debordement, hauteurLecteur } = await page.evaluate(() => ({
+        debordement: document.documentElement.scrollWidth - window.innerWidth,
+        hauteurLecteur:
+          (document.querySelector('.lecteur') as HTMLElement).offsetHeight / window.innerHeight,
+      }));
+      expect(debordement).toBeLessThanOrEqual(1);
+      // La barre fixe ne doit pas occuper la majeure partie de l'écran.
+      expect(hauteurLecteur).toBeLessThan(0.5);
+    });
+  }
 });

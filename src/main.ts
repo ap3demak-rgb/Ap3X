@@ -5,15 +5,19 @@ import './styles/theme.css';
 import './styles/mise-en-page.css';
 import './styles/lecteur.css';
 import './styles/cartes.css';
-import { t } from './i18n';
+import './styles/rendu3d.css';
+import { obtenirLangue, t } from './i18n';
 import { demarrerLecteur, reconstruireBarre } from './lecteur';
+import { demarrerRendu3d } from './rendu3d';
 import { pageAccueil } from './pages/accueil';
 import { pageAlbum } from './pages/album';
 import { pageAlbums } from './pages/albums';
 import { pageLicences } from './pages/licences';
 import { pagePiste } from './pages/piste';
 import { ecouterRoute, routeCourante, type Route } from './routeur';
-import { entete, evitement, pied } from './ui/gabarit';
+import { annonceur, annoncer } from './ui/annonceur';
+import { bandeau } from './ui/bandeau';
+import { entete, evitement, NOMS_LANGUES, pied } from './ui/gabarit';
 
 const racine = document.getElementById('app');
 if (racine === null) {
@@ -41,18 +45,22 @@ function afficher(conteneur: HTMLElement, navigation: boolean): void {
   principal.tabIndex = -1;
   principal.append(page(routeCourante()));
 
-  document.title = t('site.nom');
-  conteneur.replaceChildren(evitement(principal), entete(), principal, pied());
+  conteneur.replaceChildren(evitement(principal), entete(), bandeau.element, principal, pied());
   if (navigation) {
     window.scrollTo(0, 0);
     principal.focus({ preventScroll: true });
   }
 }
 
+document.body.append(annonceur.element);
 afficher(racine, false);
 demarrerLecteur();
+// Le rendu 3D (Three.js) se charge après l'affichage de l'interface, sans la retarder.
+if ('requestIdleCallback' in window) window.requestIdleCallback(demarrerRendu3d);
+else setTimeout(demarrerRendu3d, 200);
 window.addEventListener('changement-langue', () => {
   afficher(racine, false);
   reconstruireBarre();
+  annoncer(`${t('langue.libelle')} : ${NOMS_LANGUES[obtenirLangue()]}`);
 });
 ecouterRoute(() => afficher(racine, true));

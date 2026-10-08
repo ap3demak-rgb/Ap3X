@@ -5,7 +5,7 @@ import { anneeDe, filtrerAlbums, type Donnees, type FiltresAlbums } from '../cat
 import { TYPES_ALBUM } from '../catalogue/schemas';
 import { t, type CleI18n } from '../i18n';
 import { carteAlbum, grille } from '../ui/cartes';
-import { remplirAvecCatalogue, titrePage } from './commun';
+import { definirTitrePage, remplirAvecCatalogue, titrePage } from './commun';
 
 /** Filtres conservés entre deux affichages de la page (changement de langue, navigation). */
 const filtres: FiltresAlbums = { type: '', categorie: '', annee: '', tri: 'recent' };
@@ -44,6 +44,7 @@ function contenuGrille(donnees: Donnees): HTMLElement {
 }
 
 export function pageAlbums(): HTMLElement {
+  definirTitrePage(t('nav.albums'));
   const page = document.createElement('section');
   page.append(titrePage(t('nav.albums')));
 
