@@ -27,6 +27,7 @@ npm install
 | `npm run lint`          | Run ESLint                                                                                            |
 | `npm run format`        | Format the project with Prettier                                                                      |
 | `npm run icones`        | Regenerate PNG/ICO icons from `public/icones/favicon.svg`                                             |
+| `npm test`              | Run the unit tests (Vitest); `npx vitest run tests/lecteur.test.ts` runs a single file                |
 | `npm run catalogue`     | Generate `public/catalogue.json` from `public/musique/` (runs automatically before `dev` and `build`) |
 | `npm run tags-id3`      | Write copyright and official URLs into the ID3 tags of every MP3 in `public/musique/`                 |
 | `npm run verifier`      | Run the SPDX, i18n and forbidden-mention checks                                                       |
@@ -36,8 +37,10 @@ npm install
 
 - `src/`: TypeScript source code
 - `src/catalogue/`: catalogue schemas (shared with the generator) and client-side loading
+- `src/lecteur/`: audio player (queue logic, fixed player bar, Media Session, keyboard shortcuts)
 - `src/styles/`: CSS (single dark theme)
-- `scripts/`: build-time scripts (catalogue generation)
+- `scripts/`: build-time scripts (catalogue generation, checks)
+- `tests/`: unit tests (Vitest)
 - `src/i18n/`: translation files (en, fr, de, ja, es, ru, vi, zh, ko), accessed through `t('key')`
 - `public/icones/`: favicon and app icons
 - `public/musique/`: MP3 files, one subfolder per category
@@ -53,6 +56,12 @@ Put MP3 files in `public/musique/`: **one subfolder = one category** (`public/mu
 - Album: a subfolder of a category with an `album.json` (`titre` and the ordered list `pistes`, each a file name or `{ "fichier": "x.mp3", "disque": 2 }`; optional `artiste`, `type` = single / ep / lp / compilation, `date`, `description`, `pochette`, `hashtags`, `licence`, `copyright`, `reference`, `visible`). Without `type`: 1 track = single, 2 to 6 = ep, 7 or more = lp.
 - A file named `cover.png`, `cover.jpg`, `cover.webp` (or `pochette.*`) in a category or album folder is used as its cover. Covers embedded in MP3 files are extracted to `public/pochettes/`.
 - Hashtags come from the sheet and from `#words` in the description.
+
+## Player
+
+A fixed bar at the bottom of every page plays the queue: play/pause, previous/next, seek bar, volume and mute, shuffle, repeat (off / queue / track) and a queue panel (reorder, remove). The next track is preloaded, hardware media keys and mobile lock screens are supported (Media Session API), and the volume, shuffle, repeat mode and last played track are remembered in the browser.
+
+Keyboard shortcuts (when no form control has the focus): `Space` play/pause, `←` / `→` seek by 5 seconds, `M` mute.
 
 ## Contribution checks
 

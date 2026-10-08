@@ -28,6 +28,8 @@ jobs:
       - name: Cohérence de la documentation
         if: github.event_name == 'pull_request'
         run: npx tsx scripts/verifier-docs.ts --base origin/${{ github.base_ref }}
+      - name: Tests unitaires
+        run: npm test
       - name: Lint
         run: npm run lint
       - name: Types et build

@@ -3,7 +3,9 @@
 
 import './styles/theme.css';
 import './styles/mise-en-page.css';
+import './styles/lecteur.css';
 import { t } from './i18n';
+import { demarrerLecteur, reconstruireBarre } from './lecteur';
 import { pageAccueil } from './pages/accueil';
 import { pageLicences } from './pages/licences';
 import { ecouterRoute, routeCourante } from './routeur';
@@ -24,5 +26,9 @@ function afficher(conteneur: HTMLElement): void {
 }
 
 afficher(racine);
-window.addEventListener('changement-langue', () => afficher(racine));
+demarrerLecteur();
+window.addEventListener('changement-langue', () => {
+  afficher(racine);
+  reconstruireBarre();
+});
 ecouterRoute(() => afficher(racine));

@@ -32,7 +32,9 @@
     "tags-id3": "tsx scripts/ecrire-tags-id3.ts",
     "catalogue": "tsx scripts/generer-catalogue.ts",
     "predev": "npm run catalogue",
-    "prebuild": "npm run catalogue"
+    "prebuild": "npm run catalogue",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "node-id3": "^0.2.9",
@@ -52,6 +54,7 @@
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.1",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
   }
 }

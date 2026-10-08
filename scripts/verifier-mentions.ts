@@ -13,11 +13,12 @@ const INTERDITES = [
   ['assistant ', 'virtuel'],
   ['intelligence ', 'artificielle'],
 ].map((morceaux) => morceaux.join(''));
+// Marqueurs en majuscules uniquement (« todo » est un mot espagnol courant), mots entiers.
 const PLACEHOLDERS = [
-  ['TO', 'DO'],
-  ['FIX', 'ME'],
-  ['lorem ', 'ipsum'],
-].map((morceaux) => morceaux.join(''));
+  new RegExp(['\\bTO', 'DO\\b'].join('')),
+  new RegExp(['\\bFIX', 'ME\\b'].join('')),
+  new RegExp(['lorem ', 'ipsum'].join(''), 'i'),
+];
 
 // Le nom du fichier de consignes local reste autorisé (il est déclaré dans .gitignore).
 const NOM_AUTORISE = ['cla', 'ude.md'].join('');
@@ -29,13 +30,14 @@ const erreurs: string[] = [];
 for (const fichier of fichiersDuDepot()) {
   if (IGNORES.has(fichier) || BINAIRES.test(fichier)) continue;
   if (!existsSync(fichier) || statSync(fichier).size > 2_000_000) continue;
-  const contenu = readFileSync(fichier, 'utf8').toLowerCase().replaceAll(NOM_AUTORISE, '');
+  const brut = readFileSync(fichier, 'utf8').replaceAll(new RegExp(NOM_AUTORISE, 'gi'), '');
+  const contenu = brut.toLowerCase();
   for (const motif of INTERDITES) {
     if (contenu.includes(motif)) erreurs.push(`Mention interdite dans ${fichier}`);
   }
   for (const motif of PLACEHOLDERS) {
-    if (contenu.includes(motif.toLowerCase())) {
-      erreurs.push(`Placeholder « ${motif} » dans ${fichier}`);
+    if (motif.test(brut)) {
+      erreurs.push(`Placeholder (${motif.source}) dans ${fichier}`);
     }
   }
 }
