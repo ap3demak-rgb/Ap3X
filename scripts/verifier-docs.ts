@@ -21,6 +21,18 @@ const modifies = execFileSync('git', gitArgs, { encoding: 'utf8' })
   .split('\n')
   .filter((ligne) => ligne !== '');
 
+/** Un chemin cité dans le README doit exister, sauf modèle (<x>) ou fichier généré ignoré par git. */
+function pathAttendu(chemin: string): boolean {
+  const nettoye = chemin.replace(/\/$/, '');
+  if (/[<*]/.test(nettoye) || existsSync(nettoye)) return true;
+  try {
+    execFileSync('git', ['check-ignore', '-q', chemin]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const erreurs: string[] = [];
 const CONFIGURATION =
   /^(package\.json|tsconfig\.json|vite\.config\.ts|eslint\.config\.js|index\.html)$/;
@@ -47,7 +59,7 @@ if (existsSync('README.md') && existsSync('package.json')) {
     }
   }
   for (const [, chemin] of readme.matchAll(/`((?:src|scripts|public)\/[^`\s]*)`/g)) {
-    if (chemin !== undefined && !existsSync(chemin.replace(/\/$/, ''))) {
+    if (chemin !== undefined && !pathAttendu(chemin)) {
       erreurs.push(`README.md référence un chemin inexistant : ${chemin}`);
     }
   }

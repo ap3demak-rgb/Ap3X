@@ -9,6 +9,7 @@ dist/
 
 # Fichiers générés
 public/catalogue.json
+public/pochettes/
 
 # Journaux
 *.log
