@@ -10,5 +10,13 @@
   "licence.musique": "Распространяется по лицензии Creative Commons CC BY-NC-ND 4.0",
   "licence.site": "Распространяется по лицензии GPL-3.0-or-later",
   "pied.contact": "Контакты",
-  "erreur.chargement": "Не удалось загрузить содержимое."
+  "erreur.chargement": "Не удалось загрузить содержимое.",
+  "accueil.intro": "Слушайте каталог AP3X Records.",
+  "nav.principale": "Основная навигация",
+  "licences.musique.titre": "Музыка",
+  "licences.musique.detail": "Каждый трек и каждый альбом выпущен по лицензии Creative Commons CC BY-NC-ND 4.0: вы можете делиться ими с указанием авторства, в некоммерческих целях и без изменений.",
+  "licences.code.titre": "Исходный код сайта",
+  "licences.code.detail": "Исходный код этого сайта является свободным программным обеспечением по лицензии GPL-3.0-or-later: вы можете использовать, изучать, распространять и изменять его на тех же условиях.",
+  "licences.depot": "Репозиторий исходного кода",
+  "nav.contenu": "Перейти к содержимому"
 }

@@ -1,16 +1,67 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* © 2026 AP3X Records */
 
-:root {
-  color-scheme: dark;
-  --fond: #0b0b10;
-  --texte: #f2f2f7;
-}
+@layer base, composants;
 
-body {
-  margin: 0;
-  background: var(--fond);
-  color: var(--texte);
-  font-family: system-ui, sans-serif;
-  line-height: 1.5;
+@layer base {
+  :root {
+    color-scheme: dark;
+    --fond: #0b0b10;
+    --surface: #17171f;
+    --texte: #f2f2f7;
+    --texte-secondaire: #c9c9d6;
+    --accent: #ff8a2b;
+    --bordure: #8a8a9c;
+    --focus: #ffd166;
+
+    /* Piles de polices couvrant latin étendu (vietnamien), cyrillique, chinois, japonais, coréen. */
+    --police:
+      system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  :lang(ja) {
+    --police:
+      system-ui, 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', 'Noto Sans JP', 'Noto Sans CJK JP',
+      sans-serif;
+  }
+
+  :lang(zh) {
+    --police:
+      system-ui, 'PingFang SC', 'Microsoft YaHei UI', 'Noto Sans SC', 'Noto Sans CJK SC', sans-serif;
+  }
+
+  :lang(ko) {
+    --police:
+      system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Noto Sans CJK KR',
+      sans-serif;
+  }
+
+  :lang(vi) {
+    --police: system-ui, 'Segoe UI', Roboto, 'Noto Sans', Arial, sans-serif;
+  }
+
+  :lang(ru) {
+    --police: system-ui, 'Segoe UI', Roboto, 'Noto Sans', Arial, sans-serif;
+  }
+
+  html {
+    font-size: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--fond);
+    color: var(--texte);
+    font-family: var(--police);
+    line-height: 1.5;
+  }
+
+  a {
+    color: var(--accent);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
 }

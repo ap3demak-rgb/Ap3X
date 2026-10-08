@@ -1,0 +1,94 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* © 2026 AP3X Records */
+
+@layer composants {
+  #app {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 2rem;
+    padding: 1rem clamp(1rem, 4vw, 3rem);
+    background: var(--surface);
+    border-bottom: 1px solid var(--bordure);
+  }
+
+  header nav {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+  }
+
+  header a,
+  header select {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  .marque {
+    gap: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--texte);
+    text-decoration: none;
+  }
+
+  header label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--texte-secondaire);
+  }
+
+  select {
+    padding: 0 0.75rem;
+    background: var(--fond);
+    color: var(--texte);
+    border: 1px solid var(--bordure);
+    border-radius: 0.5rem;
+    font: inherit;
+  }
+
+  main {
+    padding: clamp(1rem, 4vw, 3rem);
+    max-width: 60rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  main:focus {
+    outline: none;
+  }
+
+  footer {
+    padding: 1.5rem clamp(1rem, 4vw, 3rem);
+    background: var(--surface);
+    border-top: 1px solid var(--bordure);
+    color: var(--texte-secondaire);
+  }
+
+  footer p {
+    margin: 0.25rem 0;
+  }
+
+  .evitement {
+    position: absolute;
+    left: -100vw;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    background: var(--fond);
+    color: var(--texte);
+    border: 2px solid var(--focus);
+    font: inherit;
+  }
+
+  .evitement:focus {
+    position: static;
+  }
+}

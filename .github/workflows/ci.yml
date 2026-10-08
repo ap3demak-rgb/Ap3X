@@ -1,0 +1,34 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# © 2026 AP3X Records
+
+name: Contrôles qualité
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: En-têtes SPDX, i18n, mentions interdites et placeholders
+        run: npm run verifier
+      - name: Cohérence de la documentation
+        if: github.event_name == 'pull_request'
+        run: npx tsx scripts/verifier-docs.ts --base origin/${{ github.base_ref }}
+      - name: Lint
+        run: npm run lint
+      - name: Types et build
+        run: npm run build

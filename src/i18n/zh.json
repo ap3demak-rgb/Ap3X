@@ -10,5 +10,13 @@
   "licence.musique": "依据知识共享 CC BY-NC-ND 4.0 许可协议发布",
   "licence.site": "依据 GPL-3.0-or-later 许可证发布",
   "pied.contact": "联系方式",
-  "erreur.chargement": "无法加载内容。"
+  "erreur.chargement": "无法加载内容。",
+  "accueil.intro": "聆听 AP3X Records 的作品目录。",
+  "nav.principale": "主导航",
+  "licences.musique.titre": "音乐",
+  "licences.musique.detail": "所有曲目和专辑均依据知识共享 CC BY-NC-ND 4.0 许可协议发布：您可以在署名、非商业用途且不作修改的前提下分享。",
+  "licences.code.titre": "网站源代码",
+  "licences.code.detail": "本网站的源代码是依据 GPL-3.0-or-later 许可证发布的自由软件：您可以在相同许可证下使用、研究、分享和修改。",
+  "licences.depot": "源代码仓库",
+  "nav.contenu": "跳到内容"
 }

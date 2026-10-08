@@ -10,5 +10,13 @@
   "licence.musique": "クリエイティブ・コモンズ CC BY-NC-ND 4.0 ライセンスの下で配布",
   "licence.site": "GPL-3.0-or-later ライセンスの下で配布",
   "pied.contact": "お問い合わせ",
-  "erreur.chargement": "コンテンツを読み込めませんでした。"
+  "erreur.chargement": "コンテンツを読み込めませんでした。",
+  "accueil.intro": "AP3X Records のカタログをお聴きください。",
+  "nav.principale": "メインナビゲーション",
+  "licences.musique.titre": "音楽",
+  "licences.musique.detail": "すべての楽曲とアルバムは、クリエイティブ・コモンズ CC BY-NC-ND 4.0 ライセンスで公開されています。表示を行い、非営利目的で、改変せずに共有できます。",
+  "licences.code.titre": "サイトのソースコード",
+  "licences.code.detail": "このサイトのソースコードは GPL-3.0-or-later ライセンスのフリーソフトウェアです。同じライセンスの下で、使用、調査、共有、改変ができます。",
+  "licences.depot": "ソースコードのリポジトリ",
+  "nav.contenu": "本文へスキップ"
 }

@@ -28,9 +28,11 @@
     "verifier:mentions": "tsx scripts/verifier-mentions.ts",
     "verifier:docs": "tsx scripts/verifier-docs.ts",
     "verifier": "npm run verifier:licences && npm run verifier:i18n && npm run verifier:mentions",
-    "prepare": "husky"
+    "prepare": "husky",
+    "tags-id3": "tsx scripts/ecrire-tags-id3.ts"
   },
   "dependencies": {
+    "node-id3": "^0.2.9",
     "three": "^0.186.1"
   },
   "devDependencies": {

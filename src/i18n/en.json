@@ -10,5 +10,13 @@
   "licence.musique": "Distributed under the Creative Commons CC BY-NC-ND 4.0 license",
   "licence.site": "Distributed under the GPL-3.0-or-later license",
   "pied.contact": "Contact",
-  "erreur.chargement": "Unable to load the content."
+  "erreur.chargement": "Unable to load the content.",
+  "accueil.intro": "Listen to the AP3X Records catalogue.",
+  "nav.principale": "Main navigation",
+  "licences.musique.titre": "Music",
+  "licences.musique.detail": "Every track and album is released under the Creative Commons CC BY-NC-ND 4.0 license: you may share it with attribution, for non-commercial purposes and without modification.",
+  "licences.code.titre": "Website source code",
+  "licences.code.detail": "The source code of this website is free software under the GPL-3.0-or-later license: you may use, study, share and modify it under the same license.",
+  "licences.depot": "Source code repository",
+  "nav.contenu": "Skip to content"
 }

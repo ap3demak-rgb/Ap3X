@@ -11,3 +11,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - 2026-10-08: Licensing and identity (Phase 0b): `LICENSE`, `COPYING`, `REUSE.toml`, SPDX headers, favicon and app icons, web manifest, `.gitattributes`.
 - 2026-10-08: Internationalization base: nine language files, typed `t()` function, browser language detection with stored choice and English fallback.
 - 2026-10-08: Quality checks: license, i18n, forbidden-mention and documentation scripts, plus Husky `pre-commit` and `commit-msg` hooks.
+- 2026-10-08: Site shell: header with logo, navigation and language selector, footer with copyright, both license notices and contact, hash router and `#/licences` page.
+- 2026-10-08: `Intl` helpers (plural, date, duration), font stacks for Latin, Cyrillic, Chinese, Japanese and Korean, skip-to-content button.
+- 2026-10-08: `npm run tags-id3` script and continuous integration workflow; checks against contributor lists and the package author.

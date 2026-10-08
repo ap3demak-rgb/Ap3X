@@ -10,5 +10,13 @@
   "licence.musique": "Phân phối theo giấy phép Creative Commons CC BY-NC-ND 4.0",
   "licence.site": "Phân phối theo giấy phép GPL-3.0-or-later",
   "pied.contact": "Liên hệ",
-  "erreur.chargement": "Không thể tải nội dung."
+  "erreur.chargement": "Không thể tải nội dung.",
+  "accueil.intro": "Hãy nghe danh mục của AP3X Records.",
+  "nav.principale": "Điều hướng chính",
+  "licences.musique.titre": "Âm nhạc",
+  "licences.musique.detail": "Mọi bài hát và album được phát hành theo giấy phép Creative Commons CC BY-NC-ND 4.0: bạn có thể chia sẻ với ghi nhận tác giả, vì mục đích phi thương mại và không chỉnh sửa.",
+  "licences.code.titre": "Mã nguồn của trang web",
+  "licences.code.detail": "Mã nguồn của trang web này là phần mềm tự do theo giấy phép GPL-3.0-or-later: bạn có thể sử dụng, nghiên cứu, chia sẻ và sửa đổi theo cùng giấy phép.",
+  "licences.depot": "Kho mã nguồn",
+  "nav.contenu": "Chuyển đến nội dung"
 }

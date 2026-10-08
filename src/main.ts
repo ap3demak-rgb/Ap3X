@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
+import './styles/theme.css';
+import './styles/mise-en-page.css';
 import { t } from './i18n';
+import { pageAccueil } from './pages/accueil';
+import { pageLicences } from './pages/licences';
+import { ecouterRoute, routeCourante } from './routeur';
+import { entete, evitement, pied } from './ui/gabarit';
 
 const racine = document.getElementById('app');
 if (racine === null) {
@@ -9,13 +15,14 @@ if (racine === null) {
 }
 
 function afficher(conteneur: HTMLElement): void {
-  conteneur.replaceChildren();
-  const titre = document.createElement('h1');
-  titre.textContent = t('site.nom');
-  const pied = document.createElement('footer');
-  pied.textContent = `${t('site.copyright')} – ${t('licence.musique')} – ${t('licence.site')}`;
-  conteneur.append(titre, pied);
+  const principal = document.createElement('main');
+  principal.tabIndex = -1;
+  principal.append(routeCourante() === 'licences' ? pageLicences() : pageAccueil());
+
+  document.title = t('site.nom');
+  conteneur.replaceChildren(evitement(principal), entete(), principal, pied());
 }
 
 afficher(racine);
 window.addEventListener('changement-langue', () => afficher(racine));
+ecouterRoute(() => afficher(racine));
