@@ -7,7 +7,7 @@ Static music listening site (SoundCloud style) for the AP3X Records catalogue, b
 
 ## Deployment
 
-Every push to `main` runs `.github/workflows/deploy.yml`: dependencies, catalogue generation, build, performance budget, then publication with `actions/deploy-pages`. In the repository settings, GitHub Pages must use the source **GitHub Actions**. The site is served at <https://ap3demak-rgb.github.io/Ap3X/>; Vite `base` is `/Ap3X/` (`src/constantes.ts`). GitHub limits: files under 100 MB, repository ideally under 1 GB, published site under 1 GB.
+Every push to `main` runs `.github/workflows/deploy.yml`: dependencies, catalogue generation, build, performance budget, then publication with `actions/deploy-pages`. In the repository settings, GitHub Pages must use the source **GitHub Actions**. The site is served at <https://ap3demak-rgb.github.io/Ap3X/>; Vite `base` is `/Ap3X/` (`src/constantes.ts`). GitHub limits: files under 100 MB, repository ideally under 1 GB, published site under 1 GB. Git LFS is not needed while the music library stays well below 1 GB; beyond roughly 500 MB, prefer external storage.
 
 ## Offline and performance
 

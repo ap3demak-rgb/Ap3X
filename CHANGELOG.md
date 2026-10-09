@@ -42,7 +42,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - 2026-10-10: Error handling (Phase 8): a "Retry" button when the catalogue cannot be loaded, a specific message when a track fails because the connection was lost, end-to-end tests for an unreachable or invalid catalogue and a missing or interrupted audio file.
 - 2026-10-10: Quality (Phase 8): axe (WCAG AAA) audits of the home, albums and licenses pages in all nine languages; a basic end-to-end journey on Firefox, WebKit (desktop Safari), Chrome desktop, Pixel 7 and iPhone 14 profiles; `npm run format:verifier` (Prettier check) in the `pre-commit` hook and the CI workflow.
 - 2026-10-10: Fixed: end-to-end tests that read a list right after a reload now wait for it (flaky on the CI runner).
-- 2026-10-10: Deployment (Phase 9): `.github/workflows/deploy.yml` builds the site on every push to `main` and publishes `dist/` with GitHub Pages (source: GitHub Actions).
+- 2026-10-10: Deployment (Phase 9): `.github/workflows/deploy.yml` builds the site on every push to `main` and publishes `dist/` with GitHub Pages (source: GitHub Actions). Checked in production: base path, MP3 range requests, share pages, `404.html`, service worker.
 
 - 2026-10-09: Offline use (Phase 7): service worker built with esbuild (interface and covers cache-first, catalogue stale-while-revalidate, navigation network-first with cached fallback, audio never cached, old caches removed), enriched web manifest with a maskable icon.
 - 2026-10-09: Pagination: lists of cards show 48 items then a "Show more" button with a status line and focus on the first new item (collections, albums, search results).
