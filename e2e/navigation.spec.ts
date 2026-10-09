@@ -115,7 +115,8 @@ test('les favoris : ajout, page Favoris, persistance et retrait', async ({ page 
   await page.goto('./#/categorie/favoris');
   expect(await titres(page, 'Tracks')).toEqual(['Brume']);
   await page.reload();
-  expect(await titres(page, 'Tracks')).toEqual(['Brume']);
+  // Le catalogue arrive après le rechargement : on attend la liste plutôt que de la lire tout de suite.
+  await expect.poll(() => titres(page, 'Tracks')).toEqual(['Brume']);
 
   await page.getByRole('button', { name: 'Remove from favorites : Brume' }).click();
   await expect(page.getByText('You have not liked any track or album yet.')).toBeVisible();

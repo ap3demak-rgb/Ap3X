@@ -38,6 +38,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - 2026-10-09: Covers are resized and converted at build time (WebP large and small, JPEG for link previews, named by content hash, stale files removed); cards and the player bar use the small version, share pages use the JPEG; original images are removed from `dist/`.
 - 2026-10-09: Performance budget (`npm run verifier:budget`, run in the CI workflow): startup script, deferred chunks, styles and cover sizes.
 - 2026-10-09: Unit tests for the catalogue generator (categories, albums, discs, hidden items, extra categories, errors, covers) and for cover conversion; end-to-end tests simulate the refusal of autoplay instead of relying on a browser flag.
+- 2026-10-09: Fixed: the favorites end-to-end test waits for the list after a reload (the catalogue now arrives after the first paint).
+
 - 2026-10-09: Offline use (Phase 7): service worker built with esbuild (interface and covers cache-first, catalogue stale-while-revalidate, navigation network-first with cached fallback, audio never cached, old caches removed), enriched web manifest with a maskable icon.
 - 2026-10-09: Pagination: lists of cards show 48 items then a "Show more" button with a status line and focus on the first new item (collections, albums, search results).
 - 2026-10-09: Startup performance: CSS inlined into `index.html`, static first-paint shell, space reserved for the visualizer band, 3D start delayed after load, non-English dictionaries and catalogue schemas loaded on demand, playlists validated without Zod.
