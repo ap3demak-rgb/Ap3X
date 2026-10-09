@@ -12,10 +12,22 @@ export type Langue = (typeof LANGUES)[number];
 
 const CLE_STOCKAGE = 'ap3x.langue';
 
-const modules = import.meta.glob<Dictionnaire>('./*.json', { eager: true, import: 'default' });
+/**
+ * Les dictionnaires autres que l'anglais (référence, toujours embarqué) sont des morceaux séparés,
+ * chargés à la demande : un visiteur n'en télécharge qu'un.
+ */
+const chargeurs = import.meta.glob<Dictionnaire>(['./*.json', '!./en.json'], { import: 'default' });
+const dictionnaires = new Map<Langue, Dictionnaire>([['en', en]]);
+
+/** Charge le dictionnaire d'une langue (sans effet s'il l'est déjà). À appeler avant `t()` pour cette langue. */
+export async function chargerLangue(langue: Langue): Promise<void> {
+  if (dictionnaires.has(langue)) return;
+  const charger = chargeurs[`./${langue}.json`];
+  if (charger !== undefined) dictionnaires.set(langue, await charger());
+}
 
 function dictionnaireDe(langue: Langue): Dictionnaire {
-  return modules[`./${langue}.json`] ?? en;
+  return dictionnaires.get(langue) ?? en;
 }
 
 function estLangue(valeur: string | null | undefined): valeur is Langue {
@@ -47,7 +59,9 @@ export function obtenirLangue(): Langue {
   return langueCourante;
 }
 
-export function definirLangue(langue: Langue): void {
+/** Change de langue : charge le dictionnaire, puis met à jour l'interface (événement `changement-langue`). */
+export async function definirLangue(langue: Langue): Promise<void> {
+  await chargerLangue(langue);
   langueCourante = langue;
   document.documentElement.lang = langue;
   try {

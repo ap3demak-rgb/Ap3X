@@ -148,5 +148,7 @@
   "album.zip_erreur": "앨범 다운로드에 실패했습니다.",
   "erreur.404.titre": "페이지를 찾을 수 없습니다",
   "erreur.404.message": "홈페이지로 이동합니다…",
-  "erreur.404.lien": "홈페이지로 이동"
+  "erreur.404.lien": "홈페이지로 이동",
+  "liste.voir_plus": "더 보기",
+  "liste.affichage": "{total}개 중 {n}개 표시"
 }

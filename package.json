@@ -17,9 +17,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run verifier && tsc --noEmit && vite build",
+    "build": "npm run verifier && tsc --noEmit && tsc -p tsconfig.sw.json && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.sw.json",
     "lint": "eslint .",
     "format": "prettier --write .",
     "icones": "tsx scripts/generer-icones.ts",
@@ -37,8 +37,9 @@
     "test:watch": "vitest",
     "verifier:contrastes": "tsx scripts/verifier-contrastes.ts",
     "e2e": "playwright test",
-    "postbuild": "tsx scripts/generer-pages-statiques.ts && tsx scripts/nettoyer-dist.ts",
-    "verifier:budget": "tsx scripts/verifier-budget.ts"
+    "postbuild": "tsx scripts/generer-pages-statiques.ts && tsx scripts/nettoyer-dist.ts && tsx scripts/integrer-css.ts && tsx scripts/generer-service-worker.ts",
+    "verifier:budget": "tsx scripts/verifier-budget.ts",
+    "lighthouse": "tsx scripts/audit-lighthouse.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",
@@ -52,8 +53,11 @@
     "@playwright/test": "^1.64.0",
     "@types/node": "^26.6.4",
     "@types/three": "^0.186.0",
+    "chrome-launcher": "^1.2.2",
+    "esbuild": "^0.28.2",
     "eslint": "^10.12.0",
     "husky": "^9.1.7",
+    "lighthouse": "^13.5.0",
     "mpg123-decoder": "^1.0.3",
     "music-metadata": "^12.1.0",
     "png-to-ico": "^3.0.2",

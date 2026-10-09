@@ -101,3 +101,66 @@
     position: static;
   }
 }
+
+/*
+ * Coquille de premier affichage (index.html) : mêmes dimensions que l'en-tête, le bandeau et le titre
+ * de la vraie page, pour qu'elle apparaisse avec le document et que son remplacement ne déplace rien.
+ */
+@layer composants {
+  #coquille {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .coquille-entete {
+    display: flex;
+    align-items: flex-start;
+    min-height: 8.5rem;
+    box-sizing: border-box;
+    padding: 1rem clamp(1rem, 4vw, 3rem);
+    background: var(--surface);
+    border-bottom: 1px solid var(--bordure);
+  }
+
+  .coquille-marque {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .coquille-bande {
+    height: clamp(5rem, 12vw, 8rem);
+    background: var(--fond);
+    border-bottom: 1px solid var(--bordure);
+  }
+
+  .coquille-contenu {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: clamp(1rem, 4vw, 3rem);
+    background: color-mix(in srgb, var(--fond) calc(var(--panneau-opacite) * 100%), transparent);
+  }
+
+  .coquille-titre {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .coquille-noscript {
+    margin: 2rem;
+  }
+
+  /* Mouvement réduit : pas de bandeau de visualiseur (voir src/ui/bandeau.ts). */
+  @media (prefers-reduced-motion: reduce) {
+    .coquille-bande {
+      display: none;
+    }
+  }
+}

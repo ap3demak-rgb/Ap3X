@@ -177,3 +177,18 @@
     margin-top: 2rem;
   }
 }
+
+@layer composants {
+  /* Pied des listes paginées : « n affichés sur total » et bouton « Voir plus » */
+  .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin-top: 1rem;
+  }
+
+  .pagination p {
+    margin: 0;
+  }
+}

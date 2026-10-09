@@ -148,5 +148,7 @@
   "album.zip_erreur": "アルバムのダウンロードに失敗しました。",
   "erreur.404.titre": "ページが見つかりません",
   "erreur.404.message": "ホームページに戻ります…",
-  "erreur.404.lien": "ホームページへ"
+  "erreur.404.lien": "ホームページへ",
+  "liste.voir_plus": "もっと見る",
+  "liste.affichage": "{total} 件中 {n} 件を表示"
 }

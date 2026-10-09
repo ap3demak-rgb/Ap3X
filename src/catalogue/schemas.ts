@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import { z } from 'zod';
+import { TYPES_ALBUM } from './types-album';
 
 /**
  * Schémas partagés entre le script de génération du catalogue, le client et la page d'administration.
@@ -13,7 +14,7 @@ export const LICENCE_PAR_DEFAUT = 'CC BY-NC-ND 4.0';
 export const ARTISTE_PAR_DEFAUT = 'AP3X Records';
 export const ANNEE_COPYRIGHT_PAR_DEFAUT = 2026;
 
-export const TYPES_ALBUM = ['single', 'ep', 'lp', 'compilation'] as const;
+export { TYPES_ALBUM };
 export const TypeAlbumSchema = z.enum(TYPES_ALBUM);
 export type TypeAlbum = z.infer<typeof TypeAlbumSchema>;
 

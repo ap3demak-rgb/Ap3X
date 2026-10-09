@@ -7,8 +7,9 @@ import './styles/lecteur.css';
 import './styles/cartes.css';
 import './styles/rendu3d.css';
 import './styles/formulaires.css';
-import { obtenirLangue, t } from './i18n';
+import { chargerLangue, obtenirLangue, t } from './i18n';
 import { demarrerLecteur, reconstruireBarre } from './lecteur';
+import { enregistrerServiceWorker } from './pwa';
 import { demarrerRendu3d } from './rendu3d';
 import { pageAccueil } from './pages/accueil';
 import { pageAlbum } from './pages/album';
@@ -83,12 +84,25 @@ function afficher(conteneur: HTMLElement, origine: Origine): void {
   }
 }
 
+// Le dictionnaire de la langue du visiteur doit être là avant le premier affichage.
+await chargerLangue(obtenirLangue());
 document.body.append(annonceur.element);
 afficher(racine, 'initiale');
 demarrerLecteur();
-// Le rendu 3D (Three.js) se charge après l'affichage de l'interface, sans la retarder.
-if ('requestIdleCallback' in window) window.requestIdleCallback(demarrerRendu3d);
-else setTimeout(demarrerRendu3d, 200);
+enregistrerServiceWorker();
+// Le rendu 3D (Three.js) n'est que décoratif : il démarre quelques secondes après le chargement, quand
+// le contenu est déjà affiché. Lancé plus tôt, il monopolise le processeur (compilation des shaders,
+// création du contexte WebGL) et retarde le premier affichage du contenu (LCP de plusieurs secondes sur
+// un appareil modeste).
+const DELAI_RENDU_3D_MS = 2500;
+const programmerRendu3d = (): void => {
+  window.setTimeout(() => {
+    if ('requestIdleCallback' in window) window.requestIdleCallback(demarrerRendu3d);
+    else demarrerRendu3d();
+  }, DELAI_RENDU_3D_MS);
+};
+if (document.readyState === 'complete') programmerRendu3d();
+else window.addEventListener('load', programmerRendu3d, { once: true });
 window.addEventListener('changement-langue', () => {
   afficher(racine, 'langue');
   reconstruireBarre();

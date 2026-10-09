@@ -1,35 +1,59 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-import { z } from 'zod';
-
 const CLE_STOCKAGE = 'ap3x.playlists';
 /** Longueur maximale du nom d'une playlist. */
 export const LONGUEUR_NOM_MAX = 80;
 
 type Stockage = Pick<Storage, 'getItem' | 'setItem'>;
 
-const NomSchema = z.string().trim().min(1).max(LONGUEUR_NOM_MAX);
-
-export const PlaylistSchema = z.object({
-  id: z.string().min(1),
-  nom: NomSchema,
-  pistes: z.array(z.string().min(1)),
-});
-export type Playlist = z.infer<typeof PlaylistSchema>;
+export interface Playlist {
+  id: string;
+  nom: string;
+  pistes: string[];
+}
 
 /** Format du fichier d'export / import. */
-export const ExportPlaylistsSchema = z.object({
-  format: z.literal('ap3x-playlists'),
-  version: z.literal(1),
-  playlists: z.array(PlaylistSchema),
-});
-export type ExportPlaylists = z.infer<typeof ExportPlaylistsSchema>;
+export interface ExportPlaylists {
+  format: 'ap3x-playlists';
+  version: 1;
+  playlists: Playlist[];
+}
+
+// Validation écrite à la main plutôt qu'avec zod : les playlists sont lues dès le démarrage du site,
+// et charger zod à ce moment-là retarderait le premier affichage.
+const estTexteNonVide = (valeur: unknown): valeur is string =>
+  typeof valeur === 'string' && valeur.length > 0;
 
 /** Nom nettoyé (espaces superflus retirés, longueur bornée) ; `undefined` s'il est vide. */
 export function nettoyerNom(nom: string): string | undefined {
-  const resultat = NomSchema.safeParse(nom.replace(/\s+/g, ' '));
-  return resultat.success ? resultat.data : undefined;
+  const propre = nom.replace(/\s+/g, ' ').trim();
+  return propre.length >= 1 && propre.length <= LONGUEUR_NOM_MAX ? propre : undefined;
+}
+
+function lirePlaylist(brut: unknown): Playlist | undefined {
+  if (typeof brut !== 'object' || brut === null) return undefined;
+  const { id, nom, pistes } = brut as Record<string, unknown>;
+  if (!estTexteNonVide(id) || typeof nom !== 'string' || !Array.isArray(pistes)) return undefined;
+  const propre = nom.trim();
+  if (propre.length < 1 || propre.length > LONGUEUR_NOM_MAX) return undefined;
+  if (!pistes.every(estTexteNonVide)) return undefined;
+  return { id, nom: propre, pistes: [...(pistes as string[])] };
+}
+
+/** Liste de playlists valides ; `undefined` si la valeur n'est pas une liste ou si un élément est invalide. */
+function lirePlaylists(brut: unknown): Playlist[] | undefined {
+  if (!Array.isArray(brut)) return undefined;
+  const listes = brut.map(lirePlaylist);
+  return listes.every((p): p is Playlist => p !== undefined) ? listes : undefined;
+}
+
+function lireExport(brut: unknown): ExportPlaylists | undefined {
+  if (typeof brut !== 'object' || brut === null) return undefined;
+  const { format, version, playlists } = brut as Record<string, unknown>;
+  if (format !== 'ap3x-playlists' || version !== 1) return undefined;
+  const listes = lirePlaylists(playlists);
+  return listes === undefined ? undefined : { format, version, playlists: listes };
 }
 
 /** Premier nom libre « Nom », « Nom (2) », « Nom (3) »… parmi les noms déjà pris (sans tenir compte de la casse). */
@@ -174,10 +198,10 @@ export class Playlists extends EventTarget {
     } catch {
       throw new ImportInvalide();
     }
-    const resultat = ExportPlaylistsSchema.safeParse(brut);
-    if (!resultat.success) throw new ImportInvalide();
+    const contenu = lireExport(brut);
+    if (contenu === undefined) throw new ImportInvalide();
     const noms = this.listes.map((p) => p.nom);
-    const importees: Playlist[] = resultat.data.playlists.map((p) => {
+    const importees: Playlist[] = contenu.playlists.map((p) => {
       const nom = nomDisponible(p.nom, noms);
       noms.push(nom);
       return { id: this.fabriqueId(), nom, pistes: [...new Set(p.pistes)] };
@@ -194,8 +218,7 @@ export class Playlists extends EventTarget {
     try {
       const brut = this.stockage?.getItem(CLE_STOCKAGE);
       const lu: unknown = brut === null || brut === undefined ? undefined : JSON.parse(brut);
-      const resultat = z.array(PlaylistSchema).safeParse(lu);
-      this.listes = resultat.success ? resultat.data : [];
+      this.listes = lirePlaylists(lu) ?? [];
     } catch {
       this.listes = [];
     }

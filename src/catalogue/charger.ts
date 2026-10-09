@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-import { CatalogueSchema, type Catalogue } from './schemas';
+import type { Catalogue } from './schemas';
 
 let promesse: Promise<Catalogue> | undefined;
 
@@ -12,6 +12,8 @@ export function chargerCatalogue(): Promise<Catalogue> {
     if (!reponse.ok) {
       throw new Error(`catalogue.json : réponse HTTP ${reponse.status}`);
     }
+    // zod n'est chargé qu'ici, quand le catalogue est arrivé : il ne retarde pas le premier affichage.
+    const { CatalogueSchema } = await import('./schemas');
     return CatalogueSchema.parse(await reponse.json());
   })().catch((erreur: unknown) => {
     promesse = undefined;

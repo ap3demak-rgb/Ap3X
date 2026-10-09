@@ -34,7 +34,9 @@ function selecteurLangue(): HTMLElement {
     option.selected = langue === obtenirLangue();
     liste.append(option);
   }
-  liste.addEventListener('change', () => definirLangue(liste.value as Langue));
+  liste.addEventListener('change', () => {
+    void definirLangue(liste.value as Langue);
+  });
   etiquette.append(texte, liste);
   return etiquette;
 }

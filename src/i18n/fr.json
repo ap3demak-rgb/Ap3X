@@ -148,5 +148,7 @@
   "album.zip_erreur": "Le téléchargement de l'album a échoué.",
   "erreur.404.titre": "Page introuvable",
   "erreur.404.message": "Retour à la page d'accueil…",
-  "erreur.404.lien": "Aller à la page d'accueil"
+  "erreur.404.lien": "Aller à la page d'accueil",
+  "liste.voir_plus": "Voir plus",
+  "liste.affichage": "{n} affichés sur {total}"
 }

@@ -138,15 +138,27 @@ export const CATALOGUE_TEST: Catalogue = CatalogueSchema.parse({
 
 /**
  * Reproduit la règle de lecture automatique des navigateurs, quel que soit l'environnement : `play()`
- * est refusé (`NotAllowedError`) tant qu'aucune action de l'utilisateur n'est en cours. Sans cela, le
- * comportement dépend du système (Windows, Linux, serveur d'intégration) et d'options de lancement
- * dont l'effet n'est pas le même partout. Un clic réel de Playwright compte comme action de l'utilisateur.
+ * est refusé (`NotAllowedError`) sauf juste après un vrai geste de l'utilisateur (clic, touche, toucher ;
+ * les clics de Playwright sont des événements fiables). On n'utilise ni les options de lancement ni
+ * `navigator.userActivation` : leur effet varie selon le système, et Playwright lui-même marque la page
+ * comme activée après une navigation.
  */
 export async function refuserLectureAutomatique(page: Page): Promise<void> {
   await page.addInitScript(() => {
+    const DELAI_GESTE_MS = 1500;
+    let dernierGeste = Number.NEGATIVE_INFINITY;
+    for (const type of ['pointerdown', 'mousedown', 'keydown', 'touchstart', 'click']) {
+      window.addEventListener(
+        type,
+        (evenement) => {
+          if (evenement.isTrusted) dernierGeste = performance.now();
+        },
+        true,
+      );
+    }
     const original = HTMLMediaElement.prototype.play;
     HTMLMediaElement.prototype.play = function (this: HTMLMediaElement): Promise<void> {
-      if (!navigator.userActivation.isActive) {
+      if (performance.now() - dernierGeste > DELAI_GESTE_MS) {
         return Promise.reject(new DOMException('Lecture automatique refusée', 'NotAllowedError'));
       }
       return original.call(this);

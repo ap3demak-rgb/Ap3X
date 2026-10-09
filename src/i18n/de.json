@@ -148,5 +148,7 @@
   "album.zip_erreur": "Der Download des Albums ist fehlgeschlagen.",
   "erreur.404.titre": "Seite nicht gefunden",
   "erreur.404.message": "Weiterleitung zur Startseite …",
-  "erreur.404.lien": "Zur Startseite"
+  "erreur.404.lien": "Zur Startseite",
+  "liste.voir_plus": "Mehr anzeigen",
+  "liste.affichage": "{n} von {total} angezeigt"
 }

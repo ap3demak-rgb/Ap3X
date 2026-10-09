@@ -41,11 +41,16 @@ const demarrage = new Set(
 );
 const lignes: string[] = [];
 
-let styles = 0;
+// Les styles sont intégrés à index.html par `scripts/integrer-css.ts` : on mesure les balises <style>.
+let styles = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].reduce(
+  (somme, m) => somme + gzipSync(m[1] ?? '').length,
+  0,
+);
 for (const chemin of fichiers(join(dist, 'assets'))) {
   const nom = relative(dist, chemin).split(sep).join('/');
   const taille = gzip(chemin);
   if (extname(chemin) === '.css') {
+    // Feuille externe restante (non intégrée) : elle compte aussi.
     styles += taille;
   } else if (extname(chemin) === '.js') {
     const demarre = demarrage.has(nom);

@@ -148,5 +148,7 @@
   "album.zip_erreur": "La descarga del álbum ha fallado.",
   "erreur.404.titre": "Página no encontrada",
   "erreur.404.message": "Volviendo a la página de inicio…",
-  "erreur.404.lien": "Ir a la página de inicio"
+  "erreur.404.lien": "Ir a la página de inicio",
+  "liste.voir_plus": "Ver más",
+  "liste.affichage": "Mostrando {n} de {total}"
 }

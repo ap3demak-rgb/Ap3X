@@ -148,5 +148,7 @@
   "album.zip_erreur": "Tải album không thành công.",
   "erreur.404.titre": "Không tìm thấy trang",
   "erreur.404.message": "Đang đưa bạn về trang chủ…",
-  "erreur.404.lien": "Về trang chủ"
+  "erreur.404.lien": "Về trang chủ",
+  "liste.voir_plus": "Xem thêm",
+  "liste.affichage": "Đang hiển thị {n} trên {total}"
 }

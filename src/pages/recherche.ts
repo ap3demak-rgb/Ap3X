@@ -5,7 +5,8 @@ import { rechercher } from '../catalogue/recherche';
 import { t, tv } from '../i18n';
 import { comptePistes } from '../i18n/format';
 import { lienArtiste, lienCategorie, lienTag } from '../routeur';
-import { carteAlbum, cartePiste, grille, lien } from '../ui/cartes';
+import { carteAlbum, cartePiste, lien } from '../ui/cartes';
+import { grillePagineeDe } from '../ui/pagination';
 import { definirTitrePage, remplirAvecCatalogue, sousTitre, titrePage } from './commun';
 
 function listeDeLiens(elements: { href: string; texte: string; detail?: string }[]): HTMLElement {
@@ -49,12 +50,15 @@ export function pageRecherche(requete: string): HTMLElement {
       blocs.push(section);
     };
     if (resultats.albums.length > 0) {
-      ajouter(t('nav.albums'), grille(resultats.albums.map((a) => carteAlbum(donnees, a))));
+      ajouter(
+        t('nav.albums'),
+        grillePagineeDe(resultats.albums, (album) => carteAlbum(donnees, album)),
+      );
     }
     if (resultats.pistes.length > 0) {
       ajouter(
         t('categorie.titres'),
-        grille(resultats.pistes.map((p) => cartePiste(donnees, p, resultats.pistes))),
+        grillePagineeDe(resultats.pistes, (piste) => cartePiste(donnees, piste, resultats.pistes)),
       );
     }
     if (resultats.artistes.length > 0) {

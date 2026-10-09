@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-export type ModeBandeau = 'cache' | 'webgl' | 'css';
+export type ModeBandeau = 'cache' | 'reserve' | 'webgl' | 'css';
 
 /**
  * Bandeau décoratif du visualiseur, placé entre l'en-tête et le contenu. Il est créé une seule fois
  * et réinséré à chaque affichage de page : le canvas garde ainsi son contexte et ses dimensions.
+ * - `reserve` : en attendant le chargement du rendu 3D, la zone est déjà là (vide) pour que la page
+ *   ne bouge pas quand le visualiseur apparaît ;
  * - `webgl` : le canvas reçoit le rendu 3D ;
  * - `css` : repli sans WebGL, une simple barre de niveau ;
  * - `cache` : mouvement réduit ou rendu indisponible.
@@ -24,7 +26,9 @@ class Bandeau {
     this.barre.className = 'niveau-barre';
     this.niveau.append(this.barre);
     this.element.append(this.canvas, this.niveau);
-    this.definirMode('cache');
+    // Mouvement réduit : jamais de visualiseur, donc aucune zone à réserver.
+    const mouvementReduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.definirMode(mouvementReduit ? 'cache' : 'reserve');
   }
 
   definirMode(mode: ModeBandeau): void {

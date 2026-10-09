@@ -8,7 +8,8 @@ import { favoris, favorisAlbums } from '../favoris';
 import { obtenirLangue, t } from '../i18n';
 import { compteAlbums, comptePistes } from '../i18n/format';
 import { lecteur } from '../lecteur';
-import { carteAlbum, cartePiste, grille } from '../ui/cartes';
+import { carteAlbum, cartePiste } from '../ui/cartes';
+import { grillePagineeDe } from '../ui/pagination';
 import { selecteurTri } from '../ui/tri';
 import { sousTitre, titrePage } from './commun';
 
@@ -87,7 +88,7 @@ export function collection(options: OptionsCollection): HTMLElement[] {
       const section = document.createElement('section');
       section.append(
         sousTitre(t('nav.albums')),
-        grille(albumsTries.map((album) => carteAlbum(donnees, album))),
+        grillePagineeDe(albumsTries, (album) => carteAlbum(donnees, album)),
       );
       zone.append(section);
     }
@@ -95,7 +96,7 @@ export function collection(options: OptionsCollection): HTMLElement[] {
       const section = document.createElement('section');
       section.append(
         sousTitre(t('categorie.titres')),
-        grille(pistesTriees.map((piste) => cartePiste(donnees, piste, pistesTriees))),
+        grillePagineeDe(pistesTriees, (piste) => cartePiste(donnees, piste, pistesTriees)),
       );
       zone.append(section);
     }

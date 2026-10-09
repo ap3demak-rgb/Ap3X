@@ -148,5 +148,7 @@
   "album.zip_erreur": "The album download failed.",
   "erreur.404.titre": "Page not found",
   "erreur.404.message": "Taking you back to the home page…",
-  "erreur.404.lien": "Go to the home page"
+  "erreur.404.lien": "Go to the home page",
+  "liste.voir_plus": "Show more",
+  "liste.affichage": "Showing {n} of {total}"
 }

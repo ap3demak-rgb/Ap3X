@@ -34,9 +34,15 @@ export default defineConfig({
   // Le rendu WebGL logiciel sature le processeur : un seul worker évite les délais d'attente aléatoires.
   workers: 1,
   reporter: 'list',
+  // Le rendu 3D démarre quelques secondes après le chargement (src/main.ts) : les attentes qui le
+  // concernent doivent patienter plus que les 5 secondes par défaut.
+  expect: { timeout: 12_000 },
   use: {
     baseURL: 'http://localhost:4173/Ap3X/',
     trace: 'retain-on-failure',
+    // Un service worker court-circuiterait `page.route` : les tests qui simulent le réseau ou le
+    // catalogue ne le voient pas. Seuls les tests hors ligne l'autorisent (e2e/hors-ligne.spec.ts).
+    serviceWorkers: 'block',
   },
   projects: [
     // Politique fixée explicitement : sinon elle dépend de l'environnement (bloquée en local, autorisée

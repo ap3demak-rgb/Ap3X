@@ -28,7 +28,17 @@
     <meta name="twitter:image" content="%URL_SITE%icones/icone-512.png" />
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!-- Coquille affichée avant le chargement du script, puis remplacée par l'application. -->
+      <div id="coquille" aria-hidden="true">
+        <div class="coquille-entete"><span class="coquille-marque">%NOM_SITE%</span></div>
+        <div class="coquille-bande"></div>
+        <div class="coquille-contenu"><div class="coquille-titre">%NOM_SITE%</div></div>
+      </div>
+      <noscript>
+        <p class="coquille-noscript">JavaScript is required to use %NOM_SITE%.</p>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

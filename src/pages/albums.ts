@@ -3,9 +3,10 @@
 
 import { anneeDe, filtrerAlbums, type Donnees, type FiltresAlbums } from '../catalogue/donnees';
 import { trierAlbums } from '../catalogue/navigation';
-import { TYPES_ALBUM } from '../catalogue/schemas';
+import { TYPES_ALBUM } from '../catalogue/types-album';
 import { obtenirLangue, t, type CleI18n } from '../i18n';
-import { carteAlbum, grille } from '../ui/cartes';
+import { carteAlbum } from '../ui/cartes';
+import { grillePagineeDe } from '../ui/pagination';
 import { selecteurTri } from '../ui/tri';
 import { etatTri } from './collection';
 import { definirTitrePage, remplirAvecCatalogue, titrePage } from './commun';
@@ -47,7 +48,7 @@ function contenuGrille(donnees: Donnees): HTMLElement {
     vide.textContent = t('albums.vide');
     return vide;
   }
-  return grille(albums.map((album) => carteAlbum(donnees, album, 'h2')));
+  return grillePagineeDe(albums, (album) => carteAlbum(donnees, album, 'h2'));
 }
 
 export function pageAlbums(): HTMLElement {

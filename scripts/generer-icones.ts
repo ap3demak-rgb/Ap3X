@@ -25,6 +25,20 @@ for (const [nom, taille] of Object.entries(tailles)) {
     .toFile(join(dossierIcones, nom));
 }
 
+// Icône « maskable » : fond plein jusqu'aux bords, logo dans la zone sûre (70 % central), pour que
+// les systèmes qui la découpent (cercle, carré arrondi) ne rognent pas le logo.
+const TAILLE_MASKABLE = 512;
+const logoMaskable = await sharp(source, { density: 384 })
+  .resize(Math.round(TAILLE_MASKABLE * 0.7), Math.round(TAILLE_MASKABLE * 0.7))
+  .png()
+  .toBuffer();
+await sharp({
+  create: { width: TAILLE_MASKABLE, height: TAILLE_MASKABLE, channels: 4, background: '#0b0b10' },
+})
+  .composite([{ input: logoMaskable, gravity: 'center' }])
+  .png()
+  .toFile(join(dossierIcones, 'icone-maskable-512.png'));
+
 const png16 = await sharp(source, { density: 384 }).resize(16, 16).png().toBuffer();
 const png32 = await sharp(source, { density: 384 }).resize(32, 32).png().toBuffer();
 const png48 = await sharp(source, { density: 384 }).resize(48, 48).png().toBuffer();
