@@ -156,7 +156,7 @@ test.describe("favoris d'albums et file d'attente", () => {
     expect(await titres(page, 'Albums')).toEqual(['Single X']);
     expect(await titres(page, 'Tracks')).toEqual(['Brume']);
     await page.reload();
-    expect(await titres(page, 'Albums')).toEqual(['Single X']);
+    await expect.poll(() => titres(page, 'Albums')).toEqual(['Single X']);
 
     // « Tout lire » : les pistes des albums d'abord.
     await page.getByRole('button', { name: /Play all/ }).click();
@@ -326,7 +326,7 @@ test.describe('playlists', () => {
     // Persistance.
     await page.reload();
     await expect(page.getByRole('heading', { level: 1, name: 'Soirée' })).toBeVisible();
-    expect(await noms()).toEqual(['Zenith', 'Night Drive']);
+    await expect.poll(() => noms()).toEqual(['Zenith', 'Night Drive']);
   });
 
   test('la suppression demande confirmation et peut être annulée', async ({ page }) => {
