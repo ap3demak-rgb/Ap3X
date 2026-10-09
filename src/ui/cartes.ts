@@ -4,6 +4,7 @@
 import { urlDuFichier } from '../catalogue/charger';
 import type { Donnees } from '../catalogue/donnees';
 import { pistesDeAlbum } from '../catalogue/donnees';
+import { pochetteReduite } from '../catalogue/pochettes';
 import type { Album, Piste } from '../catalogue/schemas';
 import { favoris, favorisAlbums, type Favoris } from '../favoris';
 import { t, tv } from '../i18n';
@@ -173,7 +174,7 @@ export function cartePiste(
   const lienPochette = lien(lienPiste(piste.id), '');
   lienPochette.tabIndex = -1;
   lienPochette.setAttribute('aria-hidden', 'true');
-  lienPochette.append(pochette(piste.pochette));
+  lienPochette.append(pochette(pochetteReduite(piste)));
 
   const corps = document.createElement('div');
   corps.className = 'carte-corps';
@@ -216,7 +217,7 @@ export function carteAlbum(
   const lienPochette = lien(lienAlbum(album.id), '');
   lienPochette.tabIndex = -1;
   lienPochette.setAttribute('aria-hidden', 'true');
-  lienPochette.append(pochette(album.pochette));
+  lienPochette.append(pochette(pochetteReduite(album)));
 
   const corps = document.createElement('div');
   corps.className = 'carte-corps';

@@ -9,7 +9,8 @@ import { servirCatalogueTest } from './fixtures/catalogue';
 test.use({ reducedMotion: 'reduce' });
 
 test.beforeEach(async ({ page }) => {
-  await servirCatalogueTest(page);
+  // Ici la lecture automatique doit rester autorisée : le projet Playwright fixe la politique du navigateur.
+  await servirCatalogueTest(page, false);
 });
 
 const lireJeton = (page: Page) => page.locator('.lecteur-titre');

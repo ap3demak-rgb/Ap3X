@@ -37,7 +37,8 @@
     "test:watch": "vitest",
     "verifier:contrastes": "tsx scripts/verifier-contrastes.ts",
     "e2e": "playwright test",
-    "postbuild": "tsx scripts/generer-pages-statiques.ts"
+    "postbuild": "tsx scripts/generer-pages-statiques.ts && tsx scripts/nettoyer-dist.ts",
+    "verifier:budget": "tsx scripts/verifier-budget.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",

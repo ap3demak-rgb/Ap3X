@@ -87,6 +87,8 @@ export const PisteSchema = z.object({
   description: z.string(),
   hashtags: z.array(TexteSchema),
   pochette: TexteSchema.optional(),
+  /** Miniature de la pochette (cartes, barre de lecture). */
+  miniature: TexteSchema.optional(),
   date: DateSchema.optional(),
   categorie: TexteSchema,
   /** Autres catégories de la piste (en plus de celle de son dossier). */
@@ -112,6 +114,7 @@ export const AlbumSchema = z.object({
   date: DateSchema.optional(),
   description: z.string(),
   pochette: TexteSchema.optional(),
+  miniature: TexteSchema.optional(),
   hashtags: z.array(TexteSchema),
   licence: TexteSchema,
   copyright: TexteSchema,
@@ -130,6 +133,7 @@ export const CategorieSchema = z.object({
   description: z.string(),
   couleur: z.string().optional(),
   pochette: TexteSchema.optional(),
+  miniature: TexteSchema.optional(),
   nombrePistes: z.number().int().min(0),
   nombreAlbums: z.number().int().min(0),
 });

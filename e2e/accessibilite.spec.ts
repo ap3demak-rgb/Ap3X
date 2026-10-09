@@ -3,6 +3,11 @@
 
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { refuserLectureAutomatique } from './fixtures/catalogue';
+
+test.beforeEach(async ({ page }) => {
+  await refuserLectureAutomatique(page);
+});
 
 // Les audits statiques tournent en mouvement réduit : le rendu WebGL logiciel des serveurs de test
 // monopolise le processeur et empêche axe de terminer. Le rendu 3D actif a son propre audit

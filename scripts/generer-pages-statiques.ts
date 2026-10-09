@@ -3,6 +3,7 @@
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { cheminImagePartage } from '../src/catalogue/pochettes.ts';
 import { CatalogueSchema, type Album, type Piste } from '../src/catalogue/schemas.ts';
 import { BASE_SITE, NOM_SITE, URL_SITE } from '../src/constantes.ts';
 import { remplacerVariables } from '../src/i18n/variables.ts';
@@ -91,7 +92,7 @@ function pagePiste(piste: Piste): string {
     duree(piste.duree),
     categories.get(piste.categorie) ?? piste.categorie,
   ].join(' · ');
-  const image = piste.pochette ?? ICONE.chemin;
+  const image = piste.pochette !== undefined ? cheminImagePartage(piste.pochette) : ICONE.chemin;
   const chemin = cheminPartage('piste', piste.id);
   return pageDePartage(
     {
@@ -100,7 +101,8 @@ function pagePiste(piste: Piste): string {
       image: urlAbsolue(urlSite, image),
       urlPage: urlAbsolue(urlSite, chemin),
       type: 'music.song',
-      grandeImage: piste.pochette !== undefined,
+      // Les pochettes sont carrées : la petite carte (vignette carrée) les montre en entier.
+      grandeImage: false,
       route: lienPiste(piste.id),
       racine: '../../../',
       nomSite: NOM_SITE,
@@ -122,10 +124,13 @@ function pageAlbum(album: Album, premierePochette: string | undefined): string {
     {
       titre: `${album.titre} – ${album.artiste}`,
       description,
-      image: urlAbsolue(urlSite, pochette ?? ICONE.chemin),
+      image: urlAbsolue(
+        urlSite,
+        pochette !== undefined ? cheminImagePartage(pochette) : ICONE.chemin,
+      ),
       urlPage: urlAbsolue(urlSite, cheminPartage('album', album.id)),
       type: 'music.album',
-      grandeImage: pochette !== undefined,
+      grandeImage: false,
       route: lienAlbum(album.id),
       racine: '../../../',
       nomSite: NOM_SITE,

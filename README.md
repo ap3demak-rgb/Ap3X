@@ -18,21 +18,22 @@ npm install
 
 ## npm scripts
 
-| Command                 | Description                                                                                                                                          |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run dev`           | Start the Vite development server                                                                                                                    |
-| `npm run build`         | Type-check, then build the site into `dist/`                                                                                                         |
-| `npm run preview`       | Serve the production build locally                                                                                                                   |
-| `npm run typecheck`     | Run the TypeScript compiler without emitting                                                                                                         |
-| `npm run lint`          | Run ESLint                                                                                                                                           |
-| `npm run format`        | Format the project with Prettier                                                                                                                     |
-| `npm run icones`        | Regenerate PNG/ICO icons from `public/icones/favicon.svg`                                                                                            |
-| `npm test`              | Run the unit tests (Vitest); `npx vitest run tests/lecteur.test.ts` runs a single file                                                               |
-| `npm run e2e`           | Build first (`npm run build`), then run the Playwright end-to-end and axe accessibility tests; the first time, run `npx playwright install chromium` |
-| `npm run catalogue`     | Generate `public/catalogue.json` from `public/musique/` (runs automatically before `dev` and `build`)                                                |
-| `npm run tags-id3`      | Write copyright and official URLs into the ID3 tags of every MP3 in `public/musique/`                                                                |
-| `npm run verifier`      | Run the SPDX, i18n and forbidden-mention checks                                                                                                      |
-| `npm run verifier:docs` | Check that documentation is consistent with staged changes                                                                                           |
+| Command                   | Description                                                                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run dev`             | Start the Vite development server                                                                                                                                              |
+| `npm run build`           | Type-check, then build the site into `dist/`                                                                                                                                   |
+| `npm run preview`         | Serve the production build locally                                                                                                                                             |
+| `npm run typecheck`       | Run the TypeScript compiler without emitting                                                                                                                                   |
+| `npm run lint`            | Run ESLint                                                                                                                                                                     |
+| `npm run format`          | Format the project with Prettier                                                                                                                                               |
+| `npm run icones`          | Regenerate PNG/ICO icons from `public/icones/favicon.svg`                                                                                                                      |
+| `npm test`                | Run the unit tests (Vitest); `npx vitest run tests/lecteur.test.ts` runs a single file                                                                                         |
+| `npm run e2e`             | Build first (`npm run build`), then run the Playwright end-to-end and axe accessibility tests; the first time, run `npx playwright install chromium`                           |
+| `npm run catalogue`       | Generate `public/catalogue.json` from `public/musique/` (runs automatically before `dev` and `build`)                                                                          |
+| `npm run verifier:budget` | After `npm run build`: check the performance budget (gzip size of the startup script, deferred chunks and styles, size of generated covers, no original image left in `dist/`) |
+| `npm run tags-id3`        | Write copyright and official URLs into the ID3 tags of every MP3 in `public/musique/`                                                                                          |
+| `npm run verifier`        | Run the SPDX, i18n and forbidden-mention checks                                                                                                                                |
+| `npm run verifier:docs`   | Check that documentation is consistent with staged changes                                                                                                                     |
 
 ## Project structure
 
@@ -56,6 +57,7 @@ Put MP3 files in `public/musique/`: **one subfolder = one category** (`public/mu
 - `categorie.json` (optional, in a category folder): `nom`, `description`, `couleur` (`#RRGGBB`), `pochette`.
 - `title.json` (optional, next to `title.mp3`): `titre`, `artiste`, `description`, `hashtags`, `pochette`, `date`, `visible`, `telechargement`, `licence`, `copyright`. Values here take priority over ID3 tags, which are used as defaults.
 - Album: a subfolder of a category with an `album.json` (`titre` and the ordered list `pistes`, each a file name or `{ "fichier": "x.mp3", "disque": 2 }`; optional `artiste`, `type` = single / ep / lp / compilation, `date`, `description`, `pochette`, `hashtags`, `licence`, `copyright`, `reference`, `visible`). Without `type`: 1 track = single, 2 to 6 = ep, 7 or more = lp.
+- Covers are converted at build time (`npm run catalogue`): a large WebP (up to 960 px) for detail pages and the 3D cover, a small WebP (320 px) for cards and the player bar, and a 1200 px JPEG for link previews, all in `public/pochettes/` (generated, git-ignored, named after the content hash so unchanged covers are not redone). The original images are removed from `dist/` after the build.
 - A file named `cover.png`, `cover.jpg`, `cover.webp` (or `pochette.*`) in a category or album folder is used as its cover. Covers embedded in MP3 files are extracted to `public/pochettes/`.
 - Hashtags come from the sheet and from `#words` in the description.
 - Downloads are opt-in: `"telechargement": true` in a track sheet shows a "Download MP3" link on its page; the same field in `album.json` shows "Download album (ZIP)", an archive built in the browser (tracks, cover, and a `LICENSE.txt` with the attribution) without compression, since MP3 files are already compressed.

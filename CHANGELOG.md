@@ -35,3 +35,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - 2026-10-09: Fixed: the "autoplay refused" end-to-end test now simulates the refusal (`play()` rejected with `NotAllowedError`) instead of relying on a browser flag whose effect differs on the CI runner.
 - 2026-10-09: Fixed: the default Playwright project now pins the autoplay policy (it differed between local runs and CI, so tests that open a track page directly failed only in CI).
 - 2026-10-09: Performance (Phase 7): the next track is only preloaded while playing (never in pause, never with data-saver mode on), and the 3D rendering is limited to 30 frames per second on touch screens and on low battery (60 on desktop).
+- 2026-10-09: Covers are resized and converted at build time (WebP large and small, JPEG for link previews, named by content hash, stale files removed); cards and the player bar use the small version, share pages use the JPEG; original images are removed from `dist/`.
+- 2026-10-09: Performance budget (`npm run verifier:budget`, run in the CI workflow): startup script, deferred chunks, styles and cover sizes.
+- 2026-10-09: Unit tests for the catalogue generator (categories, albums, discs, hidden items, extra categories, errors, covers) and for cover conversion; end-to-end tests simulate the refusal of autoplay instead of relying on a browser flag.

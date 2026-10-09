@@ -2,6 +2,11 @@
 // © 2026 AP3X Records
 
 import { expect, test, type ConsoleMessage } from '@playwright/test';
+import { refuserLectureAutomatique } from './fixtures/catalogue';
+
+test.beforeEach(async ({ page }) => {
+  await refuserLectureAutomatique(page);
+});
 
 /** Erreurs de console à surveiller pendant chaque parcours. */
 function surveillerConsole(page: import('@playwright/test').Page): ConsoleMessage[] {

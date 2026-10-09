@@ -8,20 +8,8 @@ import { servirCatalogueTest } from './fixtures/catalogue';
 test.use({ reducedMotion: 'reduce' });
 
 test.beforeEach(async ({ page }) => {
+  // Lecture automatique refusée par défaut : voir `refuserLectureAutomatique`.
   await servirCatalogueTest(page);
-  // Simule le refus de la lecture automatique par le navigateur (premier appel de `play()` seulement) :
-  // la politique réelle dépend de l'environnement (Windows, Linux, intégration continue), pas ce test.
-  await page.addInitScript(() => {
-    const original = HTMLMediaElement.prototype.play;
-    let refuser = true;
-    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement): Promise<void> {
-      if (refuser) {
-        refuser = false;
-        return Promise.reject(new DOMException('Lecture automatique refusée', 'NotAllowedError'));
-      }
-      return original.call(this);
-    };
-  });
 });
 
 const lireJeton = (page: Page) => page.locator('.lecteur-titre');

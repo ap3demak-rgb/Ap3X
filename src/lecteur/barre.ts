@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
+import { pochetteReduite } from '../catalogue/pochettes';
 import type { Album } from '../catalogue/schemas';
 import { urlDuFichier } from '../catalogue/charger';
 import { t } from '../i18n';
@@ -193,8 +194,9 @@ export function creerBarre(lecteur: Lecteur, chercherAlbum: RechercheAlbum): Bar
     const album = piste.album !== undefined ? chercherAlbum(piste.album) : undefined;
     const rang = libelleAlbum(album, piste.id);
     detail.textContent = rang === undefined ? piste.artiste : `${piste.artiste} · ${rang}`;
-    if (piste.pochette !== undefined) {
-      pochette.src = urlDuFichier(piste.pochette);
+    const miniature = pochetteReduite(piste);
+    if (miniature !== undefined) {
+      pochette.src = urlDuFichier(miniature);
       pochette.hidden = false;
     } else {
       pochette.hidden = true;

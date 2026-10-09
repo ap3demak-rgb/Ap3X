@@ -34,6 +34,8 @@ jobs:
         run: npm run lint
       - name: Types et build
         run: npm run build
+      - name: Budget de performance
+        run: npm run verifier:budget
       - name: Navigateur pour les tests de bout en bout
         run: npx playwright install --with-deps chromium
       - name: Tests de bout en bout et accessibilité

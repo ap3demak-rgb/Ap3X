@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { construireCatalogue } from './catalogue/construire.ts';
 
@@ -13,8 +13,7 @@ const racine = process.argv[2] ?? join('public', 'musique');
 const sortie = process.argv[3] ?? join('public', 'catalogue.json');
 const dossierPochettes = process.argv[4] ?? join('public', 'pochettes');
 
-await rm(dossierPochettes, { recursive: true, force: true });
-const { catalogue, erreurs, avertissements } = await construireCatalogue({
+const { catalogue, erreurs, avertissements, nettoyerPochettes } = await construireCatalogue({
   racine,
   dossierPochettes,
 });
@@ -26,9 +25,11 @@ if (erreurs.length > 0) {
   process.exit(1);
 }
 
+const supprimees = await nettoyerPochettes();
 await mkdir(dirname(sortie), { recursive: true });
 await writeFile(sortie, JSON.stringify(catalogue));
 console.log(
   `Catalogue généré : ${catalogue.categories.length} catégorie(s), ${catalogue.albums.length} album(s), ` +
-    `${catalogue.pistes.length} piste(s), ${catalogue.hashtags.length} hashtag(s).`,
+    `${catalogue.pistes.length} piste(s), ${catalogue.hashtags.length} hashtag(s)` +
+    (supprimees > 0 ? ` (${supprimees} ancienne(s) pochette(s) supprimée(s)).` : '.'),
 );

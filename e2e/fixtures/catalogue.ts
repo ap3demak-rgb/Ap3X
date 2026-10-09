@@ -136,7 +136,29 @@ export const CATALOGUE_TEST: Catalogue = CatalogueSchema.parse({
   ],
 });
 
-/** Remplace le catalogue servi par le site par le catalogue de test. */
-export async function servirCatalogueTest(page: Page): Promise<void> {
+/**
+ * Reproduit la règle de lecture automatique des navigateurs, quel que soit l'environnement : `play()`
+ * est refusé (`NotAllowedError`) tant qu'aucune action de l'utilisateur n'est en cours. Sans cela, le
+ * comportement dépend du système (Windows, Linux, serveur d'intégration) et d'options de lancement
+ * dont l'effet n'est pas le même partout. Un clic réel de Playwright compte comme action de l'utilisateur.
+ */
+export async function refuserLectureAutomatique(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const original = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement): Promise<void> {
+      if (!navigator.userActivation.isActive) {
+        return Promise.reject(new DOMException('Lecture automatique refusée', 'NotAllowedError'));
+      }
+      return original.call(this);
+    };
+  });
+}
+
+/**
+ * Remplace le catalogue servi par le site par le catalogue de test. Par défaut, la lecture automatique
+ * est refusée (voir `refuserLectureAutomatique`) ; les tests qui l'exigent autorisée passent `false`.
+ */
+export async function servirCatalogueTest(page: Page, lectureAutoRefusee = true): Promise<void> {
+  if (lectureAutoRefusee) await refuserLectureAutomatique(page);
   await page.route('**/catalogue.json', (route) => route.fulfill({ json: CATALOGUE_TEST }));
 }

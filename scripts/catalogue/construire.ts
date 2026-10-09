@@ -2,7 +2,7 @@
 // © 2026 AP3X Records
 
 import { existsSync } from 'node:fs';
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { basename, extname, join } from 'node:path';
 import { parseFile, selectCover } from 'music-metadata';
 import type { ZodType } from 'zod';
@@ -22,6 +22,7 @@ import {
 } from '../../src/catalogue/schemas.ts';
 import { CATEGORIES_RESERVEES, categoriesSupplementaires } from './categories.ts';
 import { CalculateurPics } from './pics.ts';
+import { ConvertisseurPochettes, type Pochette } from './pochettes.ts';
 import {
   arrondir,
   deduireTypeAlbum,
@@ -42,6 +43,8 @@ export interface Options {
 
 export interface Resultat {
   catalogue: Catalogue;
+  /** Supprime les pochettes générées qui ne servent plus ; renvoie leur nombre. */
+  nettoyerPochettes: () => Promise<number>;
   erreurs: string[];
   avertissements: string[];
 }
@@ -56,6 +59,7 @@ interface Contexte {
   /** Identifiant → chemin source, pour détecter les collisions. */
   identifiants: Map<string, string>;
   pics: CalculateurPics;
+  pochettes: ConvertisseurPochettes;
   /** Catégories supplémentaires demandées par piste, résolues quand toutes les catégories sont connues. */
   supplementaires: Map<string, { chemin: string; demandees: string[]; genres: string[] }>;
 }
@@ -110,17 +114,22 @@ async function trouverPochetteDossier(dossier: string): Promise<string | undefin
 
 async function resoudrePochette(
   dossier: string,
-  segments: string[],
   declaree: string | undefined,
   contexte: Contexte,
-): Promise<string | undefined> {
+): Promise<Pochette | undefined> {
   const nom = declaree ?? (await trouverPochetteDossier(dossier));
   if (nom === undefined) return undefined;
-  if (!existsSync(join(dossier, nom))) {
-    contexte.erreurs.push(`${join(dossier, nom)} : pochette introuvable`);
+  const chemin = join(dossier, nom);
+  if (!existsSync(chemin)) {
+    contexte.erreurs.push(`${chemin} : pochette introuvable`);
     return undefined;
   }
-  return `musique/${urlRelative(...segments, nom)}`;
+  try {
+    return await contexte.pochettes.depuisFichier(chemin);
+  } catch (erreur) {
+    contexte.erreurs.push(`${chemin} : pochette illisible (${(erreur as Error).message})`);
+    return undefined;
+  }
 }
 
 interface PisteSource {
@@ -182,23 +191,19 @@ async function lirePiste(
   // Pas de détection automatique ici : cover.* du dossier est la pochette de l'album ou de la catégorie.
   let pochette =
     fiche.pochette !== undefined
-      ? await resoudrePochette(dossier, segments, fiche.pochette, contexte)
+      ? await resoudrePochette(dossier, fiche.pochette, contexte)
       : undefined;
   if (fiche.pochette === undefined) {
     // La pochette intégrée au MP3 sert de pochette à la piste si la fiche n'en déclare pas.
     const integree = selectCover(common.picture);
     if (integree !== null && integree !== undefined) {
-      const extension = integree.format.includes('png')
-        ? 'png'
-        : integree.format.includes('webp')
-          ? 'webp'
-          : 'jpg';
-      await mkdir(contexte.options.dossierPochettes, { recursive: true });
-      await writeFile(
-        join(contexte.options.dossierPochettes, `${identifiant}.${extension}`),
-        integree.data,
-      );
-      pochette = `pochettes/${urlRelative(`${identifiant}.${extension}`)}`;
+      try {
+        pochette = await contexte.pochettes.depuisDonnees(integree.data);
+      } catch (erreur) {
+        contexte.avertissements.push(
+          `${chemin} : pochette intégrée illisible, ignorée (${(erreur as Error).message})`,
+        );
+      }
     }
   }
 
@@ -224,7 +229,7 @@ async function lirePiste(
     artiste,
     description,
     hashtags: fusionnerHashtags(fiche.hashtags, extraireHashtags(description)),
-    ...(pochette !== undefined && { pochette }),
+    ...(pochette !== undefined && pochette),
     ...(date !== undefined && { date }),
     categorie,
     ...(album !== undefined && { album: album.id }),
@@ -316,14 +321,14 @@ async function lireAlbum(
     return undefined;
   }
 
-  const pochette = await resoudrePochette(dossier, segments, fiche.pochette, contexte);
+  const pochette = await resoudrePochette(dossier, fiche.pochette, contexte);
   const dates = pistes.map((p) => p.date).filter((d): d is string => d !== undefined);
   const date = fiche.date ?? dates.sort().at(-1);
   const annee = date !== undefined ? Number(date.slice(0, 4)) : ANNEE_COPYRIGHT_PAR_DEFAUT;
   const description = fiche.description ?? '';
 
   const pistesAvecPochette = pistes.map((piste) =>
-    piste.pochette === undefined && pochette !== undefined ? { ...piste, pochette } : piste,
+    piste.pochette === undefined && pochette !== undefined ? { ...piste, ...pochette } : piste,
   );
   const album: Album = {
     id: idAlbum,
@@ -332,7 +337,7 @@ async function lireAlbum(
     type: fiche.type ?? deduireTypeAlbum(pistes.length),
     ...(date !== undefined && { date }),
     description,
-    ...(pochette !== undefined && { pochette }),
+    ...(pochette !== undefined && pochette),
     hashtags: fusionnerHashtags(fiche.hashtags, extraireHashtags(description)),
     licence: fiche.licence,
     copyright: fiche.copyright ?? `© ${annee} ${ARTISTE_PAR_DEFAUT}`,
@@ -356,6 +361,7 @@ export async function construireCatalogue(options: Options): Promise<Resultat> {
     avertissements: [],
     identifiants: new Map(),
     pics: new CalculateurPics(),
+    pochettes: new ConvertisseurPochettes(options.dossierPochettes),
     supplementaires: new Map(),
   };
   const categories: Categorie[] = [];
@@ -455,13 +461,13 @@ export async function construireCatalogue(options: Options): Promise<Resultat> {
       }
     }
 
-    const pochette = await resoudrePochette(dossier, [entree.name], fiche?.pochette, contexte);
+    const pochette = await resoudrePochette(dossier, fiche?.pochette, contexte);
     categories.push({
       slug,
       nom: fiche?.nom ?? titreDepuisNomFichier(entree.name),
       description: fiche?.description ?? '',
       ...(fiche?.couleur !== undefined && { couleur: fiche.couleur }),
-      ...(pochette !== undefined && { pochette }),
+      ...(pochette !== undefined && pochette),
       nombrePistes,
       nombreAlbums,
     });
@@ -530,6 +536,7 @@ export async function construireCatalogue(options: Options): Promise<Resultat> {
   await contexte.pics.enregistrer();
   return {
     catalogue: validation.success ? validation.data : (brut as Catalogue),
+    nettoyerPochettes: () => contexte.pochettes.nettoyer(),
     erreurs: contexte.erreurs,
     avertissements: contexte.avertissements,
   };
