@@ -11,9 +11,8 @@ const ARGUMENTS = [
   '--mute-audio',
 ];
 
-/** Fichiers qui exigent une politique de lecture automatique précise : un projet chacun. */
+/** Fichier qui exige que la lecture automatique soit autorisée : un projet à part. */
 const LECTURE_AUTO = /partage-lecture-auto\.spec\.ts/;
-const LECTURE_BLOQUEE = /partage-lecture-bloquee\.spec\.ts/;
 
 function projet(nom: string, politique?: string) {
   return {
@@ -42,15 +41,8 @@ export default defineConfig({
   projects: [
     // Politique fixée explicitement : sinon elle dépend de l'environnement (bloquée en local, autorisée
     // sur certains serveurs d'intégration), et l'ouverture d'une page de piste lance ou non la lecture.
-    {
-      ...projet('chromium', 'document-user-activation-required'),
-      testIgnore: [LECTURE_AUTO, LECTURE_BLOQUEE],
-    },
+    { ...projet('chromium', 'document-user-activation-required'), testIgnore: LECTURE_AUTO },
     { ...projet('lecture-auto', 'no-user-gesture-required'), testMatch: LECTURE_AUTO },
-    {
-      ...projet('lecture-bloquee', 'document-user-activation-required'),
-      testMatch: LECTURE_BLOQUEE,
-    },
   ],
   webServer: {
     command: 'npx vite preview --port 4173 --strictPort',

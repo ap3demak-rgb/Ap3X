@@ -24,6 +24,10 @@ export const lecteur = new Lecteur({
   audio: elementAudio,
   prechargeur: new Audio(),
   resoudreUrl: urlDuFichier,
+  economieDonnees: () => {
+    const connexion = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    return connexion?.saveData === true;
+  },
   ...(stockageLocal() !== undefined && { stockage: stockageLocal() as Storage }),
 });
 

@@ -356,3 +356,43 @@ describe('lecture automatique refusée par le navigateur', () => {
     expect(lecteur.etat().lectureBloquee).toBe(false);
   });
 });
+
+describe('préchargement de la piste suivante', () => {
+  it('ne télécharge rien tant que rien ne joue', () => {
+    lecteur.charger(PISTES, 0, false);
+    expect(prechargeur.src).toBe('');
+    expect(prechargeur.preload).toBe('none');
+    lecteur.ajouter(piste('e'));
+    expect(prechargeur.src).toBe('');
+  });
+
+  it('précharge dès que la lecture démarre, puis suit les changements de piste', () => {
+    lecteur.charger(PISTES, 0, false);
+    lecteur.lire();
+    audio.dispatchEvent(new Event('play'));
+    expect(prechargeur.src).toBe('/musique/cat/b.mp3');
+    expect(prechargeur.preload).toBe('auto');
+  });
+
+  it('ne précharge pas en mode économie de données', () => {
+    const economie = new Lecteur({
+      audio: audio as unknown as ElementAudio,
+      prechargeur: prechargeur as unknown as ElementAudio,
+      stockage,
+      resoudreUrl: (chemin) => `/${chemin}`,
+      economieDonnees: () => true,
+    });
+    economie.charger(PISTES, 0);
+    expect(prechargeur.src).toBe('');
+    expect(prechargeur.preload).toBe('none');
+  });
+
+  it('ne précharge pas la piste de la répétition de piste', () => {
+    lecteur.charger(PISTES, 0);
+    lecteur.cyclerRepetition();
+    lecteur.cyclerRepetition();
+    const avant = prechargeur.src;
+    lecteur.suivant();
+    expect(prechargeur.src).toBe(avant);
+  });
+});

@@ -4,12 +4,24 @@
 import { expect, test, type Page } from '@playwright/test';
 import { servirCatalogueTest } from './fixtures/catalogue';
 
-// La politique de lecture automatique du navigateur est fixée par le projet Playwright de ce fichier
-// (voir playwright.config.ts). Mouvement réduit : pas de WebGL, tests plus rapides.
+// Mouvement réduit : pas de WebGL, tests plus rapides.
 test.use({ reducedMotion: 'reduce' });
 
 test.beforeEach(async ({ page }) => {
   await servirCatalogueTest(page);
+  // Simule le refus de la lecture automatique par le navigateur (premier appel de `play()` seulement) :
+  // la politique réelle dépend de l'environnement (Windows, Linux, intégration continue), pas ce test.
+  await page.addInitScript(() => {
+    const original = HTMLMediaElement.prototype.play;
+    let refuser = true;
+    HTMLMediaElement.prototype.play = function (this: HTMLMediaElement): Promise<void> {
+      if (refuser) {
+        refuser = false;
+        return Promise.reject(new DOMException('Lecture automatique refusée', 'NotAllowedError'));
+      }
+      return original.call(this);
+    };
+  });
 });
 
 const lireJeton = (page: Page) => page.locator('.lecteur-titre');
@@ -21,7 +33,9 @@ test.describe('ouvrir un lien partagé (lecture automatique refusée)', () => {
     await page.goto('./#/piste/ambient--a1?t=1m30s');
     await expect(lireJeton(page)).toHaveText('Brume');
     await expect(
-      page.getByText('Your browser blocked autoplay: press Play to listen.'),
+      page
+        .getByRole('status')
+        .filter({ hasText: 'Your browser blocked autoplay: press Play to listen.' }),
     ).toBeVisible();
     await expect(page.locator('.lecteur-lecture')).toHaveAttribute('aria-label', 'Play');
     await expect(page.locator('.annonceur')).toContainText('blocked autoplay', { timeout: 8000 });
@@ -30,5 +44,12 @@ test.describe('ouvrir un lien partagé (lecture automatique refusée)', () => {
     await page.locator('.lecteur-lecture').click();
     await expect(page.locator('.lecteur-lecture')).toHaveAttribute('aria-label', 'Pause');
     expect(await progression(page)).toBeGreaterThanOrEqual(90);
+  });
+
+  test("un refus n'est pas une erreur de piste", async ({ page }) => {
+    await page.goto('./#/piste/ambient--a1');
+    await expect(lireJeton(page)).toHaveText('Brume');
+    await expect(page.getByText('This track cannot be played.')).toHaveCount(0);
+    await expect(page.locator('.lecteur-erreur')).toHaveText('');
   });
 });

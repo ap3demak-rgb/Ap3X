@@ -29,6 +29,8 @@ export interface OptionsLecteur {
   stockage?: Pick<Storage, 'getItem' | 'setItem'>;
   /** Transforme le chemin d'un fichier du catalogue en URL utilisable par l'élément audio. */
   resoudreUrl: (chemin: string) => string;
+  /** Vrai si l'utilisateur demande d'économiser les données : la piste suivante n'est alors pas préchargée. */
+  economieDonnees?: () => boolean;
   /** Générateur aléatoire dans [0, 1[, remplaçable pour les tests. */
   aleatoire?: () => number;
 }
@@ -91,7 +93,8 @@ export class Lecteur extends EventTarget {
     this.audio = options.audio;
     this.prechargeur = options.prechargeur;
     this.audio.preload = 'metadata';
-    if (this.prechargeur !== undefined) this.prechargeur.preload = 'auto';
+    // Aucun MP3 n'est téléchargé tant qu'on n'écoute pas : le préchargeur reste inactif jusqu'à la lecture.
+    if (this.prechargeur !== undefined) this.prechargeur.preload = 'none';
 
     const memoire = this.lireMemoire();
     this.audio.volume = borner(memoire.volume, 0, 1);
@@ -116,6 +119,7 @@ export class Lecteur extends EventTarget {
     this.audio.addEventListener('ended', () => this.finDePiste());
     this.audio.addEventListener('play', () => {
       this.bloquee = false;
+      this.preparerSuivante();
     });
     this.audio.addEventListener('error', () => {
       if (this.pisteCourante !== undefined) {
@@ -426,9 +430,13 @@ export class Lecteur extends EventTarget {
     this.emettre('piste');
   }
 
-  /** Précharge la piste qui sera jouée ensuite, pour limiter la coupure entre deux pistes. */
+  /**
+   * Précharge la piste qui sera jouée ensuite, pour limiter la coupure entre deux pistes. Uniquement
+   * pendant la lecture (jamais en pause ni à l'ouverture d'une page) et sans mode économie de données.
+   */
   private preparerSuivante(): void {
-    if (this.prechargeur === undefined) return;
+    if (this.prechargeur === undefined || this.audio.paused) return;
+    if (this.options.economieDonnees?.() === true) return;
     let suivant = -1;
     if (this.modeRepetition !== 'piste') {
       if (this.pos + 1 < this.ordre.length) suivant = this.ordre[this.pos + 1] ?? -1;
@@ -439,6 +447,7 @@ export class Lecteur extends EventTarget {
     if (piste === undefined || suivant === this.indexCourant()) return;
     if (piste.fichier === this.cheminPrecharge) return;
     this.cheminPrecharge = piste.fichier;
+    this.prechargeur.preload = 'auto';
     this.prechargeur.src = this.options.resoudreUrl(piste.fichier);
   }
 

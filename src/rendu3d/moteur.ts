@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import { WebGLRenderer } from 'three';
+import { intervalleImages, suivreBatterie } from './cadence';
 import { Fond } from './fond';
 import { creerPochette3d } from './pochette3d';
 import type { SourcesVue, VueFenetre } from './vue';
@@ -9,8 +10,6 @@ import { creerVisualiseur } from './visualiseur';
 
 /** Résolution maximale du rendu : au-delà, le gain visuel ne justifie pas le coût sur GPU modestes. */
 const RATIO_MAX = 1.5;
-/** Cadence plafonnée sur écrans tactiles (mobiles), pour économiser la batterie. */
-const IMAGES_PAR_SECONDE_TACTILE = 30;
 
 export type DemandeFenetre =
   | { canvas: HTMLCanvasElement; type: 'visualiseur' }
@@ -48,6 +47,7 @@ export class Moteur {
   private identifiantImage = 0;
   private dernierImage = 0;
   private origine = 0;
+  private batterieFaible = false;
   private enMarche = false;
   private libere = false;
 
@@ -58,6 +58,9 @@ export class Moteur {
     this.canvas.className = 'fond-3d';
     this.canvas.setAttribute('aria-hidden', 'true');
     this.redimensionner();
+    suivreBatterie((faible) => {
+      this.batterieFaible = faible;
+    });
     window.addEventListener('resize', this.redimensionner);
     document.addEventListener('visibilitychange', this.surVisibilite);
     this.canvas.addEventListener('webglcontextlost', this.surPerteContexte);
@@ -193,7 +196,10 @@ export class Moteur {
   private readonly image = (maintenant: number): void => {
     if (!this.enMarche) return;
     this.identifiantImage = requestAnimationFrame(this.image);
-    const intervalle = this.tactile ? 1000 / IMAGES_PAR_SECONDE_TACTILE : 0;
+    const intervalle = intervalleImages({
+      tactile: this.tactile,
+      batterieFaible: this.batterieFaible,
+    });
     if (maintenant - this.dernierImage < intervalle) return;
     const delta = Math.min(0.1, (maintenant - this.dernierImage) / 1000);
     this.dernierImage = maintenant;
