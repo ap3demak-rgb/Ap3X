@@ -338,6 +338,7 @@ async function lireAlbum(
     copyright: fiche.copyright ?? `© ${annee} ${ARTISTE_PAR_DEFAUT}`,
     ...(fiche.reference !== undefined && { reference: fiche.reference }),
     categorie,
+    telechargement: fiche.telechargement,
     pistes: pistesAvecPochette.map((p) => p.id),
     nombrePistes: pistesAvecPochette.length,
     duree: arrondir(

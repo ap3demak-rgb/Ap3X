@@ -42,6 +42,7 @@ const album: Album = {
   pistes: ['rock--ete--1'],
   nombrePistes: 1,
   duree: 100,
+  telechargement: false,
 };
 
 const catalogue: Catalogue = {

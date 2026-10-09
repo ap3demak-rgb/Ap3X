@@ -78,8 +78,13 @@ export function creerOnde({ piste, surPosition, grande = false }: OptionsOnde): 
     }
   }
 
+  /** Vrai une fois la waveform insérée dans la page : avant, un événement du lecteur ne doit pas la détacher. */
+  let inseree = false;
+
   function actualiser(): void {
-    if (!racine.isConnected) {
+    if (racine.isConnected) {
+      inseree = true;
+    } else if (inseree) {
       lecteur.removeEventListener('etat', actualiser);
       observateur.disconnect();
       return;

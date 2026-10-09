@@ -58,6 +58,7 @@ Put MP3 files in `public/musique/`: **one subfolder = one category** (`public/mu
 - Album: a subfolder of a category with an `album.json` (`titre` and the ordered list `pistes`, each a file name or `{ "fichier": "x.mp3", "disque": 2 }`; optional `artiste`, `type` = single / ep / lp / compilation, `date`, `description`, `pochette`, `hashtags`, `licence`, `copyright`, `reference`, `visible`). Without `type`: 1 track = single, 2 to 6 = ep, 7 or more = lp.
 - A file named `cover.png`, `cover.jpg`, `cover.webp` (or `pochette.*`) in a category or album folder is used as its cover. Covers embedded in MP3 files are extracted to `public/pochettes/`.
 - Hashtags come from the sheet and from `#words` in the description.
+- Downloads are opt-in: `"telechargement": true` in a track sheet shows a "Download MP3" link on its page; the same field in `album.json` shows "Download album (ZIP)", an archive built in the browser (tracks, cover, and a `LICENSE.txt` with the attribution) without compression, since MP3 files are already compressed.
 - A track belongs to the category of its folder and can join others: list them in its sheet (`"categories": ["techno"]`, by name or identifier) or give it an ID3 genre that matches an existing category. An unknown category in a sheet is reported; an unknown genre is ignored.
 - The category names `tout` and `favoris` are reserved for the "All" and "Favorites" pages.
 
@@ -70,6 +71,12 @@ Home (latest tracks and albums, categories, popular hashtags cloud), categories 
 Three.js is loaded on demand after the interface is shown (`src/rendu3d/`). One shared WebGL renderer draws an animated GLSL background on a full-screen canvas behind the page, and renders small "windows" (the audio visualizer band under the header and the 3D cover on a track page) before copying each image into a 2D canvas placed in the page. The visualizer shows the active track waveform and a real-time spectrum from a Web Audio `AnalyserNode`.
 
 Text never sits directly on the 3D render: it rests on a semi-opaque panel, and the background shader is clamped to `--fond-3d-max`, so `npm run verifier:contrastes` can guarantee AAA contrast in the worst case. With `prefers-reduced-motion` there is no 3D at all (static gradient, flat cover, no visualizer); without WebGL (or if the context is lost) the visualizer becomes a CSS level bar and covers stay flat. Rendering pauses while the tab is hidden, windows pause when off screen, the pixel ratio is capped at 1.5 and touch devices are limited to 30 frames per second.
+
+## Sharing and SEO
+
+- **Copy link** on every track and album page. In production the link points to a small static page generated at build time (`partage/piste/<id>/`, `partage/album/<id>/`) that carries the Open Graph and Twitter Card tags (title, description, cover) and then redirects to the application: crawlers do not read hash routes or run JavaScript, so this is what makes link previews work. On a track, "Start at 1:30" adds the current playback position (`?t=1m30s`).
+- **Opening a shared link starts playback** when the site is opened on a track page, or when a link with `?t=` is pasted in an open tab. Browsing the site, or changing the language, never starts playback. If the browser blocks autoplay, the track is loaded at the requested position and a message asks to press Play. Accepted instants: `90`, `90s`, `1m30s`, `1h2m3s`, `1:30`, `1:02:03`.
+- `npm run build` also writes `404.html` (immediate redirect to the home page), `sitemap.xml` and `robots.txt` into `dist/` (`scripts/generer-pages-statiques.ts`). The public address used in these files and in the home page tags is `URL_SITE` in `src/constantes.ts`, overridable with the `SITE_URL` environment variable (custom domain). `robots.txt` is only honored by crawlers at the root of a domain.
 
 ## Search, favorites and playlists
 

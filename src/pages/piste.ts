@@ -19,7 +19,9 @@ import {
   lienDeLArtiste,
   pochette3d,
 } from '../ui/cartes';
+import { annoncer } from '../ui/annonceur';
 import { creerOnde } from '../ui/onde';
+import { blocPartage } from '../ui/partage';
 import {
   definirTitrePage,
   introuvable,
@@ -28,7 +30,13 @@ import {
   titrePage,
 } from './commun';
 
-function detail(donnees: Donnees, piste: Piste): HTMLElement[] {
+/** Ouverture de la page : `demarrer` lance la lecture (lien partagé), à `instant` secondes si fourni. */
+export interface OptionsPagePiste {
+  demarrer: boolean;
+  instant?: number | undefined;
+}
+
+function detail(donnees: Donnees, piste: Piste, options: OptionsPagePiste): HTMLElement[] {
   const album = piste.album !== undefined ? donnees.albums.get(piste.album) : undefined;
   const file = album !== undefined ? pistesDeAlbum(donnees, album) : [piste];
   const categorie = donnees.categories.get(piste.categorie)?.nom ?? piste.categorie;
@@ -84,7 +92,11 @@ function detail(donnees: Donnees, piste: Piste): HTMLElement[] {
     boutonJaime(piste),
     boutonPlaylist(piste.titre, () => [piste.id]),
   );
-  infos.append(meta, actions);
+  infos.append(
+    meta,
+    actions,
+    blocPartage({ type: 'piste', id: piste.id, titre: piste.titre, avecInstant: true }),
+  );
   if (piste.telechargement) {
     const telecharger = lien(urlDuFichier(piste.fichier), t('piste.telecharger'), 'bouton');
     telecharger.setAttribute('download', '');
@@ -101,6 +113,8 @@ function detail(donnees: Donnees, piste: Piste): HTMLElement[] {
     },
   });
 
+  if (options.demarrer) demarrerDepuisLien(infos, file, piste, options.instant);
+
   const blocs: HTMLElement[] = [entete, onde];
   const similaires = pistesSimilaires(donnees, piste, 6);
   if (similaires.length > 0) {
@@ -114,12 +128,44 @@ function detail(donnees: Donnees, piste: Piste): HTMLElement[] {
   return blocs;
 }
 
-export function pagePiste(id: string): HTMLElement {
+/**
+ * Ouverture d'un lien partagé : lance la lecture de la piste (à l'instant demandé). Si le navigateur
+ * refuse la lecture automatique, la piste reste chargée à la bonne position et un message invite à
+ * appuyer sur Lecture.
+ */
+function demarrerDepuisLien(
+  zone: HTMLElement,
+  file: readonly Piste[],
+  piste: Piste,
+  instant: number | undefined,
+): void {
+  const message = document.createElement('p');
+  message.className = 'carte-meta';
+  message.setAttribute('role', 'status');
+  zone.append(message);
+  lecteur.addEventListener(
+    'bloquee',
+    () => {
+      message.textContent = t('partage.lecture_bloquee');
+      annoncer(t('partage.lecture_bloquee'));
+    },
+    { once: true },
+  );
+  lecteur.charger(file, file.indexOf(piste), true);
+  if (instant !== undefined) lecteur.aller(instant);
+}
+
+export function pagePiste(
+  id: string,
+  options: OptionsPagePiste = { demarrer: false },
+): HTMLElement {
   const page = document.createElement('section');
   remplirAvecCatalogue(page, (donnees) => {
     const piste = donnees.pistes.get(id);
     definirTitrePage(piste === undefined ? t('piste.introuvable') : piste.titre);
-    return piste === undefined ? [introuvable(t('piste.introuvable'))] : detail(donnees, piste);
+    return piste === undefined
+      ? [introuvable(t('piste.introuvable'))]
+      : detail(donnees, piste, options);
   });
   return page;
 }

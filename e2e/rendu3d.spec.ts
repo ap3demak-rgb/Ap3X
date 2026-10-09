@@ -48,6 +48,8 @@ test.describe('rendu 3D actif', () => {
   });
 
   test('le spectre du visualiseur réagit au son pendant la lecture', async ({ page }) => {
+    // Rendu WebGL logiciel + analyse de pixels : plus lent que les autres tests.
+    test.setTimeout(90_000);
     await page.goto('./');
     await expect(page.locator('.visualiseur-canvas')).toBeVisible();
     // Compte les pixels de la couleur d'accent (barres du spectre) dans le canvas du visualiseur.

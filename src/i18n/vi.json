@@ -135,5 +135,18 @@
   "playlist.retirer_piste": "Xóa khỏi danh sách phát",
   "dialogue.confirmer": "Xác nhận",
   "dialogue.annuler": "Hủy",
-  "lecteur.ajoutee": "Đã thêm vào hàng đợi: {titre}"
+  "lecteur.ajoutee": "Đã thêm vào hàng đợi: {titre}",
+  "partage.copier_lien": "Sao chép liên kết",
+  "partage.lien_copie": "Đã sao chép liên kết.",
+  "partage.copie_echec": "Không thể sao chép liên kết.",
+  "partage.a_partir_de": "Bắt đầu từ {temps}",
+  "partage.lecture_bloquee": "Trình duyệt đã chặn tự động phát: hãy nhấn Phát để nghe.",
+  "partage.ouvrir": "Mở trong AP3X Records",
+  "album.telecharger_zip": "Tải album (ZIP)",
+  "album.zip_progression": "Đang tải {n}/{total}…",
+  "album.zip_pret": "Đã tải album.",
+  "album.zip_erreur": "Tải album không thành công.",
+  "erreur.404.titre": "Không tìm thấy trang",
+  "erreur.404.message": "Đang đưa bạn về trang chủ…",
+  "erreur.404.lien": "Về trang chủ"
 }

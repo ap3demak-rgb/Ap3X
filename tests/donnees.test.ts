@@ -23,9 +23,9 @@ function piste(id: string, categorie: string, hashtags: string[] = [], date?: st
     ...(date !== undefined && { date }),
     duree: 100,
     fichier: `musique/${id}.mp3`,
-    telechargement: false,
     licence: 'CC BY-NC-ND 4.0',
     copyright: '© 2026 AP3X Records',
+    telechargement: false,
   };
 }
 
@@ -46,6 +46,7 @@ function album(
     hashtags: [],
     licence: 'CC BY-NC-ND 4.0',
     copyright: '© 2026 AP3X Records',
+    telechargement: false,
     categorie,
     pistes,
     nombrePistes: pistes.length,

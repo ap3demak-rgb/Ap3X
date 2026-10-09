@@ -135,5 +135,18 @@
   "playlist.retirer_piste": "Quitar de la lista",
   "dialogue.confirmer": "Confirmar",
   "dialogue.annuler": "Cancelar",
-  "lecteur.ajoutee": "Añadido a la cola: {titre}"
+  "lecteur.ajoutee": "Añadido a la cola: {titre}",
+  "partage.copier_lien": "Copiar enlace",
+  "partage.lien_copie": "Enlace copiado.",
+  "partage.copie_echec": "No se ha podido copiar el enlace.",
+  "partage.a_partir_de": "Empezar en {temps}",
+  "partage.lecture_bloquee": "Tu navegador ha bloqueado la reproducción automática: pulsa Reproducir para escuchar.",
+  "partage.ouvrir": "Abrir en AP3X Records",
+  "album.telecharger_zip": "Descargar álbum (ZIP)",
+  "album.zip_progression": "Descargando {n}/{total}…",
+  "album.zip_pret": "Álbum descargado.",
+  "album.zip_erreur": "La descarga del álbum ha fallado.",
+  "erreur.404.titre": "Página no encontrada",
+  "erreur.404.message": "Volviendo a la página de inicio…",
+  "erreur.404.lien": "Ir a la página de inicio"
 }

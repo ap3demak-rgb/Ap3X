@@ -135,5 +135,18 @@
   "playlist.retirer_piste": "재생목록에서 제거",
   "dialogue.confirmer": "확인",
   "dialogue.annuler": "취소",
-  "lecteur.ajoutee": "대기열에 추가됨: {titre}"
+  "lecteur.ajoutee": "대기열에 추가됨: {titre}",
+  "partage.copier_lien": "링크 복사",
+  "partage.lien_copie": "링크를 복사했습니다.",
+  "partage.copie_echec": "링크를 복사할 수 없습니다.",
+  "partage.a_partir_de": "{temps}부터 시작",
+  "partage.lecture_bloquee": "브라우저가 자동 재생을 차단했습니다. 재생을 눌러 들어 보세요.",
+  "partage.ouvrir": "AP3X Records에서 열기",
+  "album.telecharger_zip": "앨범 다운로드(ZIP)",
+  "album.zip_progression": "다운로드 중 {n}/{total}…",
+  "album.zip_pret": "앨범을 다운로드했습니다.",
+  "album.zip_erreur": "앨범 다운로드에 실패했습니다.",
+  "erreur.404.titre": "페이지를 찾을 수 없습니다",
+  "erreur.404.message": "홈페이지로 이동합니다…",
+  "erreur.404.lien": "홈페이지로 이동"
 }

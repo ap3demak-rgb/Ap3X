@@ -19,7 +19,9 @@ import {
   lienDeLArtiste,
   pochette,
 } from '../ui/cartes';
+import { annoncer } from '../ui/annonceur';
 import { creerOnde } from '../ui/onde';
+import { blocPartage } from '../ui/partage';
 import {
   definirTitrePage,
   introuvable,
@@ -66,6 +68,49 @@ function listeDePistes(pistes: Piste[], toutes: Piste[]): HTMLElement {
     liste.append(ligne);
   }
   return liste;
+}
+
+/** Téléchargement de l'album en ZIP, construit dans le navigateur (bibliothèque chargée à la demande). */
+function blocTelechargement(donnees: Donnees, album: Album): HTMLElement {
+  const bloc = document.createElement('div');
+  bloc.className = 'partage';
+  const bouton = document.createElement('button');
+  bouton.type = 'button';
+  bouton.className = 'bouton';
+  bouton.textContent = t('album.telecharger_zip');
+  bouton.setAttribute('aria-label', `${t('album.telecharger_zip')} : ${album.titre}`);
+  // Progression visible mais non annoncée à chaque piste : le début et la fin le sont.
+  const progression = document.createElement('span');
+  progression.className = 'carte-meta';
+  const erreur = document.createElement('p');
+  erreur.className = 'erreur-champ';
+  erreur.setAttribute('role', 'alert');
+  bouton.addEventListener('click', () => {
+    bouton.disabled = true;
+    erreur.textContent = '';
+    const total = album.nombrePistes;
+    progression.textContent = tv('album.zip_progression', { n: 0, total });
+    annoncer(progression.textContent);
+    void import('../telechargement-zip')
+      .then(async ({ archiveAlbum, enregistrerFichier }) => {
+        const { blob, nom } = await archiveAlbum(donnees, album, (n, sur) => {
+          progression.textContent = tv('album.zip_progression', { n, total: sur });
+        });
+        enregistrerFichier(blob, nom);
+        progression.textContent = t('album.zip_pret');
+        annoncer(t('album.zip_pret'));
+      })
+      .catch((cause: unknown) => {
+        console.error(cause);
+        progression.textContent = '';
+        erreur.textContent = t('album.zip_erreur');
+      })
+      .finally(() => {
+        bouton.disabled = false;
+      });
+  });
+  bloc.append(bouton, progression, erreur);
+  return bloc;
 }
 
 function detail(donnees: Donnees, album: Album): HTMLElement[] {
@@ -126,7 +171,12 @@ function detail(donnees: Donnees, album: Album): HTMLElement[] {
     boutonJaimeAlbum(album),
     boutonPlaylist(album.titre, () => album.pistes),
   );
-  infos.append(meta, actions);
+  infos.append(
+    meta,
+    actions,
+    ...(album.telechargement ? [blocTelechargement(donnees, album)] : []),
+    blocPartage({ type: 'album', id: album.id, titre: album.titre }),
+  );
   entete.append(pochette(album.pochette, 'pochette-grande'), infos);
 
   const blocs: HTMLElement[] = [entete];

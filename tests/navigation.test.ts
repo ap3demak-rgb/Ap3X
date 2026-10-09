@@ -29,9 +29,9 @@ function piste(id: string, categorie: string, extras: Partial<Piste> = {}): Pist
     categorie,
     duree: 100,
     fichier: `musique/${id}.mp3`,
-    telechargement: false,
     licence: 'CC BY-NC-ND 4.0',
     copyright: '© 2026 AP3X Records',
+    telechargement: false,
     ...extras,
   };
 }
@@ -51,6 +51,7 @@ function album(
     hashtags: [],
     licence: 'CC BY-NC-ND 4.0',
     copyright: '© 2026 AP3X Records',
+    telechargement: false,
     categorie,
     pistes,
     nombrePistes: pistes.length,

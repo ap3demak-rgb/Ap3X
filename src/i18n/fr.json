@@ -135,5 +135,18 @@
   "playlist.retirer_piste": "Retirer de la playlist",
   "dialogue.confirmer": "Confirmer",
   "dialogue.annuler": "Annuler",
-  "lecteur.ajoutee": "Ajouté à la file : {titre}"
+  "lecteur.ajoutee": "Ajouté à la file : {titre}",
+  "partage.copier_lien": "Copier le lien",
+  "partage.lien_copie": "Lien copié.",
+  "partage.copie_echec": "Impossible de copier le lien.",
+  "partage.a_partir_de": "Démarrer à {temps}",
+  "partage.lecture_bloquee": "Votre navigateur a bloqué la lecture automatique : appuyez sur Lecture pour écouter.",
+  "partage.ouvrir": "Ouvrir dans AP3X Records",
+  "album.telecharger_zip": "Télécharger l'album (ZIP)",
+  "album.zip_progression": "Téléchargement {n}/{total}…",
+  "album.zip_pret": "Album téléchargé.",
+  "album.zip_erreur": "Le téléchargement de l'album a échoué.",
+  "erreur.404.titre": "Page introuvable",
+  "erreur.404.message": "Retour à la page d'accueil…",
+  "erreur.404.lien": "Aller à la page d'accueil"
 }

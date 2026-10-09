@@ -135,5 +135,18 @@
   "playlist.retirer_piste": "从播放列表中移除",
   "dialogue.confirmer": "确认",
   "dialogue.annuler": "取消",
-  "lecteur.ajoutee": "已添加到队列：{titre}"
+  "lecteur.ajoutee": "已添加到队列：{titre}",
+  "partage.copier_lien": "复制链接",
+  "partage.lien_copie": "链接已复制。",
+  "partage.copie_echec": "无法复制链接。",
+  "partage.a_partir_de": "从 {temps} 开始",
+  "partage.lecture_bloquee": "浏览器已阻止自动播放：请点击播放收听。",
+  "partage.ouvrir": "在 AP3X Records 中打开",
+  "album.telecharger_zip": "下载专辑（ZIP）",
+  "album.zip_progression": "正在下载 {n}/{total}…",
+  "album.zip_pret": "专辑已下载。",
+  "album.zip_erreur": "专辑下载失败。",
+  "erreur.404.titre": "未找到页面",
+  "erreur.404.message": "正在返回首页…",
+  "erreur.404.lien": "前往首页"
 }

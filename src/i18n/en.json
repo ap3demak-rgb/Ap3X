@@ -135,5 +135,18 @@
   "playlist.retirer_piste": "Remove from playlist",
   "dialogue.confirmer": "Confirm",
   "dialogue.annuler": "Cancel",
-  "lecteur.ajoutee": "Added to the queue : {titre}"
+  "lecteur.ajoutee": "Added to the queue : {titre}",
+  "partage.copier_lien": "Copy link",
+  "partage.lien_copie": "Link copied.",
+  "partage.copie_echec": "Unable to copy the link.",
+  "partage.a_partir_de": "Start at {temps}",
+  "partage.lecture_bloquee": "Your browser blocked autoplay: press Play to listen.",
+  "partage.ouvrir": "Open in AP3X Records",
+  "album.telecharger_zip": "Download album (ZIP)",
+  "album.zip_progression": "Downloading {n}/{total}…",
+  "album.zip_pret": "Album downloaded.",
+  "album.zip_erreur": "The album download failed.",
+  "erreur.404.titre": "Page not found",
+  "erreur.404.message": "Taking you back to the home page…",
+  "erreur.404.lien": "Go to the home page"
 }

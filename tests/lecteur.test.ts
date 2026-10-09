@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Piste } from '../src/catalogue/schemas';
 import { Lecteur, type ElementAudio } from '../src/lecteur/lecteur';
 
@@ -319,5 +319,40 @@ describe('ajout de plusieurs pistes', () => {
     expect(audio.paused).toBe(true);
     lecteur.ajouterPlusieurs([piste('w')]);
     expect(ids(lecteur)).toEqual(['x', 'y', 'z', 'w']);
+  });
+});
+
+describe('lecture automatique refusée par le navigateur', () => {
+  it("signale le blocage sans le traiter comme une erreur de piste, puis l'efface à la lecture", async () => {
+    audio.play = (): Promise<void> => {
+      const erreur = new Error('bloquée');
+      erreur.name = 'NotAllowedError';
+      return Promise.reject(erreur);
+    };
+    const surBlocage = vi.fn();
+    lecteur.addEventListener('bloquee', surBlocage);
+    lecteur.charger(PISTES, 1);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(surBlocage).toHaveBeenCalledTimes(1);
+    expect(lecteur.etat().lectureBloquee).toBe(true);
+    expect(lecteur.etat().erreur).toBe(false);
+    expect(courante(lecteur)).toBe('b');
+
+    audio.dispatchEvent(new Event('play'));
+    expect(lecteur.etat().lectureBloquee).toBe(false);
+  });
+
+  it('range les autres refus parmi les erreurs de piste', async () => {
+    audio.play = (): Promise<void> => {
+      const erreur = new Error('format');
+      erreur.name = 'NotSupportedError';
+      return Promise.reject(erreur);
+    };
+    lecteur.charger(PISTES, 0);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(lecteur.etat().erreur).toBe(true);
+    expect(lecteur.etat().lectureBloquee).toBe(false);
   });
 });

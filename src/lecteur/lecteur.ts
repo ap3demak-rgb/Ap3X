@@ -46,6 +46,8 @@ export interface EtatLecteur {
   aleatoire: boolean;
   repetition: Repetition;
   erreur: boolean;
+  /** Le navigateur a refusé de démarrer la lecture sans action de l'utilisateur (lecture automatique). */
+  lectureBloquee: boolean;
 }
 
 interface Memoire {
@@ -66,7 +68,8 @@ function borner(valeur: number, min: number, max: number): number {
 
 /**
  * Lecteur audio : file d'attente, ordre de lecture (normal ou aléatoire), répétition, volume.
- * Événements : `etat` (tout changement), `piste` (piste courante changée), `file` (file modifiée).
+ * Événements : `etat` (tout changement), `piste` (piste courante changée), `file` (file modifiée),
+ * `bloquee` (le navigateur a refusé une lecture automatique).
  */
 export class Lecteur extends EventTarget {
   private readonly audio: ElementAudio;
@@ -79,6 +82,7 @@ export class Lecteur extends EventTarget {
   private modeAleatoire = false;
   private modeRepetition: Repetition = 'aucune';
   private enErreur = false;
+  private bloquee = false;
   private cheminPrecharge = '';
 
   constructor(options: OptionsLecteur) {
@@ -110,6 +114,9 @@ export class Lecteur extends EventTarget {
       this.emettre();
     });
     this.audio.addEventListener('ended', () => this.finDePiste());
+    this.audio.addEventListener('play', () => {
+      this.bloquee = false;
+    });
     this.audio.addEventListener('error', () => {
       if (this.pisteCourante !== undefined) {
         this.enErreur = true;
@@ -137,6 +144,7 @@ export class Lecteur extends EventTarget {
       aleatoire: this.modeAleatoire,
       repetition: this.modeRepetition,
       erreur: this.enErreur,
+      lectureBloquee: this.bloquee,
     };
   }
 
@@ -394,9 +402,15 @@ export class Lecteur extends EventTarget {
   private jouer(): void {
     this.audio.play().catch((erreur: unknown) => {
       const nom = erreur instanceof Error ? erreur.name : '';
-      // AbortError : une autre piste a été chargée entre-temps. NotAllowedError : lecture bloquée
-      // par le navigateur tant qu'il n'y a pas eu d'action de l'utilisateur.
-      if (nom === 'AbortError' || nom === 'NotAllowedError') return;
+      // AbortError : une autre piste a été chargée entre-temps.
+      if (nom === 'AbortError') return;
+      // NotAllowedError : lecture automatique refusée par le navigateur tant qu'il n'y a pas eu
+      // d'action de l'utilisateur. Ce n'est pas une erreur de piste : on le signale.
+      if (nom === 'NotAllowedError') {
+        this.bloquee = true;
+        this.emettre('bloquee');
+        return;
+      }
       this.enErreur = true;
       this.emettre();
     });
@@ -463,7 +477,7 @@ export class Lecteur extends EventTarget {
     }
   }
 
-  private emettre(supplementaire?: 'piste' | 'file'): void {
+  private emettre(supplementaire?: 'piste' | 'file' | 'bloquee'): void {
     if (supplementaire !== undefined) this.dispatchEvent(new Event(supplementaire));
     this.dispatchEvent(new Event('etat'));
   }

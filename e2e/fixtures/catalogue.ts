@@ -59,6 +59,7 @@ export const CATALOGUE_TEST: Catalogue = CatalogueSchema.parse({
       licence: 'CC BY-NC-ND 4.0',
       copyright: '© 2024 AP3X Records',
       reference: 'AP3X-001',
+      telechargement: true,
       categorie: 'rock-roll',
       pistes: ['rock-roll--mon-album--r1', 'rock-roll--mon-album--r2', 'rock-roll--mon-album--r3'],
       nombrePistes: 3,
@@ -104,6 +105,7 @@ export const CATALOGUE_TEST: Catalogue = CatalogueSchema.parse({
       disque: 2,
       date: '2024-05',
       duree: 200,
+      telechargement: true,
     }),
     piste('techno--single-x--t1', 'Zenith', {
       categorie: 'techno',

@@ -135,5 +135,18 @@
   "playlist.retirer_piste": "Убрать из плейлиста",
   "dialogue.confirmer": "Подтвердить",
   "dialogue.annuler": "Отмена",
-  "lecteur.ajoutee": "Добавлено в очередь: {titre}"
+  "lecteur.ajoutee": "Добавлено в очередь: {titre}",
+  "partage.copier_lien": "Копировать ссылку",
+  "partage.lien_copie": "Ссылка скопирована.",
+  "partage.copie_echec": "Не удалось скопировать ссылку.",
+  "partage.a_partir_de": "Начать с {temps}",
+  "partage.lecture_bloquee": "Браузер заблокировал автовоспроизведение: нажмите «Воспроизвести», чтобы послушать.",
+  "partage.ouvrir": "Открыть в AP3X Records",
+  "album.telecharger_zip": "Скачать альбом (ZIP)",
+  "album.zip_progression": "Загрузка {n}/{total}…",
+  "album.zip_pret": "Альбом скачан.",
+  "album.zip_erreur": "Не удалось скачать альбом.",
+  "erreur.404.titre": "Страница не найдена",
+  "erreur.404.message": "Возвращаем вас на главную страницу…",
+  "erreur.404.lien": "Перейти на главную"
 }

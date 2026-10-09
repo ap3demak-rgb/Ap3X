@@ -135,5 +135,18 @@
   "playlist.retirer_piste": "プレイリストから削除",
   "dialogue.confirmer": "確認",
   "dialogue.annuler": "キャンセル",
-  "lecteur.ajoutee": "キューに追加しました：{titre}"
+  "lecteur.ajoutee": "キューに追加しました：{titre}",
+  "partage.copier_lien": "リンクをコピー",
+  "partage.lien_copie": "リンクをコピーしました。",
+  "partage.copie_echec": "リンクをコピーできませんでした。",
+  "partage.a_partir_de": "{temps} から再生",
+  "partage.lecture_bloquee": "ブラウザが自動再生をブロックしました。再生を押して聴いてください。",
+  "partage.ouvrir": "AP3X Records で開く",
+  "album.telecharger_zip": "アルバムをダウンロード（ZIP）",
+  "album.zip_progression": "ダウンロード中 {n}/{total}…",
+  "album.zip_pret": "アルバムをダウンロードしました。",
+  "album.zip_erreur": "アルバムのダウンロードに失敗しました。",
+  "erreur.404.titre": "ページが見つかりません",
+  "erreur.404.message": "ホームページに戻ります…",
+  "erreur.404.lien": "ホームページへ"
 }

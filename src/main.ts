@@ -21,7 +21,7 @@ import { pagePlaylist } from './pages/playlist';
 import { pagePlaylists } from './pages/playlists';
 import { pageRecherche } from './pages/recherche';
 import { pageTag } from './pages/tag';
-import { ecouterRoute, routeCourante, type Route } from './routeur';
+import { ecouterRoute, instantDeLHash, routeCourante, type Route } from './routeur';
 import { annonceur, annoncer } from './ui/annonceur';
 import { bandeau } from './ui/bandeau';
 import { entete, evitement, NOMS_LANGUES, pied } from './ui/gabarit';
@@ -31,7 +31,7 @@ if (racine === null) {
   throw new Error('Élément #app introuvable');
 }
 
-function page(route: Route): HTMLElement {
+function page(route: Route, demarrerPiste: boolean): HTMLElement {
   switch (route.nom) {
     case 'licences':
       return pageLicences();
@@ -40,7 +40,10 @@ function page(route: Route): HTMLElement {
     case 'album':
       return pageAlbum(route.id);
     case 'piste':
-      return pagePiste(route.id);
+      return pagePiste(route.id, {
+        demarrer: demarrerPiste,
+        instant: instantDeLHash(window.location.hash),
+      });
     case 'categories':
       return pageCategories();
     case 'categorie':
@@ -61,10 +64,17 @@ function page(route: Route): HTMLElement {
 }
 
 /** Affiche la page courante. `navigation` : déplace le focus sur le contenu et remonte en haut. */
-function afficher(conteneur: HTMLElement, navigation: boolean): void {
+type Origine = 'initiale' | 'navigation' | 'langue';
+
+function afficher(conteneur: HTMLElement, origine: Origine): void {
+  const navigation = origine === 'navigation';
+  // Un lien partagé lance la lecture : à l'ouverture du site, ou quand l'adresse change vers un lien
+  // qui porte un instant (?t=…). Parcourir le site ou changer de langue ne lance jamais la lecture.
+  const demarrerPiste =
+    origine === 'initiale' || (navigation && instantDeLHash(window.location.hash) !== undefined);
   const principal = document.createElement('main');
   principal.tabIndex = -1;
-  principal.append(page(routeCourante()));
+  principal.append(page(routeCourante(), demarrerPiste));
 
   conteneur.replaceChildren(evitement(principal), entete(), bandeau.element, principal, pied());
   if (navigation) {
@@ -74,14 +84,14 @@ function afficher(conteneur: HTMLElement, navigation: boolean): void {
 }
 
 document.body.append(annonceur.element);
-afficher(racine, false);
+afficher(racine, 'initiale');
 demarrerLecteur();
 // Le rendu 3D (Three.js) se charge après l'affichage de l'interface, sans la retarder.
 if ('requestIdleCallback' in window) window.requestIdleCallback(demarrerRendu3d);
 else setTimeout(demarrerRendu3d, 200);
 window.addEventListener('changement-langue', () => {
-  afficher(racine, false);
+  afficher(racine, 'langue');
   reconstruireBarre();
   annoncer(`${t('langue.libelle')} : ${NOMS_LANGUES[obtenirLangue()]}`);
 });
-ecouterRoute(() => afficher(racine, true));
+ecouterRoute(() => afficher(racine, 'navigation'));

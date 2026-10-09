@@ -73,6 +73,8 @@ export const FicheAlbumSchema = z
     copyright: TexteSchema.optional(),
     reference: TexteSchema.optional(),
     visible: z.boolean().default(true),
+    /** Autorise le téléchargement de l'album entier (archive ZIP générée dans le navigateur). */
+    telechargement: z.boolean().default(false),
     pistes: z.array(EntreeAlbumSchema).min(1, 'Un album doit lister au moins une piste'),
   })
   .strict();
@@ -118,6 +120,7 @@ export const AlbumSchema = z.object({
   pistes: z.array(TexteSchema).min(1),
   nombrePistes: z.number().int().min(1),
   duree: z.number().min(0),
+  telechargement: z.boolean().default(false),
 });
 export type Album = z.infer<typeof AlbumSchema>;
 
