@@ -5,6 +5,10 @@ Static music listening site (SoundCloud style) for the AP3X Records catalogue, b
 - Official website: https://github.com/ap3demak-rgb/Ap3X
 - Contact: ap3x.records@proton.me
 
+## Deployment
+
+Every push to `main` runs `.github/workflows/deploy.yml`: dependencies, catalogue generation, build, performance budget, then publication with `actions/deploy-pages`. In the repository settings, GitHub Pages must use the source **GitHub Actions**. The site is served at <https://ap3demak-rgb.github.io/Ap3X/>; Vite `base` is `/Ap3X/` (`src/constantes.ts`). GitHub limits: files under 100 MB, repository ideally under 1 GB, published site under 1 GB.
+
 ## Offline and performance
 
 The production build registers a service worker (`src/sw/`) that caches the interface, covers and catalogue so the site opens offline; audio files are never cached. Card lists show 48 items at a time. The startup script stays under a gzip budget checked by `npm run verifier:budget`.
