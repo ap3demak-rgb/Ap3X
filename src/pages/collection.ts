@@ -4,7 +4,7 @@
 import type { Donnees } from '../catalogue/donnees';
 import { fileDeLecture, trierAlbums, trierPistes, type CleTri } from '../catalogue/navigation';
 import type { Album, Piste } from '../catalogue/schemas';
-import { favoris } from '../favoris';
+import { favoris, favorisAlbums } from '../favoris';
 import { obtenirLangue, t } from '../i18n';
 import { compteAlbums, comptePistes } from '../i18n/format';
 import { lecteur } from '../lecteur';
@@ -121,6 +121,7 @@ export function collection(options: OptionsCollection): HTMLElement[] {
     const actualiser = (): void => {
       if (!zone.isConnected) {
         favoris.removeEventListener('change', actualiser);
+        favorisAlbums.removeEventListener('change', actualiser);
         return;
       }
       const suite = options.suivreFavoris?.();
@@ -132,6 +133,7 @@ export function collection(options: OptionsCollection): HTMLElement[] {
       zone.focus({ preventScroll: true });
     };
     favoris.addEventListener('change', actualiser);
+    favorisAlbums.addEventListener('change', actualiser);
   }
 
   rafraichir();

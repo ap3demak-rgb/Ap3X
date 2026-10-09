@@ -71,6 +71,13 @@ Three.js is loaded on demand after the interface is shown (`src/rendu3d/`). One 
 
 Text never sits directly on the 3D render: it rests on a semi-opaque panel, and the background shader is clamped to `--fond-3d-max`, so `npm run verifier:contrastes` can guarantee AAA contrast in the worst case. With `prefers-reduced-motion` there is no 3D at all (static gradient, flat cover, no visualizer); without WebGL (or if the context is lost) the visualizer becomes a CSS level bar and covers stay flat. Rendering pauses while the tab is hidden, windows pause when off screen, the pixel ratio is capped at 1.5 and touch devices are limited to 30 frames per second.
 
+## Search, favorites and playlists
+
+- **Search** (header, `role="search"`): results appear as you type, grouped by tracks, albums, artists, hashtags and categories. It ignores case and accents in both the query and the titles, and every word must match (title, artist, hashtags, album, category, description, catalogue reference). Arrow keys move through the results, `Escape` closes the panel, `Enter` opens the full results page (`#/recherche/<query>`). Artist names link to an artist page (`#/artiste/<name>`).
+- **Favorites**: a heart button on tracks and albums (outlined or filled, with a changing label). They are stored in the browser and listed, with their albums, on the Favorites page (`#/categorie/favoris`, also in the navigation bar).
+- **Queue**: "Add to queue" on tracks and albums (a whole album at once); the addition is announced to screen readers.
+- **Playlists** (`#/playlists`, `#/playlist/<id>`): create from the Playlists page or from the "Add to a playlist" button on any track or album, rename, delete (with confirmation), reorder (move up / down), remove tracks and play. Playlists are stored in the browser; **export** downloads them as `playlists-ap3x.json` and **import** adds the playlists of such a file without ever overwriting an existing one (duplicate names get a suffix). Names are limited to 80 characters.
+
 ## Player
 
 A fixed bar at the bottom of every page plays the queue: play/pause, previous/next, seek bar, volume and mute, shuffle, repeat (off / queue / track) and a queue panel (reorder, remove). The next track is preloaded, hardware media keys and mobile lock screens are supported (Media Session API), and the volume, shuffle, repeat mode and last played track are remembered in the browser.

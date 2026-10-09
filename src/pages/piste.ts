@@ -8,7 +8,17 @@ import { t } from '../i18n';
 import { formaterDate, formaterDuree } from '../i18n/format';
 import { lecteur } from '../lecteur';
 import { lienAlbum } from '../routeur';
-import { boutonJaime, cartePiste, chipsHashtags, grille, lien, pochette3d } from '../ui/cartes';
+import {
+  boutonFile,
+  boutonJaime,
+  boutonPlaylist,
+  cartePiste,
+  chipsHashtags,
+  grille,
+  lien,
+  lienDeLArtiste,
+  pochette3d,
+} from '../ui/cartes';
 import { creerOnde } from '../ui/onde';
 import {
   definirTitrePage,
@@ -29,7 +39,7 @@ function detail(donnees: Donnees, piste: Piste): HTMLElement[] {
   infos.className = 'fiche-infos';
   const artiste = document.createElement('p');
   artiste.className = 'fiche-artiste';
-  artiste.textContent = piste.artiste;
+  artiste.append(lienDeLArtiste(piste.artiste));
 
   const lire = document.createElement('button');
   lire.type = 'button';
@@ -68,7 +78,12 @@ function detail(donnees: Donnees, piste: Piste): HTMLElement[] {
   if (hashtags !== undefined) infos.append(hashtags);
   const actions = document.createElement('div');
   actions.className = 'carte-actions';
-  actions.append(lire, boutonJaime(piste));
+  actions.append(
+    lire,
+    boutonFile(piste.titre, () => [piste]),
+    boutonJaime(piste),
+    boutonPlaylist(piste.titre, () => [piste.id]),
+  );
   infos.append(meta, actions);
   if (piste.telechargement) {
     const telecharger = lien(urlDuFichier(piste.fichier), t('piste.telecharger'), 'bouton');

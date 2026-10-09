@@ -6,15 +6,20 @@ import './styles/mise-en-page.css';
 import './styles/lecteur.css';
 import './styles/cartes.css';
 import './styles/rendu3d.css';
+import './styles/formulaires.css';
 import { obtenirLangue, t } from './i18n';
 import { demarrerLecteur, reconstruireBarre } from './lecteur';
 import { demarrerRendu3d } from './rendu3d';
 import { pageAccueil } from './pages/accueil';
 import { pageAlbum } from './pages/album';
 import { pageAlbums } from './pages/albums';
+import { pageArtiste } from './pages/artiste';
 import { pageCategorie, pageCategories } from './pages/categorie';
 import { pageLicences } from './pages/licences';
 import { pagePiste } from './pages/piste';
+import { pagePlaylist } from './pages/playlist';
+import { pagePlaylists } from './pages/playlists';
+import { pageRecherche } from './pages/recherche';
 import { pageTag } from './pages/tag';
 import { ecouterRoute, routeCourante, type Route } from './routeur';
 import { annonceur, annoncer } from './ui/annonceur';
@@ -42,6 +47,14 @@ function page(route: Route): HTMLElement {
       return pageCategorie(route.id);
     case 'tag':
       return pageTag(route.id);
+    case 'artiste':
+      return pageArtiste(route.id);
+    case 'playlists':
+      return pagePlaylists();
+    case 'playlist':
+      return pagePlaylist(route.id);
+    case 'recherche':
+      return pageRecherche(route.id);
     case 'accueil':
       return pageAccueil();
   }

@@ -1,0 +1,179 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* © 2026 AP3X Records */
+
+@layer composants {
+  /* Champs de saisie */
+  input[type='text'],
+  input[type='search'],
+  input[type='file'] {
+    box-sizing: border-box;
+    min-height: 2.75rem;
+    padding: 0 0.75rem;
+    background: var(--fond);
+    color: var(--texte);
+    border: 1px solid var(--bordure);
+    border-radius: 0.5rem;
+    font: inherit;
+  }
+
+  input[type='file'] {
+    padding: 0.5rem 0.75rem;
+  }
+
+  input[aria-invalid='true'] {
+    border-width: 2px;
+    border-color: var(--accent);
+  }
+
+  .formulaire-ligne {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.5rem 1rem;
+    margin: 1rem 0;
+  }
+
+  /* L'erreur est signalée par un texte précédé d'un symbole, pas seulement par la couleur */
+  .erreur-champ {
+    flex-basis: 100%;
+    margin: 0;
+  }
+
+  .erreur-champ:not(:empty)::before {
+    content: '⚠ ';
+  }
+
+  /* Recherche de l'en-tête */
+  .recherche {
+    position: relative;
+    flex: 1 1 14rem;
+    max-width: 24rem;
+  }
+
+  .recherche-saisie {
+    width: 100%;
+  }
+
+  .resultats-recherche {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    z-index: 30;
+    width: min(92vw, 30rem);
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--bordure);
+    border-radius: 0.5rem;
+  }
+
+  .resultats-recherche h2 {
+    margin: 0.5rem 0.5rem 0;
+    color: var(--texte-secondaire);
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+
+  .resultats-recherche ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .resultats-recherche a {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 0.5rem;
+    border-radius: 0.375rem;
+    overflow-wrap: anywhere;
+  }
+
+  .resultats-recherche a:hover {
+    background: var(--fond);
+  }
+
+  .resultats-vide {
+    margin: 0.5rem;
+  }
+
+  .resultats-tout {
+    font-weight: 700;
+  }
+
+  /* Listes de liens (artistes, hashtags, catégories trouvés) */
+  .liste-liens {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .liste-liens li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 1rem;
+  }
+
+  .liste-liens a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  /* Boîtes de dialogue modales natives */
+  .dialogue {
+    box-sizing: border-box;
+    width: min(32rem, 92vw);
+    padding: 1.25rem;
+    background: var(--surface);
+    color: var(--texte);
+    border: 1px solid var(--bordure);
+    border-radius: 0.75rem;
+  }
+
+  .dialogue::backdrop {
+    background: rgb(0 0 0 / 0.75);
+  }
+
+  .dialogue h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    overflow-wrap: anywhere;
+  }
+
+  .dialogue-liste {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dialogue-liste .bouton {
+    width: 100%;
+    text-align: start;
+  }
+
+  .dialogue-formulaire {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .dialogue-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+}
+
+@layer composants {
+  .zone-collection + section {
+    margin-top: 2rem;
+  }
+}

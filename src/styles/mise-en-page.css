@@ -23,7 +23,9 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 0.25rem 1rem;
-    flex: 1;
+    /* Deuxième rangée de l'en-tête : marque, recherche et langue restent sur la première. */
+    flex: 1 1 100%;
+    order: 3;
   }
 
   #app > header a,
@@ -42,6 +44,7 @@
   }
 
   #app > header label {
+    margin-inline-start: auto;
     display: flex;
     align-items: center;
     gap: 0.5rem;

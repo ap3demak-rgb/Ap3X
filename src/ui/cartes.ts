@@ -5,13 +5,15 @@ import { urlDuFichier } from '../catalogue/charger';
 import type { Donnees } from '../catalogue/donnees';
 import { pistesDeAlbum } from '../catalogue/donnees';
 import type { Album, Piste } from '../catalogue/schemas';
-import { t } from '../i18n';
+import { favoris, favorisAlbums, type Favoris } from '../favoris';
+import { t, tv } from '../i18n';
 import { comptePistes, formaterDuree } from '../i18n/format';
-import { favoris } from '../favoris';
 import { lecteur } from '../lecteur';
 import { icone } from '../lecteur/icones';
 import { fenetre3d } from '../rendu3d';
-import { lienAlbum, lienPiste, lienTag } from '../routeur';
+import { lienAlbum, lienArtiste, lienPiste, lienTag } from '../routeur';
+import { annoncer } from './annonceur';
+import { choisirPlaylist } from './dialogue';
 
 /** Pochette (lazy) ou, à défaut, un cadre neutre avec une icône. Toujours décorative. */
 export function pochette(chemin: string | undefined, classe = ''): HTMLElement {
@@ -66,6 +68,11 @@ export function lien(href: string, texte: string, classe = ''): HTMLAnchorElemen
   return a;
 }
 
+/** Lien vers la page d'un artiste. */
+export function lienDeLArtiste(nom: string): HTMLAnchorElement {
+  return lien(lienArtiste(nom), nom);
+}
+
 function bouton(libelle: string, aria: string, surClic: () => void): HTMLButtonElement {
   const b = document.createElement('button');
   b.type = 'button';
@@ -99,10 +106,10 @@ export function chipsHashtags(hashtags: readonly string[], max?: number): HTMLEl
 }
 
 /**
- * Bouton « J'aime » d'une piste. L'état est indiqué par la forme du cœur (contour ou plein) et par le
- * libellé (Ajouter / Retirer des favoris), jamais par la couleur seule.
+ * Bouton « J'aime » (cœur) d'un élément d'un magasin de favoris. L'état est indiqué par la forme du
+ * cœur (contour ou plein) et par le libellé (Ajouter / Retirer des favoris), jamais par la couleur seule.
  */
-export function boutonJaime(piste: Piste): HTMLButtonElement {
+export function boutonCoeur(magasin: Favoris, id: string, titre: string): HTMLButtonElement {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'bouton-icone bouton-jaime';
@@ -110,21 +117,46 @@ export function boutonJaime(piste: Piste): HTMLButtonElement {
   const actualiser = (): void => {
     // Le bouton se détache lui-même du magasin une fois retiré de la page.
     if (insere && !b.isConnected) {
-      favoris.removeEventListener('change', actualiser);
+      magasin.removeEventListener('change', actualiser);
       return;
     }
     if (b.isConnected) insere = true;
-    const aime = favoris.estFavori(piste.id);
+    const aime = magasin.estFavori(id);
     b.replaceChildren(icone(aime ? 'coeurPlein' : 'coeur'));
-    b.setAttribute('aria-label', `${t(aime ? 'jaime.retirer' : 'jaime.ajouter')} : ${piste.titre}`);
+    b.setAttribute('aria-label', `${t(aime ? 'jaime.retirer' : 'jaime.ajouter')} : ${titre}`);
     b.classList.toggle('actif', aime);
   };
   b.addEventListener('click', () => {
-    favoris.basculer(piste.id);
+    magasin.basculer(id);
   });
-  favoris.addEventListener('change', actualiser);
+  magasin.addEventListener('change', actualiser);
   actualiser();
   return b;
+}
+
+export const boutonJaime = (piste: Piste): HTMLButtonElement =>
+  boutonCoeur(favoris, piste.id, piste.titre);
+
+export const boutonJaimeAlbum = (album: Album): HTMLButtonElement =>
+  boutonCoeur(favorisAlbums, album.id, album.titre);
+
+/** Bouton « Ajouter à une playlist » : ouvre la boîte de choix avec les pistes données. */
+export function boutonPlaylist(titre: string, pistes: () => readonly string[]): HTMLButtonElement {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'bouton-icone';
+  b.append(icone('playlistAjout'));
+  b.setAttribute('aria-label', `${t('playlist.ajouter')} : ${titre}`);
+  b.addEventListener('click', () => choisirPlaylist(titre, pistes()));
+  return b;
+}
+
+/** Bouton texte « Ajouter à la file » pour une ou plusieurs pistes ; annonce l'ajout. */
+export function boutonFile(titre: string, pistes: () => readonly Piste[]): HTMLButtonElement {
+  return bouton(t('lecteur.ajouter'), `${t('lecteur.ajouter')} : ${titre}`, () => {
+    lecteur.ajouterPlusieurs(pistes());
+    annoncer(tv('lecteur.ajoutee', { titre }));
+  });
 }
 
 /** Carte d'une piste : pochette, titre, artiste, catégorie, durée, lecture et ajout à la file. */
@@ -156,10 +188,9 @@ export function cartePiste(
     bouton(t('lecteur.lecture'), `${t('lecteur.lecture')} : ${description}`, () =>
       lecteur.charger(contexte, index),
     ),
-    bouton(t('lecteur.ajouter'), `${t('lecteur.ajouter')} : ${description}`, () =>
-      lecteur.ajouter(piste),
-    ),
+    boutonFile(piste.titre, () => [piste]),
     boutonJaime(piste),
+    boutonPlaylist(piste.titre, () => [piste.id]),
   );
   const chips = chipsHashtags(piste.hashtags, 3);
   corps.append(
@@ -211,6 +242,9 @@ export function carteAlbum(
     bouton(t('album.lire'), `${t('album.lire')} : ${album.titre}`, () =>
       lecteur.charger(pistesDeAlbum(donnees, album), 0),
     ),
+    boutonFile(album.titre, () => pistesDeAlbum(donnees, album)),
+    boutonJaimeAlbum(album),
+    boutonPlaylist(album.titre, () => album.pistes),
   );
   corps.append(titre, badge, meta, actions);
 

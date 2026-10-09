@@ -6,6 +6,7 @@ import { CATEGORIE_FAVORIS, CATEGORIE_TOUT } from '../catalogue/navigation';
 import { EMAIL_CONTACT } from '../constantes';
 import { LANGUES, definirLangue, obtenirLangue, t, type Langue } from '../i18n';
 import { lienCategorie, routeCourante } from '../routeur';
+import { formulaireRecherche } from './recherche';
 
 /** Noms des langues dans leur propre langue : volontairement non traduits. */
 export const NOMS_LANGUES: Record<Langue, string> = {
@@ -112,11 +113,13 @@ export function entete(): HTMLElement {
     lien('#/', t('nav.accueil')),
     lien('#/categories', t('nav.categories')),
     lien('#/albums', t('nav.albums')),
+    lien('#/playlists', t('nav.playlists')),
+    lien(lienCategorie(CATEGORIE_FAVORIS), t('nav.favoris')),
     lien('#/licences', t('nav.licences')),
     selecteurCategorie(),
   );
 
-  en.append(marque, navigation, selecteurLangue());
+  en.append(marque, navigation, formulaireRecherche(), selecteurLangue());
   return en;
 }
 

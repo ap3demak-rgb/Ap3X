@@ -258,6 +258,11 @@ export class Lecteur extends EventTarget {
     this.emettre('file');
   }
 
+  /** Ajoute plusieurs pistes en fin de file, dans l'ordre. Si la file est vide, elle est chargée sans démarrer. */
+  ajouterPlusieurs(pistes: readonly Piste[]): void {
+    for (const piste of pistes) this.ajouter(piste);
+  }
+
   /** Retire la piste d'index `index` de la file. */
   retirer(index: number): void {
     if (index < 0 || index >= this.file.length) return;

@@ -1,21 +1,24 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-const CLE_STOCKAGE = 'ap3x.favoris';
+const CLE_PISTES = 'ap3x.favoris';
+const CLE_ALBUMS = 'ap3x.favoris.albums';
 
 type Stockage = Pick<Storage, 'getItem' | 'setItem'>;
 
 /**
- * Pistes « aimées » du visiteur, conservées dans le navigateur (localStorage).
- * Événement : `change` à chaque modification, y compris venant d'un autre onglet.
+ * Éléments « aimés » du visiteur (pistes ou albums selon la clé de stockage), conservés dans le
+ * navigateur (localStorage). Événement : `change` à chaque modification, y compris venant d'un autre onglet.
  */
 export class Favoris extends EventTarget {
   private ids: string[] = [];
   private readonly stockage: Stockage | undefined;
+  readonly cle: string;
 
-  constructor(stockage?: Stockage) {
+  constructor(stockage?: Stockage, cle: string = CLE_PISTES) {
     super();
     this.stockage = stockage;
+    this.cle = cle;
     this.recharger(false);
   }
 
@@ -40,7 +43,7 @@ export class Favoris extends EventTarget {
   /** Relit le stockage (par exemple après une modification dans un autre onglet). */
   recharger(notifier = true): void {
     try {
-      const brut = this.stockage?.getItem(CLE_STOCKAGE);
+      const brut = this.stockage?.getItem(this.cle);
       const lu: unknown = brut === null || brut === undefined ? [] : JSON.parse(brut);
       this.ids = Array.isArray(lu)
         ? [...new Set(lu.filter((valeur): valeur is string => typeof valeur === 'string'))]
@@ -53,7 +56,7 @@ export class Favoris extends EventTarget {
 
   private enregistrer(): void {
     try {
-      this.stockage?.setItem(CLE_STOCKAGE, JSON.stringify(this.ids));
+      this.stockage?.setItem(this.cle, JSON.stringify(this.ids));
     } catch {
       // Stockage indisponible : les favoris ne durent que le temps de la visite.
     }
@@ -68,8 +71,10 @@ function stockageLocal(): Storage | undefined {
   }
 }
 
-/** Favoris de l'application, synchronisés entre les onglets. */
-export const favoris = new Favoris(stockageLocal());
+/** Pistes aimées et albums aimés de l'application, synchronisés entre les onglets. */
+export const favoris = new Favoris(stockageLocal(), CLE_PISTES);
+export const favorisAlbums = new Favoris(stockageLocal(), CLE_ALBUMS);
 window.addEventListener('storage', (evenement) => {
-  if (evenement.key === CLE_STOCKAGE || evenement.key === null) favoris.recharger();
+  if (evenement.key === CLE_PISTES || evenement.key === null) favoris.recharger();
+  if (evenement.key === CLE_ALBUMS || evenement.key === null) favorisAlbums.recharger();
 });

@@ -20,6 +20,18 @@ export function indexer(catalogue: Catalogue): Donnees {
   };
 }
 
+const memoire = new WeakMap<Catalogue, Donnees>();
+
+/** Données indexées d'un catalogue, calculées une seule fois et partagées par toute l'application. */
+export function donneesDe(catalogue: Catalogue): Donnees {
+  let donnees = memoire.get(catalogue);
+  if (donnees === undefined) {
+    donnees = indexer(catalogue);
+    memoire.set(catalogue, donnees);
+  }
+  return donnees;
+}
+
 /** Pistes d'un album, dans l'ordre des disques puis des numéros. */
 export function pistesDeAlbum(donnees: Donnees, album: Album): Piste[] {
   return album.pistes

@@ -310,3 +310,14 @@ describe('lecture aléatoire', () => {
     expect(vues.has('e')).toBe(true);
   });
 });
+
+describe('ajout de plusieurs pistes', () => {
+  it("ajoute dans l'ordre, et charge sans démarrer si la file est vide", () => {
+    lecteur.ajouterPlusieurs([piste('x'), piste('y'), piste('z')]);
+    expect(ids(lecteur)).toEqual(['x', 'y', 'z']);
+    expect(courante(lecteur)).toBe('x');
+    expect(audio.paused).toBe(true);
+    lecteur.ajouterPlusieurs([piste('w')]);
+    expect(ids(lecteur)).toEqual(['x', 'y', 'z', 'w']);
+  });
+});

@@ -6,14 +6,26 @@ export type Route =
   | { nom: 'licences' }
   | { nom: 'albums' }
   | { nom: 'categories' }
+  | { nom: 'playlists' }
   | { nom: 'album'; id: string }
   | { nom: 'piste'; id: string }
   | { nom: 'categorie'; id: string }
-  | { nom: 'tag'; id: string };
+  | { nom: 'tag'; id: string }
+  | { nom: 'artiste'; id: string }
+  | { nom: 'playlist'; id: string }
+  | { nom: 'recherche'; id: string };
 
 /** Pages à un identifiant : `#/<nom>/<id>`. */
-const ROUTES_AVEC_ID = ['album', 'piste', 'categorie', 'tag'] as const;
-const ROUTES_SIMPLES = ['licences', 'albums', 'categories'] as const;
+const ROUTES_AVEC_ID = [
+  'album',
+  'piste',
+  'categorie',
+  'tag',
+  'artiste',
+  'playlist',
+  'recherche',
+] as const;
+const ROUTES_SIMPLES = ['licences', 'albums', 'categories', 'playlists'] as const;
 
 /** Route déduite d'un hash (`#/album/rock--mon-album`) ; toute route inconnue renvoie à l'accueil. */
 export function analyserRoute(hash: string): Route {
@@ -44,21 +56,15 @@ export function routeCourante(): Route {
   return analyserRoute(window.location.hash);
 }
 
-export function lienAlbum(id: string): string {
-  return `#/album/${encodeURIComponent(id)}`;
-}
+const lien = (nom: string) => (id: string) => `#/${nom}/${encodeURIComponent(id)}`;
 
-export function lienPiste(id: string): string {
-  return `#/piste/${encodeURIComponent(id)}`;
-}
-
-export function lienCategorie(slug: string): string {
-  return `#/categorie/${encodeURIComponent(slug)}`;
-}
-
-export function lienTag(nom: string): string {
-  return `#/tag/${encodeURIComponent(nom)}`;
-}
+export const lienAlbum = lien('album');
+export const lienPiste = lien('piste');
+export const lienCategorie = lien('categorie');
+export const lienTag = lien('tag');
+export const lienArtiste = lien('artiste');
+export const lienPlaylist = lien('playlist');
+export const lienRecherche = lien('recherche');
 
 export function ecouterRoute(rappel: () => void): void {
   window.addEventListener('hashchange', rappel);

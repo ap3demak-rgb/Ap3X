@@ -9,8 +9,9 @@ import {
   pistesDeCategorie,
   pistesHorsAlbum,
 } from '../catalogue/navigation';
-import type { Piste } from '../catalogue/schemas';
-import { favoris } from '../favoris';
+import { fileDeLecture } from '../catalogue/navigation';
+import type { Album, Piste } from '../catalogue/schemas';
+import { favoris, favorisAlbums } from '../favoris';
 import { t } from '../i18n';
 import { compteAlbums, comptePistes } from '../i18n/format';
 import { lienCategorie } from '../routeur';
@@ -26,6 +27,24 @@ function pistesFavorites(donnees: Donnees): Piste[] {
     .filter((p): p is Piste => p !== undefined);
 }
 
+/** Albums aimés encore présents dans le catalogue. */
+function albumsFavoris(donnees: Donnees): Album[] {
+  return favorisAlbums
+    .liste()
+    .map((id) => donnees.albums.get(id))
+    .filter((a): a is Album => a !== undefined);
+}
+
+/** File de lecture des favoris : pistes des albums aimés puis pistes aimées, sans doublon. */
+function fileFavoris(
+  donnees: Donnees,
+  albums: readonly Album[],
+  pistes: readonly Piste[],
+): Piste[] {
+  const vues = new Set<string>();
+  return fileDeLecture(donnees, albums, pistes).filter((p) => !vues.has(p.id) && vues.add(p.id));
+}
+
 /** Page d'une catégorie, de « Tout » ou de « Favoris ». */
 export function pageCategorie(slug: string): HTMLElement {
   const page = document.createElement('section');
@@ -35,11 +54,14 @@ export function pageCategorie(slug: string): HTMLElement {
       return collection({
         donnees,
         titre: t('categorie.favoris'),
-        albums: [],
+        albums: albumsFavoris(donnees),
         pistes: pistesFavorites(donnees),
-        file: (_albums, pistes) => [...pistes],
+        file: (albums, pistes) => fileFavoris(donnees, albums, pistes),
         messageVide: t('favoris.vide'),
-        suivreFavoris: () => ({ albums: [], pistes: pistesFavorites(donnees) }),
+        suivreFavoris: () => ({
+          albums: albumsFavoris(donnees),
+          pistes: pistesFavorites(donnees),
+        }),
       });
     }
     const categorie = slug === CATEGORIE_TOUT ? undefined : donnees.categories.get(slug);
@@ -111,7 +133,7 @@ export function pageCategories(): HTMLElement {
       t('categorie.favoris'),
       '',
       pistesFavorites(donnees).length,
-      undefined,
+      albumsFavoris(donnees).length,
     );
     return [liste];
   });

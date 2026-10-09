@@ -75,3 +75,16 @@ describe('favoris', () => {
     expect(favoris.estFavori('a')).toBe(true);
   });
 });
+
+describe('favoris avec une clé de stockage propre', () => {
+  it('garde séparés les pistes et les albums', async () => {
+    const { Favoris } = await import('../src/favoris');
+    const stockage = new StockageMemoire();
+    const pistes = new Favoris(stockage);
+    const albums = new Favoris(stockage, 'ap3x.favoris.albums');
+    pistes.basculer('p1');
+    albums.basculer('a1');
+    expect(new Favoris(stockage).liste()).toEqual(['p1']);
+    expect(new Favoris(stockage, 'ap3x.favoris.albums').liste()).toEqual(['a1']);
+  });
+});

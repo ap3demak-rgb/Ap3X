@@ -7,7 +7,18 @@ import { t, tv } from '../i18n';
 import { comptePistes, formaterDate, formaterDuree } from '../i18n/format';
 import { lecteur } from '../lecteur';
 import { lienPiste } from '../routeur';
-import { boutonJaime, carteAlbum, chipsHashtags, grille, lien, pochette } from '../ui/cartes';
+import {
+  boutonFile,
+  boutonJaime,
+  boutonJaimeAlbum,
+  boutonPlaylist,
+  carteAlbum,
+  chipsHashtags,
+  grille,
+  lien,
+  lienDeLArtiste,
+  pochette,
+} from '../ui/cartes';
 import { creerOnde } from '../ui/onde';
 import {
   definirTitrePage,
@@ -70,7 +81,7 @@ function detail(donnees: Donnees, album: Album): HTMLElement[] {
   badge.textContent = t(`type.${album.type}`);
   const artiste = document.createElement('p');
   artiste.className = 'fiche-artiste';
-  artiste.textContent = album.artiste;
+  artiste.append(lienDeLArtiste(album.artiste));
 
   const meta = document.createElement('dl');
   meta.className = 'meta';
@@ -107,7 +118,15 @@ function detail(donnees: Donnees, album: Album): HTMLElement[] {
   }
   const hashtags = chipsHashtags(album.hashtags);
   if (hashtags !== undefined) infos.append(hashtags);
-  infos.append(meta, lireAlbum);
+  const actions = document.createElement('div');
+  actions.className = 'carte-actions';
+  actions.append(
+    lireAlbum,
+    boutonFile(album.titre, () => pistes),
+    boutonJaimeAlbum(album),
+    boutonPlaylist(album.titre, () => album.pistes),
+  );
+  infos.append(meta, actions);
   entete.append(pochette(album.pochette, 'pochette-grande'), infos);
 
   const blocs: HTMLElement[] = [entete];

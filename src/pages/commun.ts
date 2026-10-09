@@ -2,12 +2,9 @@
 // © 2026 AP3X Records
 
 import { chargerCatalogue } from '../catalogue/charger';
-import { indexer, type Donnees } from '../catalogue/donnees';
-import type { Catalogue } from '../catalogue/schemas';
+import { donneesDe, type Donnees } from '../catalogue/donnees';
 import { t } from '../i18n';
 import { annoncer } from '../ui/annonceur';
-
-const memoire = new WeakMap<Catalogue, Donnees>();
 
 /**
  * Charge le catalogue puis ajoute à `page` les éléments produits par `rendu`.
@@ -19,12 +16,7 @@ export function remplirAvecCatalogue(
 ): void {
   chargerCatalogue()
     .then((catalogue) => {
-      let donnees = memoire.get(catalogue);
-      if (donnees === undefined) {
-        donnees = indexer(catalogue);
-        memoire.set(catalogue, donnees);
-      }
-      page.append(...rendu(donnees));
+      page.append(...rendu(donneesDe(catalogue)));
     })
     .catch((erreur: unknown) => {
       console.error(erreur);

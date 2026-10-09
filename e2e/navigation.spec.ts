@@ -118,10 +118,10 @@ test('les favoris : ajout, page Favoris, persistance et retrait', async ({ page 
   expect(await titres(page, 'Tracks')).toEqual(['Brume']);
 
   await page.getByRole('button', { name: 'Remove from favorites : Brume' }).click();
-  await expect(page.getByText('You have not liked any track yet.')).toBeVisible();
+  await expect(page.getByText('You have not liked any track or album yet.')).toBeVisible();
   await expect(page.getByRole('button', { name: /Play all/ })).toBeDisabled();
   await page.reload();
-  await expect(page.getByText('You have not liked any track yet.')).toBeVisible();
+  await expect(page.getByText('You have not liked any track or album yet.')).toBeVisible();
 });
 
 test('un favori ajouté depuis une carte met à jour toutes les cartes de la piste', async ({
