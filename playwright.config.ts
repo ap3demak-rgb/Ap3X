@@ -40,7 +40,12 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    { ...projet('chromium'), testIgnore: [LECTURE_AUTO, LECTURE_BLOQUEE] },
+    // Politique fixée explicitement : sinon elle dépend de l'environnement (bloquée en local, autorisée
+    // sur certains serveurs d'intégration), et l'ouverture d'une page de piste lance ou non la lecture.
+    {
+      ...projet('chromium', 'document-user-activation-required'),
+      testIgnore: [LECTURE_AUTO, LECTURE_BLOQUEE],
+    },
     { ...projet('lecture-auto', 'no-user-gesture-required'), testMatch: LECTURE_AUTO },
     {
       ...projet('lecture-bloquee', 'document-user-activation-required'),
