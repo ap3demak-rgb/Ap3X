@@ -150,5 +150,7 @@
   "erreur.404.message": "正在返回首页…",
   "erreur.404.lien": "前往首页",
   "liste.voir_plus": "显示更多",
-  "liste.affichage": "已显示 {n} / {total}"
+  "liste.affichage": "已显示 {n} / {total}",
+  "erreur.reessayer": "重试",
+  "lecteur.erreur_reseau": "连接已断开，无法播放此曲目。"
 }

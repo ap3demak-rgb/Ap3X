@@ -78,9 +78,12 @@ test('hors ligne, la lecture signale que la piste est indisponible au lieu de pl
   await context.setOffline(true);
   await page.reload();
   await page.locator('.carte').first().getByRole('button', { name: /^Play/ }).click();
-  await expect(page.locator('.lecteur-erreur')).toHaveText('This track cannot be played.', {
-    timeout: 20_000,
-  });
+  await expect(page.locator('.lecteur-erreur')).toHaveText(
+    'This track cannot be played because the connection was lost.',
+    {
+      timeout: 20_000,
+    },
+  );
   await context.setOffline(false);
 });
 

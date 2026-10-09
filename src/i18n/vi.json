@@ -150,5 +150,7 @@
   "erreur.404.message": "Đang đưa bạn về trang chủ…",
   "erreur.404.lien": "Về trang chủ",
   "liste.voir_plus": "Xem thêm",
-  "liste.affichage": "Đang hiển thị {n} trên {total}"
+  "liste.affichage": "Đang hiển thị {n} trên {total}",
+  "erreur.reessayer": "Thử lại",
+  "lecteur.erreur_reseau": "Không thể phát bản nhạc này vì đã mất kết nối."
 }

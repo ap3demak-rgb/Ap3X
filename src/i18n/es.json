@@ -150,5 +150,7 @@
   "erreur.404.message": "Volviendo a la página de inicio…",
   "erreur.404.lien": "Ir a la página de inicio",
   "liste.voir_plus": "Ver más",
-  "liste.affichage": "Mostrando {n} de {total}"
+  "liste.affichage": "Mostrando {n} de {total}",
+  "erreur.reessayer": "Reintentar",
+  "lecteur.erreur_reseau": "No se puede reproducir esta pista porque se perdió la conexión."
 }

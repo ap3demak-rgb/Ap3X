@@ -22,23 +22,24 @@ npm install
 
 ## npm scripts
 
-| Command                   | Description                                                                                                                                                                    |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `npm run dev`             | Start the Vite development server                                                                                                                                              |
-| `npm run build`           | Type-check, then build the site into `dist/`                                                                                                                                   |
-| `npm run preview`         | Serve the production build locally                                                                                                                                             |
-| `npm run typecheck`       | Run the TypeScript compiler without emitting                                                                                                                                   |
-| `npm run lint`            | Run ESLint                                                                                                                                                                     |
-| `npm run format`          | Format the project with Prettier                                                                                                                                               |
-| `npm run icones`          | Regenerate PNG/ICO icons from `public/icones/favicon.svg`                                                                                                                      |
-| `npm test`                | Run the unit tests (Vitest); `npx vitest run tests/lecteur.test.ts` runs a single file                                                                                         |
-| `npm run e2e`             | Build first (`npm run build`), then run the Playwright end-to-end and axe accessibility tests; the first time, run `npx playwright install chromium`                           |
-| `npm run catalogue`       | Generate `public/catalogue.json` from `public/musique/` (runs automatically before `dev` and `build`)                                                                          |
-| `npm run verifier:budget` | After `npm run build`: check the performance budget (gzip size of the startup script, deferred chunks and styles, size of generated covers, no original image left in `dist/`) |
+| Command                   | Description                                                                                                                                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run dev`             | Start the Vite development server                                                                                                                                                                      |
+| `npm run build`           | Type-check, then build the site into `dist/`                                                                                                                                                           |
+| `npm run preview`         | Serve the production build locally                                                                                                                                                                     |
+| `npm run typecheck`       | Run the TypeScript compiler without emitting                                                                                                                                                           |
+| `npm run lint`            | Run ESLint                                                                                                                                                                                             |
+| `npm run format`          | Format the project with Prettier                                                                                                                                                                       |
+| `npm run format:verifier` | Check formatting with Prettier without changing files (run by the `pre-commit` hook and the CI workflow)                                                                                               |
+| `npm run icones`          | Regenerate PNG/ICO icons from `public/icones/favicon.svg`                                                                                                                                              |
+| `npm test`                | Run the unit tests (Vitest); `npx vitest run tests/lecteur.test.ts` runs a single file                                                                                                                 |
+| `npm run e2e`             | Build first (`npm run build`), then run the Playwright end-to-end and axe accessibility tests; the first time, run `npx playwright install chromium firefox webkit`                                    |
+| `npm run catalogue`       | Generate `public/catalogue.json` from `public/musique/` (runs automatically before `dev` and `build`)                                                                                                  |
+| `npm run verifier:budget` | After `npm run build`: check the performance budget (gzip size of the startup script, deferred chunks and styles, size of generated covers, no original image left in `dist/`)                         |
 | `npm run lighthouse`      | After `npm run build`: Lighthouse audit (mobile and desktop) of the home, albums and licenses pages, served like GitHub Pages; fails below 90 (accessibility, best practices, SEO) or 80 (performance) |
-| `npm run tags-id3`        | Write copyright and official URLs into the ID3 tags of every MP3 in `public/musique/`                                                                                          |
-| `npm run verifier`        | Run the SPDX, i18n and forbidden-mention checks                                                                                                                                |
-| `npm run verifier:docs`   | Check that documentation is consistent with staged changes                                                                                                                     |
+| `npm run tags-id3`        | Write copyright and official URLs into the ID3 tags of every MP3 in `public/musique/`                                                                                                                  |
+| `npm run verifier`        | Run the SPDX, i18n and forbidden-mention checks                                                                                                                                                        |
+| `npm run verifier:docs`   | Check that documentation is consistent with staged changes                                                                                                                                             |
 
 ## Project structure
 

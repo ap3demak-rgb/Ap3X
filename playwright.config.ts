@@ -11,6 +11,9 @@ const ARGUMENTS = [
   '--mute-audio',
 ];
 
+/** Parcours de base partagé par tous les navigateurs (seul fichier lancé par les projets ci-dessous). */
+const NAVIGATEURS = /navigateurs\.spec\.ts/;
+
 /** Fichier qui exige que la lecture automatique soit autorisée : un projet à part. */
 const LECTURE_AUTO = /partage-lecture-auto\.spec\.ts/;
 
@@ -47,8 +50,22 @@ export default defineConfig({
   projects: [
     // Politique fixée explicitement : sinon elle dépend de l'environnement (bloquée en local, autorisée
     // sur certains serveurs d'intégration), et l'ouverture d'une page de piste lance ou non la lecture.
-    { ...projet('chromium', 'document-user-activation-required'), testIgnore: LECTURE_AUTO },
+    {
+      ...projet('chromium', 'document-user-activation-required'),
+      testIgnore: [LECTURE_AUTO, NAVIGATEURS],
+    },
     { ...projet('lecture-auto', 'no-user-gesture-required'), testMatch: LECTURE_AUTO },
+    // Autres moteurs et formats d'écran : parcours de base uniquement (le rendu WebGL et l'audio
+    // détaillés sont vérifiés avec Chromium).
+    {
+      name: 'chrome-bureau',
+      testMatch: NAVIGATEURS,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    { name: 'firefox', testMatch: NAVIGATEURS, use: { ...devices['Desktop Firefox'] } },
+    { name: 'safari-bureau', testMatch: NAVIGATEURS, use: { ...devices['Desktop Safari'] } },
+    { name: 'chrome-mobile', testMatch: NAVIGATEURS, use: { ...devices['Pixel 7'] } },
+    { name: 'safari-mobile', testMatch: NAVIGATEURS, use: { ...devices['iPhone 14'] } },
   ],
   webServer: {
     command: 'npx vite preview --port 4173 --strictPort',

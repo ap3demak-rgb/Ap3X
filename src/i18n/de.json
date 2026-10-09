@@ -150,5 +150,7 @@
   "erreur.404.message": "Weiterleitung zur Startseite …",
   "erreur.404.lien": "Zur Startseite",
   "liste.voir_plus": "Mehr anzeigen",
-  "liste.affichage": "{n} von {total} angezeigt"
+  "liste.affichage": "{n} von {total} angezeigt",
+  "erreur.reessayer": "Erneut versuchen",
+  "lecteur.erreur_reseau": "Dieser Titel kann nicht abgespielt werden, weil die Verbindung unterbrochen wurde."
 }

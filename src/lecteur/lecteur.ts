@@ -20,7 +20,10 @@ export type ElementAudio = EventTarget &
     | 'pause'
     | 'removeAttribute'
     | 'load'
-  >;
+  > & {
+    /** Erreur de média en cours (`HTMLMediaElement.error`) ; absente des éléments simulés. */
+    readonly error?: Pick<MediaError, 'code'> | null;
+  };
 
 export interface OptionsLecteur {
   audio: ElementAudio;
@@ -48,6 +51,8 @@ export interface EtatLecteur {
   aleatoire: boolean;
   repetition: Repetition;
   erreur: boolean;
+  /** L'erreur vient du réseau (connexion coupée ou interrompue) et non du fichier lui-même. */
+  erreurReseau: boolean;
   /** Le navigateur a refusé de démarrer la lecture sans action de l'utilisateur (lecture automatique). */
   lectureBloquee: boolean;
 }
@@ -84,6 +89,7 @@ export class Lecteur extends EventTarget {
   private modeAleatoire = false;
   private modeRepetition: Repetition = 'aucune';
   private enErreur = false;
+  private erreurReseau = false;
   private bloquee = false;
   private cheminPrecharge = '';
 
@@ -124,6 +130,10 @@ export class Lecteur extends EventTarget {
     this.audio.addEventListener('error', () => {
       if (this.pisteCourante !== undefined) {
         this.enErreur = true;
+        // Code 2 = MEDIA_ERR_NETWORK ; hors connexion, le fichier peut aussi être simplement injoignable.
+        this.erreurReseau =
+          this.audio.error?.code === 2 ||
+          (typeof navigator !== 'undefined' && navigator.onLine === false);
         this.emettre();
       }
     });
@@ -148,6 +158,7 @@ export class Lecteur extends EventTarget {
       aleatoire: this.modeAleatoire,
       repetition: this.modeRepetition,
       erreur: this.enErreur,
+      erreurReseau: this.enErreur && this.erreurReseau,
       lectureBloquee: this.bloquee,
     };
   }
@@ -395,6 +406,7 @@ export class Lecteur extends EventTarget {
     const piste = this.pisteCourante;
     if (piste === undefined) return;
     this.enErreur = false;
+    this.erreurReseau = false;
     this.audio.src = this.options.resoudreUrl(piste.fichier);
     if (lire) this.jouer();
     else this.audio.pause();

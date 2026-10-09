@@ -150,5 +150,7 @@
   "erreur.404.message": "홈페이지로 이동합니다…",
   "erreur.404.lien": "홈페이지로 이동",
   "liste.voir_plus": "더 보기",
-  "liste.affichage": "{total}개 중 {n}개 표시"
+  "liste.affichage": "{total}개 중 {n}개 표시",
+  "erreur.reessayer": "다시 시도",
+  "lecteur.erreur_reseau": "연결이 끊겨 이 트랙을 재생할 수 없습니다."
 }

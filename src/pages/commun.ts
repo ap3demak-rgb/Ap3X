@@ -20,10 +20,21 @@ export function remplirAvecCatalogue(
     })
     .catch((erreur: unknown) => {
       console.error(erreur);
+      const zone = document.createElement('div');
+      zone.className = 'erreur-chargement';
       const message = document.createElement('p');
       message.setAttribute('role', 'alert');
       message.textContent = t('erreur.chargement');
-      page.append(message);
+      const reessayer = document.createElement('button');
+      reessayer.type = 'button';
+      reessayer.className = 'bouton';
+      reessayer.textContent = t('erreur.reessayer');
+      reessayer.addEventListener('click', () => {
+        zone.remove();
+        remplirAvecCatalogue(page, rendu);
+      });
+      zone.append(message, reessayer);
+      page.append(zone);
     });
 }
 

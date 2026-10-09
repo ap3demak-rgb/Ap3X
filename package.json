@@ -22,6 +22,7 @@
     "typecheck": "tsc --noEmit && tsc -p tsconfig.sw.json",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "format:verifier": "prettier --check .",
     "icones": "tsx scripts/generer-icones.ts",
     "verifier:licences": "tsx scripts/verifier-licences.ts",
     "verifier:i18n": "tsx scripts/verifier-i18n.ts",

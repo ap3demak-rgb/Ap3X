@@ -30,13 +30,15 @@ jobs:
         run: npx tsx scripts/verifier-docs.ts --base origin/${{ github.base_ref }}
       - name: Tests unitaires
         run: npm test
+      - name: Formatage (Prettier)
+        run: npm run format:verifier
       - name: Lint
         run: npm run lint
       - name: Types et build
         run: npm run build
       - name: Budget de performance
         run: npm run verifier:budget
-      - name: Navigateur pour les tests de bout en bout
-        run: npx playwright install --with-deps chromium
+      - name: Navigateurs pour les tests de bout en bout
+        run: npx playwright install --with-deps chromium firefox webkit
       - name: Tests de bout en bout et accessibilité
         run: npm run e2e

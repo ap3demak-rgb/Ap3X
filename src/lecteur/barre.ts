@@ -239,7 +239,9 @@ export function creerBarre(lecteur: Lecteur, chercherAlbum: RechercheAlbum): Bar
       ),
     );
 
-    erreur.textContent = etat.erreur ? t('lecteur.erreur') : '';
+    erreur.textContent = etat.erreur
+      ? t(etat.erreurReseau ? 'lecteur.erreur_reseau' : 'lecteur.erreur')
+      : '';
   }
 
   // Interactions

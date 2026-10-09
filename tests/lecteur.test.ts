@@ -13,6 +13,7 @@ class FauxAudio extends EventTarget {
   muted = false;
   paused = true;
   preload = '';
+  error: { code: number } | null = null;
   play(): Promise<void> {
     this.paused = false;
     this.dispatchEvent(new Event('play'));
@@ -354,6 +355,20 @@ describe('lecture automatique refusée par le navigateur', () => {
     await Promise.resolve();
     expect(lecteur.etat().erreur).toBe(true);
     expect(lecteur.etat().lectureBloquee).toBe(false);
+  });
+
+  it("distingue une coupure réseau (code 2) d'un fichier illisible, et l'efface au chargement suivant", () => {
+    lecteur.charger(PISTES, 0);
+    audio.error = { code: 2 };
+    audio.dispatchEvent(new Event('error'));
+    expect(lecteur.etat().erreur).toBe(true);
+    expect(lecteur.etat().erreurReseau).toBe(true);
+
+    lecteur.charger(PISTES, 1);
+    audio.error = { code: 4 };
+    audio.dispatchEvent(new Event('error'));
+    expect(lecteur.etat().erreur).toBe(true);
+    expect(lecteur.etat().erreurReseau).toBe(false);
   });
 });
 

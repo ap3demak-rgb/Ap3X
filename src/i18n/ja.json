@@ -150,5 +150,7 @@
   "erreur.404.message": "ホームページに戻ります…",
   "erreur.404.lien": "ホームページへ",
   "liste.voir_plus": "もっと見る",
-  "liste.affichage": "{total} 件中 {n} 件を表示"
+  "liste.affichage": "{total} 件中 {n} 件を表示",
+  "erreur.reessayer": "再試行",
+  "lecteur.erreur_reseau": "接続が切れたため、このトラックを再生できません。"
 }
