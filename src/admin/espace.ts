@@ -1,7 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-import { analyserArbre, type AlbumDepot, type AnalyseDepot, type PisteDepot } from './depot';
+import {
+  analyserArbre,
+  type AlbumDepot,
+  type AnalyseDepot,
+  type CategorieDepot,
+  type PisteDepot,
+} from './depot';
 import { lireFicheBrute, type FicheBrute } from './edition';
 import type { ClientGitHub } from './github';
 import { lireResumeFiche, type ResumeFiche } from './liste';
@@ -58,6 +64,33 @@ export class Espace {
   /** `album.json` d'un album ; lève `ErreurFicheIllisible` s'il n'est pas lisible. */
   async ficheAlbum(album: AlbumDepot): Promise<FicheBrute> {
     return lireFicheBrute(await this.texteBlob(album.fiche.sha));
+  }
+
+  /** `categorie.json` d'une catégorie ; `undefined` si elle n'en a pas. */
+  async ficheCategorie(categorie: CategorieDepot): Promise<FicheBrute | undefined> {
+    return categorie.fiche === undefined
+      ? undefined
+      : lireFicheBrute(await this.texteBlob(categorie.fiche.sha));
+  }
+
+  /**
+   * `categorie.json` de plusieurs catégories (clé : nom du dossier). Une fiche illisible lève une erreur :
+   * la modifier ou réécrire l'ordre effacerait ses autres champs.
+   */
+  async fichesCategoriesDe(
+    categories: readonly CategorieDepot[],
+  ): Promise<Map<string, FicheBrute | undefined>> {
+    const resultats = new Map<string, FicheBrute | undefined>();
+    let echec: unknown;
+    await this.enParallele(categories, async (categorie) => {
+      try {
+        resultats.set(categorie.dossier, await this.ficheCategorie(categorie));
+      } catch (erreur) {
+        echec ??= erreur;
+      }
+    });
+    if (echec !== undefined) throw echec instanceof Error ? echec : new Error('Fiche illisible');
+    return resultats;
   }
 
   /** `album.json` de plusieurs albums (clé : chemin du fichier) ; un fichier illisible donne `undefined`. */

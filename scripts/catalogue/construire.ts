@@ -365,6 +365,8 @@ export async function construireCatalogue(options: Options): Promise<Resultat> {
     supplementaires: new Map(),
   };
   const categories: Categorie[] = [];
+  /** Position demandée par `categorie.json` (champ `ordre`), par catégorie. */
+  const ordres = new Map<string, number>();
   const albums: Album[] = [];
   const pistes: Piste[] = [];
 
@@ -462,6 +464,7 @@ export async function construireCatalogue(options: Options): Promise<Resultat> {
     }
 
     const pochette = await resoudrePochette(dossier, fiche?.pochette, contexte);
+    if (fiche?.ordre !== undefined) ordres.set(slug, fiche.ordre);
     categories.push({
       slug,
       nom: fiche?.nom ?? titreDepuisNomFichier(entree.name),
@@ -522,7 +525,12 @@ export async function construireCatalogue(options: Options): Promise<Resultat> {
 
   const brut = {
     version: 1 as const,
-    categories: categories.sort((a, b) => a.nom.localeCompare(b.nom)),
+    // Les catégories qui ont un `ordre` viennent d'abord, dans cet ordre ; les autres suivent, par nom.
+    categories: categories.sort(
+      (a, b) =>
+        (ordres.get(a.slug) ?? Number.MAX_SAFE_INTEGER) -
+          (ordres.get(b.slug) ?? Number.MAX_SAFE_INTEGER) || a.nom.localeCompare(b.nom),
+    ),
     albums: albums.sort((a, b) => a.id.localeCompare(b.id)),
     pistes: pistes.sort((a, b) => a.id.localeCompare(b.id)),
     hashtags,

@@ -41,11 +41,25 @@ export interface AlbumDepot {
   pistes: PisteDepot[];
 }
 
+/** Catégorie telle qu'elle existe dans le dépôt : un dossier de `public/musique/`. */
+export interface CategorieDepot {
+  dossier: string;
+  /** `categorie.json`, s'il existe. */
+  fiche?: FichierDepot;
+  /** Images posées directement dans le dossier (pochette de la catégorie, ou image d'un titre seul). */
+  images: FichierDepot[];
+  /** Tous les fichiers du dossier, à tous les niveaux. */
+  fichiers: FichierDepot[];
+  pistes: PisteDepot[];
+  albums: AlbumDepot[];
+}
+
 export interface AnalyseDepot {
   /** Dossiers de catégories, dans l'ordre alphabétique. */
   categories: string[];
   pistes: PisteDepot[];
   albums: AlbumDepot[];
+  categoriesDepot: CategorieDepot[];
   /** Tous les chemins de fichiers du dépôt (pour détecter les collisions). */
   chemins: ReadonlySet<string>;
 }
@@ -144,10 +158,23 @@ export function analyserArbre(entrees: readonly EntreeArbre[]): AnalyseDepot {
     });
   }
   albums.sort((a, b) => a.fiche.chemin.localeCompare(b.fiche.chemin));
-  return {
-    categories: [...categories].sort((a, b) => a.localeCompare(b)),
-    pistes,
-    albums,
-    chemins,
-  };
+  const noms = [...categories].sort((a, b) => a.localeCompare(b));
+  const categoriesDepot: CategorieDepot[] = noms.map((dossier) => {
+    const racine = `${prefixe}${dossier}/`;
+    const contenu = [...fichiers.values()].filter((f) => f.chemin.startsWith(racine));
+    const fiche = fichiers.get(`${racine}categorie.json`);
+    return {
+      dossier,
+      ...(fiche !== undefined && { fiche }),
+      images: contenu.filter(
+        (f) =>
+          f.chemin.slice(racine.length).indexOf('/') < 0 &&
+          EXTENSIONS_IMAGE.includes(extension(f.chemin)),
+      ),
+      fichiers: contenu,
+      pistes: pistes.filter((p) => p.categorie === dossier),
+      albums: albums.filter((a) => a.categorie === dossier),
+    };
+  });
+  return { categories: noms, pistes, albums, categoriesDepot, chemins };
 }

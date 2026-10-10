@@ -471,3 +471,24 @@ describe("albums produits par la page d'administration", () => {
     expect(catalogue.albums).toEqual([]);
   });
 });
+
+describe('ordre des catégories', () => {
+  it('place d’abord les catégories qui ont un ordre, puis les autres par nom', async () => {
+    await mp3('alpha/a.mp3');
+    await mp3('beta/b.mp3');
+    await mp3('gamma/c.mp3');
+    await mp3('delta/d.mp3');
+    await json('gamma/categorie.json', { ordre: 1 });
+    await json('beta/categorie.json', { ordre: 2 });
+    const { catalogue, erreurs } = await generer();
+    expect(erreurs).toEqual([]);
+    expect(catalogue.categories.map((c) => c.slug)).toEqual(['gamma', 'beta', 'alpha', 'delta']);
+  });
+
+  it('refuse un ordre qui n’est pas un entier positif', async () => {
+    await mp3('alpha/a.mp3');
+    await json('alpha/categorie.json', { ordre: 0 });
+    const { erreurs } = await generer();
+    expect(erreurs.length).toBeGreaterThan(0);
+  });
+});

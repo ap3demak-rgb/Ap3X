@@ -426,3 +426,24 @@
     }
   }
 }
+
+@layer composants {
+  .admin-pastille {
+    flex: none;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    border: 1px solid var(--bordure);
+    border-radius: 50%;
+    background: var(--fond);
+  }
+
+  .admin-categories .admin-ligne {
+    flex-wrap: nowrap;
+  }
+
+  @media (max-width: 40rem) {
+    .admin-categories .admin-ligne {
+      flex-wrap: wrap;
+    }
+  }
+}

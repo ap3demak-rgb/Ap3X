@@ -34,6 +34,8 @@ export const FicheCategorieSchema = z
       .regex(/^#[0-9a-fA-F]{6}$/, 'Couleur attendue : #RRGGBB')
       .optional(),
     pochette: TexteSchema.optional(),
+    /** Position de la catégorie dans les listes (1 d'abord) ; sans valeur, après les autres, par nom. */
+    ordre: z.number().int().min(1).optional(),
   })
   .strict();
 export type FicheCategorie = z.infer<typeof FicheCategorieSchema>;

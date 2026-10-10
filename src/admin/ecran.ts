@@ -20,9 +20,12 @@ import {
   lireJeton,
   nettoyerJeton,
 } from './session';
+import type { CategorieDepot } from './depot';
 import type { LignePiste } from './liste';
 import type { LigneAlbum } from './liste-albums';
 import { construireEditionAlbum, construireNouvelAlbum } from './ui-album';
+import { construireCategorie } from './ui-categorie';
+import { construireCategories } from './ui-categories';
 import { construireAlbums } from './ui-albums';
 import { construireEdition } from './ui-edition';
 import { construireNouvelle } from './ui-nouvelle';
@@ -132,7 +135,7 @@ export function construireEcran(): HTMLElement {
   return racine;
 }
 
-type Section = 'tableau' | 'pistes' | 'nouvelle' | 'albums' | 'nouvelAlbum';
+type Section = 'tableau' | 'pistes' | 'nouvelle' | 'albums' | 'nouvelAlbum' | 'categories';
 
 const SECTIONS: { section: Section; libelle: CleI18n }[] = [
   { section: 'tableau', libelle: 'admin.nav.tableau' },
@@ -140,6 +143,7 @@ const SECTIONS: { section: Section; libelle: CleI18n }[] = [
   { section: 'nouvelle', libelle: 'admin.nav.nouvelle' },
   { section: 'albums', libelle: 'admin.nav.albums' },
   { section: 'nouvelAlbum', libelle: 'admin.nav.nouvel_album' },
+  { section: 'categories', libelle: 'admin.nav.categories' },
 ];
 
 function panneauSession(
@@ -162,6 +166,7 @@ function panneauSession(
     succes?: string,
     edition?: LignePiste,
     editionAlbum?: LigneAlbum,
+    vueCategorie?: 'nouvelle' | CategorieDepot,
   ): void => {
     for (const [nom, bouton] of boutons) {
       if (nom === section) bouton.setAttribute('aria-current', 'page');
@@ -198,6 +203,25 @@ function panneauSession(
         construireAlbums(espace, {
           modifier: (ligne) => afficher('albums', undefined, undefined, ligne),
           termine: (message) => afficher('albums', message),
+        }),
+      );
+    } else if (section === 'categories' && vueCategorie !== undefined) {
+      blocs.push(
+        construireCategorie(
+          espace,
+          vueCategorie === 'nouvelle' ? undefined : vueCategorie,
+          (message) => {
+            afficher('categories', message);
+          },
+        ),
+      );
+    } else if (section === 'categories') {
+      blocs.push(
+        construireCategories(espace, {
+          nouvelle: () => afficher('categories', undefined, undefined, undefined, 'nouvelle'),
+          modifier: (categorie) =>
+            afficher('categories', undefined, undefined, undefined, categorie),
+          termine: (message) => afficher('categories', message),
         }),
       );
     } else if (section === 'nouvelAlbum') {

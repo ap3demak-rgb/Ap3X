@@ -53,6 +53,28 @@ const FICHIERS: FichierSimule[] = [
   },
 ];
 
+/** Fiches et pochette de catégories, et une catégorie vide. */
+function fichiersCategories(): FichierSimule[] {
+  return [
+    {
+      chemin: 'public/musique/ambient/categorie.json',
+      sha: 'c-ambient',
+      contenu: JSON.stringify({ nom: 'Ambiance', couleur: '#ffcc00', ordre: 2 }),
+    },
+    { chemin: 'public/musique/ambient/cover.webp', sha: 'i-cat-ambient' },
+    {
+      chemin: 'public/musique/techno/categorie.json',
+      sha: 'c-techno',
+      contenu: JSON.stringify({ nom: 'Techno', description: 'Rythmes rapides', ordre: 1 }),
+    },
+    {
+      chemin: 'public/musique/vide/categorie.json',
+      sha: 'c-vide',
+      contenu: JSON.stringify({ nom: 'Vide' }),
+    },
+  ];
+}
+
 /** Fichiers supplémentaires : une 2e piste dans l'album Club, et un brouillon d'album incomplet. */
 function fichiersEtendus(): FichierSimule[] {
   return [
@@ -100,6 +122,8 @@ export interface DepotSimule {
 interface OptionsDepot {
   /** Ajoute une 2e piste à l'album Club et un brouillon d'album incomplet. */
   etendu?: boolean;
+  /** Ajoute des fiches de catégories (ordre, couleur) et une catégorie vide. */
+  categories?: boolean;
   /** Numéros (à partir de 1) des mises à jour de référence qui échouent par une coupure réseau. */
   echecsReference?: number[];
   /** Réponse de la mise à jour de la référence (422 simule une branche qui a avancé). */
@@ -112,12 +136,14 @@ export async function simulerDepot(page: Page, options: OptionsDepot = {}): Prom
   const blobs = new Map<string, Buffer>();
   let lecturesArbre = 0;
   let appelsReference = 0;
-  const fichiers: FichierSimule[] = options.etendu
-    ? [
-        ...FICHIERS.filter((f) => !fichiersEtendus().some((e) => e.chemin === f.chemin)),
-        ...fichiersEtendus(),
-      ]
-    : FICHIERS;
+  const supplements = [
+    ...(options.etendu === true ? fichiersEtendus() : []),
+    ...(options.categories === true ? fichiersCategories() : []),
+  ];
+  const fichiers: FichierSimule[] = [
+    ...FICHIERS.filter((f) => !supplements.some((e) => e.chemin === f.chemin)),
+    ...supplements,
+  ];
   let numeroBlob = 0;
   let arbreEnvoye: { path: string; sha: string | null }[] = [];
   let messageEnvoye = '';
