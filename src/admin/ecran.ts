@@ -3,6 +3,8 @@
 
 import { t, tv, type CleI18n } from '../i18n';
 import { annoncer } from '../ui/annonceur';
+import { element } from './dom';
+import { Espace } from './espace';
 import {
   ClientGitHub,
   ErreurGitHub,
@@ -10,6 +12,7 @@ import {
   type Deploiement,
   type Utilisateur,
 } from './github';
+import { messageErreur } from './messages';
 import {
   effacerJeton,
   enregistrerJeton,
@@ -17,33 +20,15 @@ import {
   lireJeton,
   nettoyerJeton,
 } from './session';
-
-/** Message traduit d'une erreur ; une erreur inattendue est affichée comme « autre » (et journalisée sans jeton). */
-export function messageErreur(erreur: unknown): string {
-  if (erreur instanceof ErreurGitHub) {
-    return t(`admin.erreur.${erreur.code}` satisfies CleI18n);
-  }
-  console.error(erreur);
-  return t('admin.erreur.autre');
-}
-
-function element<K extends keyof HTMLElementTagNameMap>(
-  nom: K,
-  classe?: string,
-  texte?: string,
-): HTMLElementTagNameMap[K] {
-  const noeud = document.createElement(nom);
-  if (classe !== undefined) noeud.className = classe;
-  if (texte !== undefined) noeud.textContent = texte;
-  return noeud;
-}
+import { construireNouvelle } from './ui-nouvelle';
+import { construirePistes } from './ui-pistes';
 
 /** Codes d'erreur qui prouvent que le jeton mémorisé ne servira plus. */
 const CODES_JETON_PERDU = ['jeton', 'droit', 'introuvable'];
 
 /**
- * Écran d'administration : connexion par jeton, puis état du compte et du dernier déploiement.
- * Le jeton n'est jamais affiché, ni écrit dans la console.
+ * Écran d'administration : connexion par jeton, puis sections (état du déploiement, liste des pistes,
+ * nouvelle piste). Le jeton n'est jamais affiché, ni écrit dans la console.
  */
 export function construireEcran(): HTMLElement {
   const racine = element('div', 'admin');
@@ -142,28 +127,87 @@ export function construireEcran(): HTMLElement {
   return racine;
 }
 
+type Section = 'tableau' | 'pistes' | 'nouvelle';
+
+const SECTIONS: { section: Section; libelle: CleI18n }[] = [
+  { section: 'tableau', libelle: 'admin.nav.tableau' },
+  { section: 'pistes', libelle: 'admin.nav.pistes' },
+  { section: 'nouvelle', libelle: 'admin.nav.nouvelle' },
+];
+
 function panneauSession(
   client: ClientGitHub,
   utilisateur: Utilisateur,
   deconnecter: () => void,
 ): HTMLElement {
+  const espace = new Espace(client);
   const panneau = element('div', 'admin-session');
   const statut = element('p', undefined, tv('admin.connecte', { nom: utilisateur.login }));
   const droit = element('p', 'carte-meta', t('admin.droit_ok'));
 
-  const titreDeploiement = element('h2', undefined, t('admin.deploiement'));
-  const etatDeploiement = element('p', 'admin-deploiement');
-  etatDeploiement.setAttribute('role', 'status');
+  const navigation = element('nav', 'admin-nav');
+  navigation.setAttribute('aria-label', t('admin.nav.label'));
+  const contenu = element('div', 'admin-contenu');
+  const boutons = new Map<Section, HTMLButtonElement>();
+
+  const afficher = (section: Section, succes?: string): void => {
+    for (const [nom, bouton] of boutons) {
+      if (nom === section) bouton.setAttribute('aria-current', 'page');
+      else bouton.removeAttribute('aria-current');
+    }
+    const blocs: HTMLElement[] = [];
+    if (succes !== undefined) {
+      const message = element('p', 'admin-succes', succes);
+      message.setAttribute('role', 'status');
+      blocs.push(message);
+    }
+    if (section === 'tableau') blocs.push(blocDeploiement(client));
+    else if (section === 'pistes') blocs.push(construirePistes(espace));
+    else {
+      blocs.push(
+        construireNouvelle(espace, (message) => {
+          afficher('nouvelle', message);
+        }),
+      );
+    }
+    contenu.replaceChildren(...blocs);
+  };
+
+  for (const { section, libelle } of SECTIONS) {
+    const bouton = element('button', 'bouton', t(libelle));
+    bouton.type = 'button';
+    bouton.addEventListener('click', () => afficher(section));
+    boutons.set(section, bouton);
+    navigation.append(bouton);
+  }
+
+  const sortie = element('button', 'bouton', t('admin.deconnexion'));
+  sortie.type = 'button';
+  sortie.addEventListener('click', () => {
+    deconnecter();
+    annoncer(t('admin.deconnexion'));
+  });
+
+  panneau.append(statut, droit, navigation, contenu, sortie);
+  afficher('tableau');
+  return panneau;
+}
+
+/** État du dernier déploiement du site, avec un bouton pour l'actualiser. */
+function blocDeploiement(client: ClientGitHub): HTMLElement {
+  const bloc = element('div', 'admin-bloc');
+  const titre = element('h2', undefined, t('admin.deploiement'));
+  const etat = element('p', 'admin-deploiement');
+  etat.setAttribute('role', 'status');
   const lien = element('a', undefined, t('admin.deploiement.voir'));
   lien.rel = 'noopener';
   lien.hidden = true;
-
   const actualiser = element('button', 'bouton', t('admin.actualiser'));
   actualiser.type = 'button';
 
   const afficherDeploiement = (deploiement: Deploiement | undefined): void => {
     if (deploiement === undefined) {
-      etatDeploiement.textContent = t('admin.deploiement.aucun');
+      etat.textContent = t('admin.deploiement.aucun');
       lien.hidden = true;
       return;
     }
@@ -176,33 +220,25 @@ function panneauSession(
       dateStyle: 'medium',
       timeStyle: 'short',
     }).format(new Date(deploiement.date));
-    etatDeploiement.textContent = `${t(cle[deploiement.etat])} · ${date} · ${deploiement.commit.slice(0, 7)}`;
+    etat.textContent = `${t(cle[deploiement.etat])} · ${date} · ${deploiement.commit.slice(0, 7)}`;
     lien.href = deploiement.url;
     lien.hidden = false;
   };
 
-  const chargerDeploiement = async (): Promise<void> => {
+  const charger = async (): Promise<void> => {
     actualiser.disabled = true;
     try {
       afficherDeploiement(await client.dernierDeploiement());
     } catch (erreur) {
-      etatDeploiement.textContent = messageErreur(erreur);
+      etat.textContent = messageErreur(erreur);
       lien.hidden = true;
     } finally {
       actualiser.disabled = false;
     }
   };
 
-  actualiser.addEventListener('click', () => void chargerDeploiement());
-
-  const sortie = element('button', 'bouton', t('admin.deconnexion'));
-  sortie.type = 'button';
-  sortie.addEventListener('click', () => {
-    deconnecter();
-    annoncer(t('admin.deconnexion'));
-  });
-
-  panneau.append(statut, droit, titreDeploiement, etatDeploiement, lien, actualiser, sortie);
-  void chargerDeploiement();
-  return panneau;
+  actualiser.addEventListener('click', () => void charger());
+  bloc.append(titre, etat, lien, actualiser);
+  void charger();
+  return bloc;
 }

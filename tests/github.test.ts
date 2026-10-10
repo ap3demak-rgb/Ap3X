@@ -210,7 +210,7 @@ describe('ClientGitHub : commit groupé', () => {
 
   it('envoie les fichiers en un seul commit, supprime sans blob et rapporte la progression', async () => {
     const { f, appels } = serveurGit();
-    const progres: [number, number][] = [];
+    const progres: [number, number, number, number][] = [];
     const sha = await new ClientGitHub({ jeton: 'x', fetch: f }).commit(
       'ajout: une piste',
       [
@@ -218,14 +218,14 @@ describe('ClientGitHub : commit groupé', () => {
         { chemin: 'public/musique/x/a.json', contenu: '{}' },
         { chemin: 'public/musique/x/vieux.json', supprimer: true },
       ],
-      (envoyes, total) => progres.push([envoyes, total]),
+      (p) => progres.push([p.fichiers, p.totalFichiers, p.octets, p.totalOctets]),
     );
     expect(sha).toBe('commit1');
     expect(progres).toEqual([
-      [0, 3],
-      [1, 3],
-      [2, 3],
-      [3, 3],
+      [0, 3, 0, 4],
+      [1, 3, 2, 4],
+      [2, 3, 4, 4],
+      [3, 3, 4, 4],
     ]);
     expect(appels.filter((a) => a.chemin.endsWith('/git/blobs'))).toHaveLength(2);
     const arbre = appels.find((a) => a.chemin.endsWith('/git/trees'))?.corps;
@@ -257,6 +257,34 @@ describe('ClientGitHub : commit groupé', () => {
   it('refuse un commit vide', async () => {
     const { f } = serveurGit();
     await expect(new ClientGitHub({ jeton: 'x', fetch: f }).commit('m', [])).rejects.toThrow();
+  });
+});
+
+describe('ClientGitHub : arbre du dépôt', () => {
+  it('liste tous les fichiers et signale une liste tronquée', async () => {
+    const { f } = fauxFetch({
+      [`GET ${DEPOT}/git/trees/main?recursive=1`]: {
+        json: {
+          truncated: true,
+          tree: [
+            { path: 'public', type: 'tree', sha: 't' },
+            { path: 'public/musique/techno/300.mp3', type: 'blob', sha: 'b', size: 5 },
+          ],
+        },
+      },
+      [`GET ${DEPOT}/git/blobs/b`]: { json: { content: versBase64(new Uint8Array([7, 8])) } },
+    });
+    const client = new ClientGitHub({ jeton: 'x', fetch: f });
+    const arbre = await client.arbre();
+    expect(arbre.tronque).toBe(true);
+    expect(arbre.entrees[1]).toEqual({
+      chemin: 'public/musique/techno/300.mp3',
+      type: 'blob',
+      sha: 'b',
+      taille: 5,
+    });
+    expect(arbre.entrees[0]?.taille).toBe(0);
+    expect(Array.from(await client.lireBlob('b'))).toEqual([7, 8]);
   });
 });
 

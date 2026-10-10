@@ -64,6 +64,27 @@ export interface Suppression {
 
 export type Changement = Ajout | Suppression;
 
+/** Avancement d'un envoi : fichiers et octets déjà transmis, sur le total. */
+export interface Progression {
+  fichiers: number;
+  totalFichiers: number;
+  octets: number;
+  totalOctets: number;
+}
+
+export interface EntreeArbre {
+  chemin: string;
+  type: 'blob' | 'tree' | 'commit';
+  sha: string;
+  taille: number;
+}
+
+export interface ArbreDepot {
+  entrees: EntreeArbre[];
+  /** GitHub a tronqué la liste : le dépôt est trop gros pour être listé en une fois. */
+  tronque: boolean;
+}
+
 export type EtatDeploiement = 'en_cours' | 'termine' | 'echec';
 
 export interface Deploiement {
@@ -272,7 +293,7 @@ export class ClientGitHub {
   async commit(
     message: string,
     changements: readonly Changement[],
-    progression?: (envoyes: number, total: number) => void,
+    progression?: (avancement: Progression) => void,
   ): Promise<string> {
     if (changements.length === 0) throw new Error('Aucun changement à publier');
     for (const c of changements) {
@@ -288,8 +309,15 @@ export class ClientGitHub {
     );
 
     const arbre: { path: string; mode: '100644'; type: 'blob'; sha: string | null }[] = [];
-    let envoyes = 0;
-    progression?.(0, changements.length);
+    const totalOctets = changements.reduce(
+      (somme, c) => somme + ('supprimer' in c ? 0 : enOctets(c.contenu).length),
+      0,
+    );
+    let fichiers = 0;
+    let octets = 0;
+    const signaler = (): void =>
+      progression?.({ fichiers, totalFichiers: changements.length, octets, totalOctets });
+    signaler();
     for (const c of changements) {
       if ('supprimer' in c) {
         arbre.push({ path: c.chemin, mode: '100644', type: 'blob', sha: null });
@@ -300,8 +328,9 @@ export class ClientGitHub {
         });
         arbre.push({ path: c.chemin, mode: '100644', type: 'blob', sha: blob.sha });
       }
-      envoyes += 1;
-      progression?.(envoyes, changements.length);
+      fichiers += 1;
+      if (!('supprimer' in c)) octets += enOctets(c.contenu).length;
+      signaler();
     }
 
     const nouvelArbre = await this.json<{ sha: string }>(`${this.racine}/git/trees`, {
@@ -317,6 +346,29 @@ export class ClientGitHub {
       body: JSON.stringify({ sha: nouveau.sha, force: false }),
     });
     return nouveau.sha;
+  }
+
+  /** Tous les fichiers du dépôt en un seul appel (arbre Git récursif de la branche). */
+  async arbre(): Promise<ArbreDepot> {
+    const donnees = await this.json<{
+      tree: { path: string; type: EntreeArbre['type']; sha: string; size?: number }[];
+      truncated: boolean;
+    }>(`${this.racine}/git/trees/${this.depot.branche}?recursive=1`);
+    return {
+      entrees: donnees.tree.map((e) => ({
+        chemin: e.path,
+        type: e.type,
+        sha: e.sha,
+        taille: e.size ?? 0,
+      })),
+      tronque: donnees.truncated,
+    };
+  }
+
+  /** Contenu d'un blob d'après son empreinte. */
+  async lireBlob(sha: string): Promise<Uint8Array> {
+    const blob = await this.json<{ content: string }>(`${this.racine}/git/blobs/${sha}`);
+    return depuisBase64(blob.content);
   }
 
   /** Dernière exécution du workflow de déploiement, ou `undefined` s'il n'y en a pas encore. */

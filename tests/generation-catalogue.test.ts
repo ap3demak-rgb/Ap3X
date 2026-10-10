@@ -9,6 +9,7 @@ import NodeID3 from 'node-id3';
 import sharp from 'sharp';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { construireCatalogue } from '../scripts/catalogue/construire';
+import { construireFiche, formulaireVide, nomFichierPiste } from '../src/admin/fiche';
 
 let racine: string;
 let musique: string;
@@ -327,5 +328,50 @@ describe('pochettes du catalogue', () => {
     expect(await readdir(pochettes)).toHaveLength(6);
     expect(await second.nettoyerPochettes()).toBe(3);
     expect(await readdir(pochettes)).toHaveLength(3);
+  });
+});
+
+describe("fiches produites par la page d'administration", () => {
+  it('une piste créée par le formulaire (MP3, fiche JSON, pochette WebP) entre dans le catalogue', async () => {
+    const formulaire = {
+      ...formulaireVide('ambient'),
+      titre: 'Étoile filante',
+      artiste: 'Zoé',
+      hashtags: '#Nuit claire',
+      date: '2025-03-14',
+      telechargement: true,
+    };
+    const base = nomFichierPiste(formulaire.titre);
+    await mp3(`ambient/${base}.mp3`);
+    await json(`ambient/${base}.json`, construireFiche(formulaire, `${base}.webp`));
+    const webp = await sharp({
+      create: { width: 600, height: 600, channels: 3, background: '#3366cc' },
+    })
+      .webp()
+      .toBuffer();
+    await mkdir(join(musique, 'ambient'), { recursive: true });
+    await writeFile(join(musique, 'ambient', `${base}.webp`), webp);
+
+    const { catalogue, erreurs } = await generer();
+    expect(erreurs).toEqual([]);
+    expect(catalogue.pistes[0]).toMatchObject({
+      id: 'ambient--etoile-filante',
+      titre: 'Étoile filante',
+      artiste: 'Zoé',
+      hashtags: ['nuit', 'claire'],
+      date: '2025-03-14',
+      telechargement: true,
+      categorie: 'ambient',
+    });
+    expect(catalogue.pistes[0]?.pochette).toBeDefined();
+  });
+
+  it('un brouillon est absent du catalogue', async () => {
+    const formulaire = { ...formulaireVide('ambient'), titre: 'Brouillon', visible: false };
+    await mp3('ambient/brouillon.mp3');
+    await json('ambient/brouillon.json', construireFiche(formulaire));
+    const { catalogue, erreurs } = await generer();
+    expect(erreurs).toEqual([]);
+    expect(catalogue.pistes).toEqual([]);
   });
 });
