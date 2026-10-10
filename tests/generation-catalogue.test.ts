@@ -9,7 +9,10 @@ import NodeID3 from 'node-id3';
 import sharp from 'sharp';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { construireCatalogue } from '../scripts/catalogue/construire';
+import { formulaireAlbumVide, planAlbum, type PisteAlbum } from '../src/admin/album';
+import { analyserArbre } from '../src/admin/depot';
 import { construireFiche, formulaireVide, nomFichierPiste } from '../src/admin/fiche';
+import type { Changement } from '../src/admin/github';
 
 let racine: string;
 let musique: string;
@@ -373,5 +376,98 @@ describe("fiches produites par la page d'administration", () => {
     const { catalogue, erreurs } = await generer();
     expect(erreurs).toEqual([]);
     expect(catalogue.pistes).toEqual([]);
+  });
+});
+
+describe("albums produits par la page d'administration", () => {
+  /** Applique les changements d'un commit au dossier de musique de test (écritures et suppressions). */
+  async function appliquer(changements: readonly Changement[]): Promise<void> {
+    for (const changement of changements) {
+      const chemin = join(musique, changement.chemin.replace(/^public\/musique\//, ''));
+      if ('supprimer' in changement) {
+        await rm(chemin, { force: true });
+      } else if ('contenu' in changement) {
+        await mkdir(dirname(chemin), { recursive: true });
+        await writeFile(chemin, changement.contenu);
+      }
+    }
+  }
+
+  const piste = (cle: string, titre: string, disque = 1): PisteAlbum => ({
+    cle,
+    titre,
+    artiste: '',
+    disque,
+    origine: { type: 'nouvelle', octets: new Uint8Array(donneesMp3()) },
+  });
+
+  it('un envoi en plusieurs commits ne casse le build à aucune étape, et l’album final est complet', async () => {
+    const depotVide = analyserArbre([]);
+    const plan = planAlbum({
+      formulaire: { ...formulaireAlbumVide('ambient'), titre: 'Nuit Claire', artiste: 'Zoé' },
+      pistes: [piste('a', 'Premier'), piste('b', 'Deuxième', 2), piste('c', 'Troisième')],
+      pochette: {
+        octets: new Uint8Array(
+          await sharp({ create: { width: 64, height: 64, channels: 3, background: '#336699' } })
+            .webp()
+            .toBuffer(),
+        ),
+        extension: '.webp',
+      },
+      depot: depotVide,
+      // Un MP3 de test pèse ~83 Ko : un seuil bas force un commit par piste.
+      seuilLot: 90_000,
+    });
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    expect(plan.lots.length).toBeGreaterThanOrEqual(5);
+
+    for (const [i, lot] of plan.lots.entries()) {
+      await appliquer(lot.changements);
+      const { catalogue, erreurs } = await generer();
+      // À chaque étape : aucune erreur de génération (un dossier de MP3 sans album.json en serait une).
+      expect(erreurs, `après le commit ${i + 1}/${plan.lots.length}`).toEqual([]);
+      if (i < plan.lots.length - 1) expect(catalogue.albums).toEqual([]);
+    }
+    const { catalogue } = await generer();
+    expect(catalogue.albums).toHaveLength(1);
+    const album = catalogue.albums[0];
+    expect(album).toMatchObject({
+      id: 'ambient--nuit-claire',
+      titre: 'Nuit Claire',
+      artiste: 'Zoé',
+      type: 'ep',
+      nombrePistes: 3,
+    });
+    expect(album?.pochette).toBeDefined();
+    // Ordre : disque 1 (Premier, Troisième) puis disque 2 (Deuxième).
+    const titres = (album?.pistes ?? []).map(
+      (id) => catalogue.pistes.find((p) => p.id === id)?.titre,
+    );
+    expect(titres).toEqual(['Premier', 'Troisième', 'Deuxième']);
+    expect(
+      (album?.pistes ?? []).map((id) => {
+        const p = catalogue.pistes.find((x) => x.id === id);
+        return [p?.numero, p?.disque];
+      }),
+    ).toEqual([
+      [1, 1],
+      [2, 1],
+      [1, 2],
+    ]);
+  });
+
+  it('un brouillon est absent du catalogue mais ne produit aucune erreur', async () => {
+    const plan = planAlbum({
+      formulaire: { ...formulaireAlbumVide('ambient'), titre: 'Brouillon', visible: false },
+      pistes: [piste('a', 'Un')],
+      depot: analyserArbre([]),
+    });
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    for (const lot of plan.lots) await appliquer(lot.changements);
+    const { catalogue, erreurs } = await generer();
+    expect(erreurs).toEqual([]);
+    expect(catalogue.albums).toEqual([]);
   });
 });

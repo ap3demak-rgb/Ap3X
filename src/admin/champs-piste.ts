@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-import { t, tv } from '../i18n';
+import { t } from '../i18n';
 import { construireApercu } from './apercu';
-import { champ, element, formaterTaille } from './dom';
+import { creerChampCategorie, creerChampPochette } from './champs-communs';
+import { champ, element } from './dom';
 import type { DepotAnalyse } from './espace';
 import { formulaireVide, lireHashtags, type FormulairePiste } from './fiche';
-import { preparerPochette, type PochettePreparee } from './image';
+import type { PochettePreparee } from './image';
 
-export const NOUVELLE_CATEGORIE = '\u0000nouvelle';
+export { NOUVELLE_CATEGORIE } from './champs-communs';
 
 export type ChampControle = 'titre' | 'categorie' | 'date';
 
@@ -40,7 +41,6 @@ export interface ChampsPiste {
 
 /** Champs communs à la création et à la modification d'une piste (fiche JSON et pochette). */
 export function creerChampsPiste(depot: DepotAnalyse, options: OptionsChamps = {}): ChampsPiste {
-  const langue = document.documentElement.lang;
   const valeurs = formulaireVide();
 
   const titre = element('input');
@@ -52,19 +52,7 @@ export function creerChampsPiste(depot: DepotAnalyse, options: OptionsChamps = {
   const description = element('textarea');
   description.rows = 4;
 
-  const categorie = element('select');
-  categorie.append(new Option('', ''));
-  for (const dossier of depot.categories) categorie.append(new Option(dossier, dossier));
-  categorie.append(new Option(t('admin.nouvelle.categorie_nouvelle'), NOUVELLE_CATEGORIE));
-  const categorieNom = element('input');
-  categorieNom.type = 'text';
-  const categorieNomChamp = champ(t('admin.nouvelle.categorie_nom'), categorieNom);
-  categorieNomChamp.hidden = true;
-  categorie.addEventListener('change', () => {
-    const nouvelle = categorie.value === NOUVELLE_CATEGORIE;
-    categorieNomChamp.hidden = !nouvelle;
-    if (nouvelle) categorieNom.focus();
-  });
+  const categorie = creerChampCategorie(depot);
 
   const hashtags = element('input');
   hashtags.type = 'text';
@@ -91,43 +79,7 @@ export function creerChampsPiste(depot: DepotAnalyse, options: OptionsChamps = {
     return etiquette;
   };
 
-  // --- Pochette ---------------------------------------------------------------------------------
-  const saisiePochette = element('input');
-  saisiePochette.type = 'file';
-  saisiePochette.accept = 'image/*';
-  const imageApercu = element('img', 'admin-apercu');
-  imageApercu.alt = '';
-  imageApercu.hidden = true;
-  const infoPochette = element('p', 'carte-meta');
-  infoPochette.setAttribute('role', 'status');
-  let preparee: PochettePreparee | undefined;
-  let adresse: string | undefined;
-
-  saisiePochette.addEventListener('change', () => {
-    const fichier = saisiePochette.files?.[0];
-    preparee = undefined;
-    imageApercu.hidden = true;
-    infoPochette.textContent = '';
-    if (adresse !== undefined) URL.revokeObjectURL(adresse);
-    adresse = undefined;
-    if (fichier === undefined) return;
-    preparerPochette(fichier)
-      .then((prete) => {
-        preparee = prete;
-        adresse = URL.createObjectURL(prete.blob);
-        imageApercu.src = adresse;
-        imageApercu.hidden = false;
-        infoPochette.textContent = tv('admin.nouvelle.pochette_prete', {
-          largeur: prete.largeur,
-          hauteur: prete.hauteur,
-          taille: formaterTaille(prete.blob.size, langue),
-        });
-      })
-      .catch(() => {
-        saisiePochette.value = '';
-        infoPochette.textContent = t('admin.nouvelle.err_image');
-      });
-  });
+  const pochette = creerChampPochette();
 
   // --- Aperçu de la page publique ---------------------------------------------------------------
   const boutonApercu = element('button', 'bouton', t('admin.apercu.bouton'));
@@ -136,15 +88,14 @@ export function creerChampsPiste(depot: DepotAnalyse, options: OptionsChamps = {
   const zoneApercu = element('div');
   zoneApercu.hidden = true;
   const actualiserApercu = (): void => {
-    const donnees = lire();
-    const pochette = adresse ?? options.pochetteActuelle?.();
+    const adresse = pochette.adresse() ?? options.pochetteActuelle?.();
     const audio = options.audio?.();
     const base = options.base?.();
     zoneApercu.replaceChildren(
       construireApercu({
-        formulaire: donnees,
+        formulaire: lire(),
         categories: depot.categories,
-        ...(pochette !== undefined && { pochette }),
+        ...(adresse !== undefined && { pochette: adresse }),
         ...(audio !== undefined && { audio }),
         ...(base !== undefined && { base }),
       }),
@@ -162,7 +113,7 @@ export function creerChampsPiste(depot: DepotAnalyse, options: OptionsChamps = {
       titre: titre.value,
       artiste: artiste.value,
       description: description.value,
-      categorie: categorie.value === NOUVELLE_CATEGORIE ? categorieNom.value : categorie.value,
+      categorie: categorie.lire(),
       hashtags: hashtags.value,
       date: date.value,
       visible: publier.checked,
@@ -176,13 +127,7 @@ export function creerChampsPiste(depot: DepotAnalyse, options: OptionsChamps = {
     titre.value = v.titre;
     artiste.value = v.artiste;
     description.value = v.description;
-    if (depot.categories.includes(v.categorie) || v.categorie === '') {
-      categorie.value = v.categorie;
-    } else {
-      categorie.value = NOUVELLE_CATEGORIE;
-      categorieNom.value = v.categorie;
-    }
-    categorieNomChamp.hidden = categorie.value !== NOUVELLE_CATEGORIE;
+    categorie.ecrire(v.categorie);
     hashtags.value = lireHashtags(v.hashtags)
       .map((h) => `#${h}`)
       .join(' ');
@@ -198,24 +143,21 @@ export function creerChampsPiste(depot: DepotAnalyse, options: OptionsChamps = {
       champ(t('admin.nouvelle.champ_titre'), titre),
       champ(t('admin.nouvelle.artiste'), artiste),
       champ(t('admin.nouvelle.description'), description),
-      champ(t('admin.nouvelle.categorie'), categorie),
-      categorieNomChamp,
+      ...categorie.elements,
       champ(t('admin.nouvelle.hashtags'), hashtags),
       champ(t('admin.nouvelle.date'), date),
       champ(t('admin.nouvelle.licence'), licence),
       champ(t('admin.nouvelle.copyright'), copyright),
       caseEtiquette(t('admin.nouvelle.telechargement'), telechargement),
       caseEtiquette(t('admin.nouvelle.publier'), publier),
-      champ(t('admin.nouvelle.pochette'), saisiePochette),
-      imageApercu,
-      infoPochette,
+      ...pochette.elements,
       boutonApercu,
       zoneApercu,
     ],
-    saisies: { titre, artiste, description, date, categorie },
-    controles: { titre, categorie, date },
+    saisies: { titre, artiste, description, date, categorie: categorie.select },
+    controles: { titre, categorie: categorie.select, date },
     lire,
     ecrire,
-    pochette: () => preparee,
+    pochette: pochette.pochette,
   };
 }

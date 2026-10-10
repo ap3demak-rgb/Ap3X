@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-import { analyserArbre, type AnalyseDepot, type PisteDepot } from './depot';
+import { analyserArbre, type AlbumDepot, type AnalyseDepot, type PisteDepot } from './depot';
 import { lireFicheBrute, type FicheBrute } from './edition';
 import type { ClientGitHub } from './github';
 import { lireResumeFiche, type ResumeFiche } from './liste';
@@ -41,14 +41,31 @@ export class Espace {
     this.promesse = undefined;
   }
 
+  /** Texte d'un fichier d'après son empreinte (téléchargé une seule fois). */
+  private async texteBlob(sha: string): Promise<string> {
+    const connu = this.textes.get(sha);
+    if (connu !== undefined) return connu;
+    const contenu = new TextDecoder().decode(await this.client.lireBlob(sha));
+    this.textes.set(sha, contenu);
+    return contenu;
+  }
+
   /** Texte de la fiche d'une piste, ou `undefined` si elle n'en a pas. */
   private async texteFiche(piste: PisteDepot): Promise<string | undefined> {
-    if (piste.fiche === undefined) return undefined;
-    const connu = this.textes.get(piste.fiche.sha);
-    if (connu !== undefined) return connu;
-    const contenu = new TextDecoder().decode(await this.client.lireBlob(piste.fiche.sha));
-    this.textes.set(piste.fiche.sha, contenu);
-    return contenu;
+    return piste.fiche === undefined ? undefined : this.texteBlob(piste.fiche.sha);
+  }
+
+  /** `album.json` d'un album ; lève `ErreurFicheIllisible` s'il n'est pas lisible. */
+  async ficheAlbum(album: AlbumDepot): Promise<FicheBrute> {
+    return lireFicheBrute(await this.texteBlob(album.fiche.sha));
+  }
+
+  /** `album.json` de plusieurs albums (clé : chemin du fichier) ; un fichier illisible donne `undefined`. */
+  async fichesAlbumsDe(
+    albums: readonly AlbumDepot[],
+  ): Promise<Map<string, FicheBrute | undefined>> {
+    const resultats = await this.enParallele(albums, (album) => this.ficheAlbum(album));
+    return new Map(albums.map((album, i) => [album.fiche.chemin, resultats[i]]));
   }
 
   /** Résumé de la fiche d'une piste (liste d'administration). */

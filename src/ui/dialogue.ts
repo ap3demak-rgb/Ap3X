@@ -77,6 +77,61 @@ export async function confirmer(message: string, titre: string): Promise<boolean
   return confirme;
 }
 
+export interface OptionDialogue {
+  valeur: string;
+  libelle: string;
+}
+
+/**
+ * Demande de choisir entre plusieurs options (boutons radio), puis de confirmer. Renvoie la valeur choisie,
+ * ou `undefined` si l'utilisateur annule ou appuie sur Échap. La première option est cochée au départ.
+ */
+export async function choisirOption(
+  titre: string,
+  message: string,
+  question: string,
+  options: readonly OptionDialogue[],
+  libelleConfirmer: string,
+): Promise<string | undefined> {
+  const { corps, fermer, fermee } = ouvrir(titre);
+  let choix: string | undefined;
+  const texte = document.createElement('p');
+  texte.textContent = message;
+  const groupe = document.createElement('fieldset');
+  groupe.className = 'dialogue-choix';
+  const legende = document.createElement('legend');
+  legende.textContent = question;
+  groupe.append(legende);
+  const nom = `dialogue-choix-${(compteur += 1)}`;
+  options.forEach((option, i) => {
+    const etiquette = document.createElement('label');
+    etiquette.className = 'champ-case';
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = nom;
+    radio.value = option.valeur;
+    radio.checked = i === 0;
+    const libelle = document.createElement('span');
+    libelle.textContent = option.libelle;
+    etiquette.append(radio, libelle);
+    groupe.append(etiquette);
+  });
+  const actions = document.createElement('div');
+  actions.className = 'dialogue-actions';
+  const annuler = bouton(t('dialogue.annuler'));
+  const valider = bouton(libelleConfirmer, 'bouton bouton-principal');
+  annuler.addEventListener('click', fermer);
+  valider.addEventListener('click', () => {
+    choix = groupe.querySelector<HTMLInputElement>(`input[name="${nom}"]:checked`)?.value;
+    fermer();
+  });
+  actions.append(annuler, valider);
+  corps.append(texte, groupe, actions);
+  annuler.focus();
+  await fermee;
+  return choix;
+}
+
 /**
  * Boîte « Ajouter à une playlist » : choisir une playlist existante ou en créer une nouvelle qui
  * reçoit les pistes. Annonce le résultat aux lecteurs d'écran.

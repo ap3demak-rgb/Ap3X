@@ -10,7 +10,13 @@ const encodeur = new TextEncoder();
 const base64 = (texte: string): string => Buffer.from(encodeur.encode(texte)).toString('base64');
 
 /** Fichiers du dépôt simulé : chemin, empreinte, contenu texte éventuel. */
-const FICHIERS: { chemin: string; sha: string; contenu?: string }[] = [
+interface FichierSimule {
+  chemin: string;
+  sha: string;
+  contenu?: string;
+}
+
+const FICHIERS: FichierSimule[] = [
   { chemin: 'public/musique/ambient/brume.mp3', sha: 'm-brume' },
   { chemin: 'public/musique/ambient/brume.webp', sha: 'i-brume' },
   {
@@ -34,7 +40,50 @@ const FICHIERS: { chemin: string; sha: string; contenu?: string }[] = [
     }),
   },
   { chemin: 'public/musique/techno/club/01-intro.mp3', sha: 'm-intro' },
+  { chemin: 'public/musique/techno/club/cover.webp', sha: 'i-club' },
+  {
+    chemin: 'public/musique/techno/club/album.json',
+    sha: 'a-club',
+    contenu: JSON.stringify({
+      titre: 'Club',
+      artiste: 'AP3X Records',
+      date: '2025-06-01',
+      pistes: ['01-intro.mp3'],
+    }),
+  },
 ];
+
+/** Fichiers supplémentaires : une 2e piste dans l'album Club, et un brouillon d'album incomplet. */
+function fichiersEtendus(): FichierSimule[] {
+  return [
+    { chemin: 'public/musique/techno/club/02-outro.mp3', sha: 'm-outro' },
+    {
+      chemin: 'public/musique/techno/club/02-outro.json',
+      sha: 'f-outro',
+      contenu: JSON.stringify({ titre: 'Outro', artiste: 'Invité' }),
+    },
+    {
+      chemin: 'public/musique/techno/club/album.json',
+      sha: 'a-club2',
+      contenu: JSON.stringify({
+        titre: 'Club',
+        artiste: 'AP3X Records',
+        date: '2025-06-01',
+        pistes: ['01-intro.mp3', '02-outro.mp3'],
+      }),
+    },
+    {
+      chemin: 'public/musique/ambient/Nuit/album.json',
+      sha: 'a-nuit',
+      contenu: JSON.stringify({
+        titre: 'Nuit',
+        visible: false,
+        pistes: ['lune.mp3', 'aube.mp3'],
+      }),
+    },
+    { chemin: 'public/musique/ambient/Nuit/lune.mp3', sha: 'm-lune' },
+  ];
+}
 
 export interface CommitRecu {
   message: string;
@@ -49,6 +98,10 @@ export interface DepotSimule {
 }
 
 interface OptionsDepot {
+  /** Ajoute une 2e piste à l'album Club et un brouillon d'album incomplet. */
+  etendu?: boolean;
+  /** Numéros (à partir de 1) des mises à jour de référence qui échouent par une coupure réseau. */
+  echecsReference?: number[];
   /** Réponse de la mise à jour de la référence (422 simule une branche qui a avancé). */
   statutReference?: number;
 }
@@ -58,6 +111,13 @@ export async function simulerDepot(page: Page, options: OptionsDepot = {}): Prom
   const commits: CommitRecu[] = [];
   const blobs = new Map<string, Buffer>();
   let lecturesArbre = 0;
+  let appelsReference = 0;
+  const fichiers: FichierSimule[] = options.etendu
+    ? [
+        ...FICHIERS.filter((f) => !fichiersEtendus().some((e) => e.chemin === f.chemin)),
+        ...fichiersEtendus(),
+      ]
+    : FICHIERS;
   let numeroBlob = 0;
   let arbreEnvoye: { path: string; sha: string | null }[] = [];
   let messageEnvoye = '';
@@ -90,12 +150,12 @@ export async function simulerDepot(page: Page, options: OptionsDepot = {}): Prom
       lecturesArbre += 1;
       return json({
         truncated: false,
-        tree: FICHIERS.map((f) => ({ path: f.chemin, type: 'blob', sha: f.sha, size: 10 })),
+        tree: fichiers.map((f) => ({ path: f.chemin, type: 'blob', sha: f.sha, size: 10 })),
       });
     }
     const lectureBlob = /\/git\/blobs\/(.+)$/.exec(url.pathname);
     if (requete.method() === 'GET' && lectureBlob !== null) {
-      const fichier = FICHIERS.find((f) => f.sha === lectureBlob[1]);
+      const fichier = fichiers.find((f) => f.sha === lectureBlob[1]);
       return json({ content: base64(fichier?.contenu ?? '') });
     }
     if (cle === `GET ${racine}/git/ref/heads/main`) return json({ object: { sha: 'tete' } });
@@ -116,6 +176,11 @@ export async function simulerDepot(page: Page, options: OptionsDepot = {}): Prom
       return json({ sha: 'commit1' });
     }
     if (cle === `PATCH ${racine}/git/refs/heads/main`) {
+      appelsReference += 1;
+      if (options.echecsReference?.includes(appelsReference) === true) {
+        await route.abort('connectionfailed');
+        return;
+      }
       const statut = options.statutReference ?? 200;
       if (statut === 200) {
         commits.push({

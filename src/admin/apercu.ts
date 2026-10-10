@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import { t } from '../i18n';
+import { formaterDuree } from '../i18n/format';
 import { element } from './dom';
 import { identifiantPisteDepot } from './depot';
 import { lireHashtags, nomFichierPiste, type FormulairePiste } from './fiche';
@@ -75,5 +76,78 @@ export function construireApercu(donnees: DonneesApercu): HTMLElement {
   const base = donnees.base ?? nomFichierPiste(formulaire.titre);
   const identifiant = identifiantPisteDepot({ categorie, base });
   racine.append(element('p', 'carte-meta', `${t('admin.apercu.identifiant')} : ${identifiant}`));
+  return racine;
+}
+
+export interface PisteApercuAlbum {
+  titre: string;
+  artiste: string;
+  disque: number;
+  duree?: number;
+}
+
+export interface DonneesApercuAlbum {
+  titre: string;
+  artiste: string;
+  /** Type affiché (choisi, ou déduit du nombre de pistes). */
+  type: string;
+  date: string;
+  description: string;
+  hashtags: string;
+  categorie: string;
+  licence: string;
+  visible: boolean;
+  pistes: readonly PisteApercuAlbum[];
+  pochette?: string;
+}
+
+/** Aperçu de la page publique d'un album : pochette, informations et liste numérotée des pistes. */
+export function construireApercuAlbum(donnees: DonneesApercuAlbum): HTMLElement {
+  const racine = element('article', 'admin-apercu-page');
+  racine.append(element('p', 'carte-meta', t('admin.apercu.note')));
+  if (donnees.pochette !== undefined) {
+    const image = element('img', 'admin-apercu');
+    image.src = donnees.pochette;
+    image.alt = '';
+    racine.append(image);
+  }
+  racine.append(element('h3', undefined, donnees.titre.trim() || t('admin.apercu.sans_titre')));
+  if (!donnees.visible) {
+    racine.append(element('p', 'admin-brouillon', t('admin.liste.brouillon')));
+  }
+  const lignes: [string, string][] = [
+    [t('admin.album.type'), donnees.type],
+    [t('admin.album.artiste'), donnees.artiste.trim()],
+    [t('admin.nouvelle.categorie'), donnees.categorie.trim()],
+    [t('admin.nouvelle.date'), donnees.date.trim()],
+    [t('admin.nouvelle.licence'), donnees.licence.trim()],
+  ];
+  const meta = element('dl', 'meta');
+  for (const [libelle, valeur] of lignes) {
+    if (valeur === '') continue;
+    meta.append(element('dt', undefined, libelle), element('dd', undefined, valeur));
+  }
+  racine.append(meta);
+  const hashtags = lireHashtags(donnees.hashtags);
+  if (hashtags.length > 0) {
+    racine.append(element('p', 'carte-meta', hashtags.map((h) => `#${h}`).join(' ')));
+  }
+  if (donnees.description.trim() !== '') {
+    racine.append(element('p', undefined, donnees.description.trim()));
+  }
+  racine.append(element('h4', undefined, t('admin.album.pistes')));
+  const liste = element('ol', 'admin-apercu-pistes');
+  const numeros = new Map<number, number>();
+  for (const piste of donnees.pistes) {
+    const numero = (numeros.get(piste.disque) ?? 0) + 1;
+    numeros.set(piste.disque, numero);
+    const prefixe = donnees.pistes.some((p) => p.disque !== 1)
+      ? `${piste.disque}.${numero}`
+      : `${numero}.`;
+    const artiste = piste.artiste.trim() !== '' ? ` – ${piste.artiste.trim()}` : '';
+    const duree = piste.duree === undefined ? '' : ` (${formaterDuree(piste.duree)})`;
+    liste.append(element('li', undefined, `${prefixe} ${piste.titre.trim()}${artiste}${duree}`));
+  }
+  racine.append(liste);
   return racine;
 }

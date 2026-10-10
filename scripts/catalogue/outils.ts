@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-import type { TypeAlbum } from '../../src/catalogue/schemas.ts';
 import { normaliserHashtag } from '../../src/catalogue/texte.ts';
 
 export {
+  deduireTypeAlbum,
   normaliserDate,
   normaliserHashtag,
   slugifier,
@@ -26,13 +26,6 @@ export function fusionnerHashtags(...listes: string[][]): string[] {
     }
   }
   return [...vus];
-}
-
-/** 1 piste = single, 2 à 6 = EP, 7 ou plus = LP. */
-export function deduireTypeAlbum(nombrePistes: number): TypeAlbum {
-  if (nombrePistes <= 1) return 'single';
-  if (nombrePistes <= 6) return 'ep';
-  return 'lp';
 }
 
 /** Chemin relatif à public/, encodé segment par segment pour être utilisable dans une URL. */

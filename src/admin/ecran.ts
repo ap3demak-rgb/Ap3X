@@ -21,6 +21,9 @@ import {
   nettoyerJeton,
 } from './session';
 import type { LignePiste } from './liste';
+import type { LigneAlbum } from './liste-albums';
+import { construireEditionAlbum, construireNouvelAlbum } from './ui-album';
+import { construireAlbums } from './ui-albums';
 import { construireEdition } from './ui-edition';
 import { construireNouvelle } from './ui-nouvelle';
 import { construirePistes } from './ui-pistes';
@@ -129,12 +132,14 @@ export function construireEcran(): HTMLElement {
   return racine;
 }
 
-type Section = 'tableau' | 'pistes' | 'nouvelle';
+type Section = 'tableau' | 'pistes' | 'nouvelle' | 'albums' | 'nouvelAlbum';
 
 const SECTIONS: { section: Section; libelle: CleI18n }[] = [
   { section: 'tableau', libelle: 'admin.nav.tableau' },
   { section: 'pistes', libelle: 'admin.nav.pistes' },
   { section: 'nouvelle', libelle: 'admin.nav.nouvelle' },
+  { section: 'albums', libelle: 'admin.nav.albums' },
+  { section: 'nouvelAlbum', libelle: 'admin.nav.nouvel_album' },
 ];
 
 function panneauSession(
@@ -152,7 +157,12 @@ function panneauSession(
   const contenu = element('div', 'admin-contenu');
   const boutons = new Map<Section, HTMLButtonElement>();
 
-  const afficher = (section: Section, succes?: string, edition?: LignePiste): void => {
+  const afficher = (
+    section: Section,
+    succes?: string,
+    edition?: LignePiste,
+    editionAlbum?: LigneAlbum,
+  ): void => {
     for (const [nom, bouton] of boutons) {
       if (nom === section) bouton.setAttribute('aria-current', 'page');
       else bouton.removeAttribute('aria-current');
@@ -175,6 +185,25 @@ function panneauSession(
         construirePistes(espace, {
           modifier: (ligne) => afficher('pistes', undefined, ligne),
           termine: (message) => afficher('pistes', message),
+        }),
+      );
+    } else if (section === 'albums' && editionAlbum !== undefined) {
+      blocs.push(
+        construireEditionAlbum(espace, editionAlbum.album, (message) => {
+          afficher('albums', message);
+        }),
+      );
+    } else if (section === 'albums') {
+      blocs.push(
+        construireAlbums(espace, {
+          modifier: (ligne) => afficher('albums', undefined, undefined, ligne),
+          termine: (message) => afficher('albums', message),
+        }),
+      );
+    } else if (section === 'nouvelAlbum') {
+      blocs.push(
+        construireNouvelAlbum(espace, (message) => {
+          afficher('nouvelAlbum', message);
         }),
       );
     } else {

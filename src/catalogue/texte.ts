@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
+import type { TYPES_ALBUM } from './types-album';
+
+type TypeAlbum = (typeof TYPES_ALBUM)[number];
+
 /** Fonctions de texte partagées entre le générateur du catalogue (Node) et la page d'administration (navigateur). */
 
 /** Transforme un nom (accents, espaces, majuscules) en identifiant stable pour une URL. */
@@ -32,4 +36,11 @@ export function normaliserDate(brut: string | number | undefined): string | unde
   if (annee === undefined) return undefined;
   if (mois === undefined) return annee;
   return jour === undefined ? `${annee}-${mois}` : `${annee}-${mois}-${jour}`;
+}
+
+/** 1 piste = single, 2 à 6 = EP, 7 ou plus = LP. */
+export function deduireTypeAlbum(nombrePistes: number): TypeAlbum {
+  if (nombrePistes <= 1) return 'single';
+  if (nombrePistes <= 6) return 'ep';
+  return 'lp';
 }

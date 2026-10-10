@@ -4,12 +4,15 @@
 import { t, tv } from '../i18n';
 import { element } from './dom';
 import type { Progression } from './github';
+import type { AvancementLots } from './lots';
 
 export interface BarreProgression {
   /** Barre et texte d'état, à insérer dans la page. */
   element: HTMLElement;
   demarrer(): void;
   mettreAJour(avancement: Progression): void;
+  /** Avancement d'un envoi en plusieurs commits. */
+  mettreAJourLots(avancement: AvancementLots): void;
   /** Cache la barre et affiche `texte` (ou rien) dans la zone d'état. */
   terminer(texte?: string): void;
 }
@@ -40,6 +43,21 @@ export function creerProgression(): BarreProgression {
           : Math.round((avancement.octets / avancement.totalOctets) * 100);
       barre.value = pourcent;
       etat.textContent = tv('admin.nouvelle.envoi_pourcent', { n: pourcent });
+    },
+    mettreAJourLots(avancement) {
+      const pourcent =
+        avancement.totalOctets === 0
+          ? Math.round((avancement.lot / Math.max(1, avancement.totalLots)) * 100)
+          : Math.round((avancement.octets / avancement.totalOctets) * 100);
+      barre.value = pourcent;
+      etat.textContent =
+        avancement.totalLots > 1
+          ? tv('admin.album.envoi_lots', {
+              n: pourcent,
+              i: avancement.lot,
+              total: avancement.totalLots,
+            })
+          : tv('admin.nouvelle.envoi_pourcent', { n: pourcent });
     },
     terminer(texte = '') {
       barre.hidden = true;

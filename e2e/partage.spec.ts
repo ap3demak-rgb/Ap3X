@@ -195,7 +195,7 @@ test.describe('téléchargements', () => {
     expect(licence).toContain('© 2024 AP3X Records');
     expect(licence).toContain('License: CC BY-NC-ND 4.0');
     expect(licence).toContain('Catalogue reference: AP3X-001');
-    await expect(page.getByText('Album downloaded.')).toBeVisible();
+    await expect(page.locator('.carte-meta', { hasText: 'Album downloaded.' })).toBeVisible();
     await expect(page.getByRole('button', { name: /Download album/ })).toBeEnabled();
   });
 

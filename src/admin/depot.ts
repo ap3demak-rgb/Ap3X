@@ -27,10 +27,25 @@ export interface PisteDepot {
   image?: FichierDepot;
 }
 
+/** Album tel qu'il existe dans le dépôt : un sous-dossier de catégorie qui contient `album.json`. */
+export interface AlbumDepot {
+  /** Nom du dossier de la catégorie. */
+  categorie: string;
+  /** Nom du dossier de l'album. */
+  dossier: string;
+  fiche: FichierDepot;
+  /** Images du dossier (pochette de l'album, pochettes de pistes). */
+  images: FichierDepot[];
+  /** Tous les fichiers du dossier, `album.json` compris. */
+  fichiers: FichierDepot[];
+  pistes: PisteDepot[];
+}
+
 export interface AnalyseDepot {
   /** Dossiers de catégories, dans l'ordre alphabétique. */
   categories: string[];
   pistes: PisteDepot[];
+  albums: AlbumDepot[];
   /** Tous les chemins de fichiers du dépôt (pour détecter les collisions). */
   chemins: ReadonlySet<string>;
 }
@@ -55,6 +70,11 @@ export function identifiantPisteDepot(
   ]
     .filter((segment) => segment !== '')
     .join('--');
+}
+
+/** Identifiant public d'un album, calculé comme le fait le générateur du catalogue. */
+export function identifiantAlbumDepot(album: Pick<AlbumDepot, 'categorie' | 'dossier'>): string {
+  return [slugifier(album.categorie), slugifier(album.dossier)].filter((s) => s !== '').join('--');
 }
 
 /** Extrait de l'arbre du dépôt les catégories et les pistes de `public/musique/`. */
@@ -106,9 +126,28 @@ export function analyserArbre(entrees: readonly EntreeArbre[]): AnalyseDepot {
     pistes.push(piste);
   }
   pistes.sort((a, b) => a.mp3.chemin.localeCompare(b.mp3.chemin));
+
+  const albums: AlbumDepot[] = [];
+  for (const fichier of fichiers.values()) {
+    const segments = fichier.chemin.slice(prefixe.length).split('/');
+    if (segments.length !== 3 || segments[2] !== 'album.json') continue;
+    const [categorie = '', dossier = ''] = segments;
+    const racineAlbum = `${prefixe}${categorie}/${dossier}/`;
+    const contenu = [...fichiers.values()].filter((f) => f.chemin.startsWith(racineAlbum));
+    albums.push({
+      categorie,
+      dossier,
+      fiche: fichier,
+      images: contenu.filter((f) => EXTENSIONS_IMAGE.includes(extension(f.chemin))),
+      fichiers: contenu,
+      pistes: pistes.filter((p) => p.categorie === categorie && p.album === dossier),
+    });
+  }
+  albums.sort((a, b) => a.fiche.chemin.localeCompare(b.fiche.chemin));
   return {
     categories: [...categories].sort((a, b) => a.localeCompare(b)),
     pistes,
+    albums,
     chemins,
   };
 }
