@@ -4,6 +4,7 @@
 @layer composants {
   /* Champs de saisie */
   input[type='text'],
+  input[type='password'],
   input[type='search'],
   input[type='file'] {
     box-sizing: border-box;
@@ -189,6 +190,41 @@
   }
 
   .pagination p {
+    margin: 0;
+  }
+}
+
+@layer composants {
+  /* Page d'administration */
+  .admin-connexion,
+  .admin-session {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    max-width: 36rem;
+  }
+
+  .admin-connexion .champ {
+    align-self: stretch;
+  }
+
+  .champ-case {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    color: var(--texte-secondaire);
+  }
+
+  .champ-case input {
+    width: 1.5rem;
+    height: 1.5rem;
+    accent-color: var(--accent);
+  }
+
+  .admin-connexion .erreur-champ,
+  .admin-session p {
     margin: 0;
   }
 }

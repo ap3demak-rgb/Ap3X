@@ -12,6 +12,7 @@ import { demarrerLecteur, reconstruireBarre } from './lecteur';
 import { enregistrerServiceWorker } from './pwa';
 import { demarrerRendu3d } from './rendu3d';
 import { pageAccueil } from './pages/accueil';
+import { pageAdmin, retirerNonIndexee } from './pages/admin';
 import { pageAlbum } from './pages/album';
 import { pageAlbums } from './pages/albums';
 import { pageArtiste } from './pages/artiste';
@@ -36,6 +37,8 @@ function page(route: Route, demarrerPiste: boolean): HTMLElement {
   switch (route.nom) {
     case 'licences':
       return pageLicences();
+    case 'admin':
+      return pageAdmin();
     case 'albums':
       return pageAlbums();
     case 'album':
@@ -73,6 +76,7 @@ function afficher(conteneur: HTMLElement, origine: Origine): void {
   // qui porte un instant (?t=…). Parcourir le site ou changer de langue ne lance jamais la lecture.
   const demarrerPiste =
     origine === 'initiale' || (navigation && instantDeLHash(window.location.hash) !== undefined);
+  if (routeCourante().nom !== 'admin') retirerNonIndexee();
   const principal = document.createElement('main');
   principal.tabIndex = -1;
   principal.append(page(routeCourante(), demarrerPiste));

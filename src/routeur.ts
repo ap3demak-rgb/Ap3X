@@ -4,6 +4,7 @@
 export type Route =
   | { nom: 'accueil' }
   | { nom: 'licences' }
+  | { nom: 'admin' }
   | { nom: 'albums' }
   | { nom: 'categories' }
   | { nom: 'playlists' }
@@ -25,7 +26,7 @@ const ROUTES_AVEC_ID = [
   'playlist',
   'recherche',
 ] as const;
-const ROUTES_SIMPLES = ['licences', 'albums', 'categories', 'playlists'] as const;
+const ROUTES_SIMPLES = ['licences', 'admin', 'albums', 'categories', 'playlists'] as const;
 
 /** Sépare le chemin d'un hash de ses paramètres : `#/piste/a?t=90` donne `#/piste/a` et `t=90`. */
 function separer(hash: string): { chemin: string; parametres: URLSearchParams } {
