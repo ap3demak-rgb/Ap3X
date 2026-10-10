@@ -20,6 +20,8 @@ import {
   lireJeton,
   nettoyerJeton,
 } from './session';
+import type { LignePiste } from './liste';
+import { construireEdition } from './ui-edition';
 import { construireNouvelle } from './ui-nouvelle';
 import { construirePistes } from './ui-pistes';
 
@@ -150,7 +152,7 @@ function panneauSession(
   const contenu = element('div', 'admin-contenu');
   const boutons = new Map<Section, HTMLButtonElement>();
 
-  const afficher = (section: Section, succes?: string): void => {
+  const afficher = (section: Section, succes?: string, edition?: LignePiste): void => {
     for (const [nom, bouton] of boutons) {
       if (nom === section) bouton.setAttribute('aria-current', 'page');
       else bouton.removeAttribute('aria-current');
@@ -162,8 +164,20 @@ function panneauSession(
       blocs.push(message);
     }
     if (section === 'tableau') blocs.push(blocDeploiement(client));
-    else if (section === 'pistes') blocs.push(construirePistes(espace));
-    else {
+    else if (section === 'pistes' && edition !== undefined) {
+      blocs.push(
+        construireEdition(espace, edition, (message) => {
+          afficher('pistes', message);
+        }),
+      );
+    } else if (section === 'pistes') {
+      blocs.push(
+        construirePistes(espace, {
+          modifier: (ligne) => afficher('pistes', undefined, ligne),
+          termine: (message) => afficher('pistes', message),
+        }),
+      );
+    } else {
       blocs.push(
         construireNouvelle(espace, (message) => {
           afficher('nouvelle', message);

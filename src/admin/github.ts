@@ -62,7 +62,16 @@ export interface Suppression {
   supprimer: true;
 }
 
-export type Changement = Ajout | Suppression;
+/**
+ * Fichier déjà présent dans le dépôt, placé à un autre chemin sans être renvoyé (déplacement : seul
+ * le chemin change, l'empreinte du contenu reste la même).
+ */
+export interface Reutilisation {
+  chemin: string;
+  sha: string;
+}
+
+export type Changement = Ajout | Suppression | Reutilisation;
 
 /** Avancement d'un envoi : fichiers et octets déjà transmis, sur le total. */
 export interface Progression {
@@ -297,7 +306,7 @@ export class ClientGitHub {
   ): Promise<string> {
     if (changements.length === 0) throw new Error('Aucun changement à publier');
     for (const c of changements) {
-      if (!('supprimer' in c)) verifierTaille(c.chemin, enOctets(c.contenu));
+      if ('contenu' in c) verifierTaille(c.chemin, enOctets(c.contenu));
     }
     const branche = this.depot.branche;
     const reference = await this.json<{ object: { sha: string } }>(
@@ -310,7 +319,7 @@ export class ClientGitHub {
 
     const arbre: { path: string; mode: '100644'; type: 'blob'; sha: string | null }[] = [];
     const totalOctets = changements.reduce(
-      (somme, c) => somme + ('supprimer' in c ? 0 : enOctets(c.contenu).length),
+      (somme, c) => somme + ('contenu' in c ? enOctets(c.contenu).length : 0),
       0,
     );
     let fichiers = 0;
@@ -321,6 +330,8 @@ export class ClientGitHub {
     for (const c of changements) {
       if ('supprimer' in c) {
         arbre.push({ path: c.chemin, mode: '100644', type: 'blob', sha: null });
+      } else if ('sha' in c) {
+        arbre.push({ path: c.chemin, mode: '100644', type: 'blob', sha: c.sha });
       } else {
         const blob = await this.json<{ sha: string }>(`${this.racine}/git/blobs`, {
           method: 'POST',
@@ -329,7 +340,7 @@ export class ClientGitHub {
         arbre.push({ path: c.chemin, mode: '100644', type: 'blob', sha: blob.sha });
       }
       fichiers += 1;
-      if (!('supprimer' in c)) octets += enOctets(c.contenu).length;
+      if ('contenu' in c) octets += enOctets(c.contenu).length;
       signaler();
     }
 

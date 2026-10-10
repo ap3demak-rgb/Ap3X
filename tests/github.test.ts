@@ -386,3 +386,33 @@ describe('session du jeton', () => {
     expect(nettoyerJeton('deux mots')).toBeUndefined();
   });
 });
+
+describe('ClientGitHub : déplacement sans renvoi du contenu', () => {
+  it('place un fichier existant à un autre chemin en réutilisant son empreinte, sans créer de blob', async () => {
+    const { f, appels } = fauxFetch({
+      [`GET ${DEPOT}/git/ref/heads/main`]: { json: { object: { sha: 'tete' } } },
+      [`GET ${DEPOT}/git/commits/tete`]: { json: { tree: { sha: 'arbre0' } } },
+      [`POST ${DEPOT}/git/trees`]: { json: { sha: 'arbre1' } },
+      [`POST ${DEPOT}/git/commits`]: { json: { sha: 'commit1' } },
+      [`PATCH ${DEPOT}/git/refs/heads/main`]: { json: {} },
+    });
+    const progres: number[] = [];
+    await new ClientGitHub({ jeton: 'x', fetch: f }).commit(
+      'déplacement: piste',
+      [
+        { chemin: 'public/musique/b/a.mp3', sha: 'sha-mp3' },
+        { chemin: 'public/musique/a/a.mp3', supprimer: true },
+      ],
+      (p) => progres.push(p.totalOctets),
+    );
+    expect(appels.some((a) => a.chemin.endsWith('/git/blobs'))).toBe(false);
+    expect(appels.find((a) => a.chemin.endsWith('/git/trees'))?.corps).toEqual({
+      base_tree: 'arbre0',
+      tree: [
+        { path: 'public/musique/b/a.mp3', mode: '100644', type: 'blob', sha: 'sha-mp3' },
+        { path: 'public/musique/a/a.mp3', mode: '100644', type: 'blob', sha: null },
+      ],
+    });
+    expect(progres.every((octets) => octets === 0)).toBe(true);
+  });
+});

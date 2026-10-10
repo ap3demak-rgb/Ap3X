@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import { t, tv, type CleI18n } from '../i18n';
+import { ErreurFicheIllisible } from './edition';
 import { ErreurGitHub } from './github';
 
 /**
@@ -16,6 +17,7 @@ export function messageErreur(erreur: unknown): string {
     }
     return t(`admin.erreur.${erreur.code}` satisfies CleI18n);
   }
+  if (erreur instanceof ErreurFicheIllisible) return t('admin.erreur.fiche');
   console.error(erreur);
   return t('admin.erreur.autre');
 }

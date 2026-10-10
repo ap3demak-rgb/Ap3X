@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { crc32, deflateSync } from 'node:zlib';
 
 export const JETON_TEST = 'github_pat_FAUX_JETON_DE_TEST';
@@ -12,10 +12,16 @@ const base64 = (texte: string): string => Buffer.from(encodeur.encode(texte)).to
 /** Fichiers du dépôt simulé : chemin, empreinte, contenu texte éventuel. */
 const FICHIERS: { chemin: string; sha: string; contenu?: string }[] = [
   { chemin: 'public/musique/ambient/brume.mp3', sha: 'm-brume' },
+  { chemin: 'public/musique/ambient/brume.webp', sha: 'i-brume' },
   {
     chemin: 'public/musique/ambient/brume.json',
     sha: 'f-brume',
-    contenu: JSON.stringify({ titre: 'Brume', hashtags: ['nuit', 'calme'], visible: false }),
+    contenu: JSON.stringify({
+      titre: 'Brume',
+      hashtags: ['nuit', 'calme'],
+      pochette: 'brume.webp',
+      visible: false,
+    }),
   },
   { chemin: 'public/musique/techno/300.mp3', sha: 'm-300' },
   {
@@ -33,7 +39,7 @@ const FICHIERS: { chemin: string; sha: string; contenu?: string }[] = [
 export interface CommitRecu {
   message: string;
   /** Chemins de l'arbre envoyé, avec le contenu texte des blobs correspondants. */
-  fichiers: { chemin: string; contenu: Buffer | null }[];
+  fichiers: { chemin: string; contenu: Buffer | null; sha: string | null }[];
 }
 
 export interface DepotSimule {
@@ -117,6 +123,7 @@ export async function simulerDepot(page: Page, options: OptionsDepot = {}): Prom
           fichiers: arbreEnvoye.map((e) => ({
             chemin: e.path,
             contenu: e.sha === null ? null : (blobs.get(e.sha) ?? null),
+            sha: e.sha,
           })),
         });
       }
@@ -175,4 +182,16 @@ export function pngDeTest(): Buffer {
     morceau('IDAT', pixels),
     morceau('IEND', Buffer.alloc(0)),
   ]);
+}
+
+/** Ouvre l'administration déjà connectée, sur la section demandée. */
+export async function ouvrirAdmin(page: Page, section: 'Tracks' | 'New track'): Promise<void> {
+  await page.goto('./#/admin');
+  await page.evaluate((j) => sessionStorage.setItem('ap3x.admin.jeton', j), JETON_TEST);
+  await page.reload();
+  await expect(page.getByText('Signed in as ap3x-test.')).toBeVisible();
+  await page
+    .getByRole('navigation', { name: 'Administration sections' })
+    .getByRole('button', { name: section })
+    .click();
 }

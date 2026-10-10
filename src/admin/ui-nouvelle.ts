@@ -4,6 +4,7 @@
 import { normaliserDate } from '../catalogue/texte';
 import { t, tv } from '../i18n';
 import { annoncer } from '../ui/annonceur';
+import { creerChampsPiste } from './champs-piste';
 import { champ, element, formaterTaille } from './dom';
 import type { DepotAnalyse, Espace } from './espace';
 import {
@@ -17,11 +18,10 @@ import {
   type FormulairePiste,
 } from './fiche';
 import type { Changement } from './github';
-import { lireTagsFichier } from './id3';
-import { preparerPochette, type PochettePreparee } from './image';
+import { lireTagsFichier, type TagsId3 } from './id3';
 import { messageErreur } from './messages';
-
-const NOUVELLE_CATEGORIE = '\u0000nouvelle';
+import { creerProgression } from './progression';
+import { surveillerModifications } from './sortie';
 
 function estMp3(fichier: File): boolean {
   return fichier.name.toLowerCase().endsWith('.mp3') || fichier.type === 'audio/mpeg';
@@ -63,30 +63,12 @@ function formulaire(
   f.noValidate = true;
 
   let mp3: File | undefined;
-  let pochette: PochettePreparee | undefined;
-  let modifie = false;
+  let adresseMp3: string | undefined;
   let envoiEnCours = false;
+  const modifications = surveillerModifications(f);
 
-  const avantFermeture = (evenement: BeforeUnloadEvent): void => {
-    evenement.preventDefault();
-  };
-  const marquerModifie = (): void => {
-    if (modifie) return;
-    modifie = true;
-    window.addEventListener('beforeunload', avantFermeture);
-  };
-  const oublierModifications = (): void => {
-    modifie = false;
-    window.removeEventListener('beforeunload', avantFermeture);
-  };
-  // Le formulaire quitte la page (navigation interne) : plus d'avertissement à gérer.
-  const surveillance = new MutationObserver(() => {
-    if (!f.isConnected) {
-      oublierModifications();
-      surveillance.disconnect();
-    }
-  });
-  queueMicrotask(() => surveillance.observe(document.body, { childList: true, subtree: true }));
+  const champs = creerChampsPiste(depot, { audio: () => adresseMp3 });
+  const valeursInitiales = formulaireVide();
 
   // --- Fichier MP3 -----------------------------------------------------------------------------
   const zone = element('div', 'admin-depot');
@@ -98,114 +80,22 @@ function formulaire(
   nomMp3.setAttribute('role', 'status');
   zone.append(champ(t('admin.nouvelle.fichier'), saisieMp3), indication, nomMp3);
 
-  // --- Champs ----------------------------------------------------------------------------------
-  const valeurs: FormulairePiste = formulaireVide();
-  const titreSaisie = element('input');
-  titreSaisie.type = 'text';
-  titreSaisie.required = true;
-  const artisteSaisie = element('input');
-  artisteSaisie.type = 'text';
-  artisteSaisie.value = valeurs.artiste;
-  const descriptionSaisie = element('textarea');
-  descriptionSaisie.rows = 4;
-
-  const categorieSelect = element('select');
-  categorieSelect.append(new Option('', ''));
-  for (const dossier of depot.categories) categorieSelect.append(new Option(dossier, dossier));
-  categorieSelect.append(new Option(t('admin.nouvelle.categorie_nouvelle'), NOUVELLE_CATEGORIE));
-  const categorieNom = element('input');
-  categorieNom.type = 'text';
-  const categorieNomChamp = champ(t('admin.nouvelle.categorie_nom'), categorieNom);
-  categorieNomChamp.hidden = true;
-
-  const hashtagsSaisie = element('input');
-  hashtagsSaisie.type = 'text';
-  hashtagsSaisie.placeholder = '#ambient #nuit';
-  const dateSaisie = element('input');
-  dateSaisie.type = 'text';
-  dateSaisie.placeholder = 'YYYY-MM-DD';
-  dateSaisie.inputMode = 'numeric';
-  const licenceSaisie = element('input');
-  licenceSaisie.type = 'text';
-  licenceSaisie.value = valeurs.licence;
-  const copyrightSaisie = element('input');
-  copyrightSaisie.type = 'text';
-  copyrightSaisie.value = valeurs.copyright;
-
-  const caseTelechargement = element('input');
-  caseTelechargement.type = 'checkbox';
-  const casePublier = element('input');
-  casePublier.type = 'checkbox';
-  casePublier.checked = true;
-
-  const caseEtiquette = (libelle: string, controle: HTMLInputElement): HTMLLabelElement => {
-    const etiquette = element('label', 'champ-case');
-    etiquette.append(controle, element('span', undefined, libelle));
-    return etiquette;
-  };
-
-  // --- Pochette --------------------------------------------------------------------------------
-  const saisiePochette = element('input');
-  saisiePochette.type = 'file';
-  saisiePochette.accept = 'image/*';
-  const apercu = element('img', 'admin-apercu');
-  apercu.alt = '';
-  apercu.hidden = true;
-  const infoPochette = element('p', 'carte-meta');
-  infoPochette.setAttribute('role', 'status');
-  let adresseApercu: string | undefined;
-
   // --- Retours ---------------------------------------------------------------------------------
   const erreurs = element('div', 'erreur-champ');
   erreurs.setAttribute('role', 'alert');
-  const progression = element('progress', 'admin-progression');
-  progression.max = 100;
-  progression.value = 0;
-  progression.hidden = true;
-  progression.setAttribute('aria-label', t('admin.nouvelle.envoi'));
-  const etatEnvoi = element('p', 'carte-meta');
-  etatEnvoi.setAttribute('role', 'status');
+  const progression = creerProgression();
   const enregistrer = element('button', 'bouton bouton-principal', t('admin.nouvelle.enregistrer'));
   enregistrer.type = 'submit';
 
-  f.append(
-    zone,
-    champ(t('admin.nouvelle.champ_titre'), titreSaisie),
-    champ(t('admin.nouvelle.artiste'), artisteSaisie),
-    champ(t('admin.nouvelle.description'), descriptionSaisie),
-    champ(t('admin.nouvelle.categorie'), categorieSelect),
-    categorieNomChamp,
-    champ(t('admin.nouvelle.hashtags'), hashtagsSaisie),
-    champ(t('admin.nouvelle.date'), dateSaisie),
-    champ(t('admin.nouvelle.licence'), licenceSaisie),
-    champ(t('admin.nouvelle.copyright'), copyrightSaisie),
-    caseEtiquette(t('admin.nouvelle.telechargement'), caseTelechargement),
-    caseEtiquette(t('admin.nouvelle.publier'), casePublier),
-    champ(t('admin.nouvelle.pochette'), saisiePochette),
-    apercu,
-    infoPochette,
-    enregistrer,
-    progression,
-    etatEnvoi,
-    erreurs,
-  );
+  f.append(...[zone, ...champs.elements], enregistrer, progression.element, erreurs);
 
   const controles: Record<ChampInvalide, HTMLElement> = {
     fichier: saisieMp3,
-    titre: titreSaisie,
-    categorie: categorieSelect,
-    date: dateSaisie,
-    doublon: titreSaisie,
+    titre: champs.controles.titre,
+    categorie: champs.controles.categorie,
+    date: champs.controles.date,
+    doublon: champs.controles.titre,
   };
-
-  // --- Comportements ---------------------------------------------------------------------------
-  f.addEventListener('input', marquerModifie);
-  f.addEventListener('change', marquerModifie);
-  categorieSelect.addEventListener('change', () => {
-    const nouvelle = categorieSelect.value === NOUVELLE_CATEGORIE;
-    categorieNomChamp.hidden = !nouvelle;
-    if (nouvelle) categorieNom.focus();
-  });
 
   /** Retient le MP3 choisi ou déposé et préremplit les champs vides avec ses tags ID3. */
   const choisirMp3 = async (fichier: File): Promise<void> => {
@@ -216,30 +106,33 @@ function formulaire(
     }
     erreurs.textContent = '';
     mp3 = fichier;
-    marquerModifie();
+    if (adresseMp3 !== undefined) URL.revokeObjectURL(adresseMp3);
+    adresseMp3 = URL.createObjectURL(fichier);
+    modifications.marquer();
     nomMp3.textContent = `${fichier.name} (${formaterTaille(fichier.size, langue)})`;
-    const tags = await lireTagsFichier(fichier).catch(
-      () => ({}) as Awaited<ReturnType<typeof lireTagsFichier>>,
-    );
+    const tags: TagsId3 = await lireTagsFichier(fichier).catch(() => ({}));
+    const { saisies } = champs;
     let rempli = false;
     const remplir = (saisie: HTMLInputElement | HTMLTextAreaElement, valeur?: string): void => {
       if (valeur === undefined || valeur === '' || saisie.value.trim() !== '') return;
       saisie.value = valeur;
       rempli = true;
     };
-    remplir(titreSaisie, tags.titre);
-    if (tags.artiste !== undefined && artisteSaisie.value.trim() === valeurs.artiste) {
-      artisteSaisie.value = tags.artiste;
+    remplir(saisies.titre, tags.titre);
+    if (tags.artiste !== undefined && saisies.artiste.value.trim() === valeursInitiales.artiste) {
+      saisies.artiste.value = tags.artiste;
       rempli = true;
     }
-    remplir(descriptionSaisie, tags.commentaire);
-    remplir(dateSaisie, tags.date === undefined ? undefined : normaliserDate(tags.date));
-    if (titreSaisie.value.trim() === '') remplir(titreSaisie, fichier.name.replace(/\.mp3$/i, ''));
-    if (categorieSelect.value === '' && tags.genre !== undefined) {
+    remplir(saisies.description, tags.commentaire);
+    remplir(saisies.date, tags.date === undefined ? undefined : normaliserDate(tags.date));
+    if (saisies.titre.value.trim() === '') {
+      remplir(saisies.titre, fichier.name.replace(/\.mp3$/i, ''));
+    }
+    if (saisies.categorie.value === '' && tags.genre !== undefined) {
       const genre = tags.genre.toLowerCase();
       const dossier = depot.categories.find((d) => d.toLowerCase() === genre);
       if (dossier !== undefined) {
-        categorieSelect.value = dossier;
+        saisies.categorie.value = dossier;
         rempli = true;
       }
     }
@@ -262,66 +155,26 @@ function formulaire(
     if (fichier !== undefined) void choisirMp3(fichier);
   });
 
-  saisiePochette.addEventListener('change', () => {
-    const fichier = saisiePochette.files?.[0];
-    pochette = undefined;
-    apercu.hidden = true;
-    infoPochette.textContent = '';
-    if (adresseApercu !== undefined) URL.revokeObjectURL(adresseApercu);
-    if (fichier === undefined) return;
-    preparerPochette(fichier)
-      .then((prete) => {
-        pochette = prete;
-        adresseApercu = URL.createObjectURL(prete.blob);
-        apercu.src = adresseApercu;
-        apercu.hidden = false;
-        infoPochette.textContent = tv('admin.nouvelle.pochette_prete', {
-          largeur: prete.largeur,
-          hauteur: prete.hauteur,
-          taille: formaterTaille(prete.blob.size, langue),
-        });
-      })
-      .catch(() => {
-        saisiePochette.value = '';
-        infoPochette.textContent = t('admin.nouvelle.err_image');
-      });
-  });
-
-  const lireFormulaire = (): FormulairePiste => ({
-    titre: titreSaisie.value,
-    artiste: artisteSaisie.value,
-    description: descriptionSaisie.value,
-    categorie:
-      categorieSelect.value === NOUVELLE_CATEGORIE ? categorieNom.value : categorieSelect.value,
-    hashtags: hashtagsSaisie.value,
-    date: dateSaisie.value,
-    visible: casePublier.checked,
-    telechargement: caseTelechargement.checked,
-    licence: licenceSaisie.value,
-    copyright: copyrightSaisie.value,
-  });
-
   f.addEventListener('submit', (evenement) => {
     evenement.preventDefault();
     if (envoiEnCours) return;
     erreurs.textContent = '';
     for (const controle of Object.values(controles)) controle.removeAttribute('aria-invalid');
 
-    const donnees = lireFormulaire();
+    const donnees = champs.lire();
     const problemes = verifierFormulaire(donnees, mp3 !== undefined, depot);
     if (problemes.length > 0) {
-      const messages = problemes.map((p) => {
-        const cle = {
-          fichier: 'admin.nouvelle.err_fichier',
-          titre: 'admin.nouvelle.err_titre',
-          categorie: 'admin.nouvelle.err_categorie',
-          date: 'admin.nouvelle.err_date',
-          doublon: 'admin.nouvelle.err_doublon',
-        } as const;
-        return tv(cle[p.champ], { id: p.id ?? '' });
-      });
+      const cles = {
+        fichier: 'admin.nouvelle.err_fichier',
+        titre: 'admin.nouvelle.err_titre',
+        categorie: 'admin.nouvelle.err_categorie',
+        date: 'admin.nouvelle.err_date',
+        doublon: 'admin.nouvelle.err_doublon',
+      } as const;
       for (const p of problemes) controles[p.champ].setAttribute('aria-invalid', 'true');
-      erreurs.replaceChildren(...messages.map((m) => element('p', undefined, m)));
+      erreurs.replaceChildren(
+        ...problemes.map((p) => element('p', undefined, tv(cles[p.champ], { id: p.id ?? '' }))),
+      );
       controles[problemes[0]?.champ ?? 'titre'].focus();
       return;
     }
@@ -332,13 +185,12 @@ function formulaire(
   async function publier(fichier: File, donnees: FormulairePiste): Promise<void> {
     envoiEnCours = true;
     enregistrer.disabled = true;
-    progression.hidden = false;
-    progression.value = 0;
-    etatEnvoi.textContent = tv('admin.nouvelle.envoi_pourcent', { n: 0 });
+    progression.demarrer();
     try {
       const categorie = dossierCategorie(donnees.categorie, depot.categories);
       const base = nomFichierPiste(donnees.titre);
       const chemins = cheminsPiste(categorie, base);
+      const pochette = champs.pochette();
       const nomPochette = pochette === undefined ? undefined : `${base}${pochette.extension}`;
       const changements: Changement[] = [
         { chemin: chemins.mp3, contenu: new Uint8Array(await fichier.arrayBuffer()) },
@@ -353,26 +205,19 @@ function formulaire(
       const message = donnees.visible
         ? `ajout: piste « ${donnees.titre.trim()} »`
         : `ajout: brouillon de piste « ${donnees.titre.trim()} »`;
-      await espace.client.commit(message, changements, (avancement) => {
-        const pourcent =
-          avancement.totalOctets === 0
-            ? 100
-            : Math.round((avancement.octets / avancement.totalOctets) * 100);
-        progression.value = pourcent;
-        etatEnvoi.textContent = tv('admin.nouvelle.envoi_pourcent', { n: pourcent });
-      });
-      progression.value = 100;
-      oublierModifications();
+      await espace.client.commit(message, changements, (avancement) =>
+        progression.mettreAJour(avancement),
+      );
+      modifications.oublier();
       espace.invalider();
       const succes = donnees.visible
         ? t('admin.nouvelle.ok_publie')
         : t('admin.nouvelle.ok_brouillon');
-      etatEnvoi.textContent = succes;
+      progression.terminer(succes);
       annoncer(succes);
       apresPublication(succes);
     } catch (erreur) {
-      etatEnvoi.textContent = '';
-      progression.hidden = true;
+      progression.terminer();
       erreurs.replaceChildren(element('p', undefined, messageErreur(erreur)));
     } finally {
       envoiEnCours = false;
