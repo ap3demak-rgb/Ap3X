@@ -3,6 +3,7 @@
 
 import { WebGLRenderer } from 'three';
 import { intervalleImages, suivreBatterie } from './cadence';
+import { reglages } from '../site/reglages';
 import { Fond } from './fond';
 import { creerPochette3d } from './pochette3d';
 import type { SourcesVue, VueFenetre } from './vue';
@@ -217,7 +218,7 @@ export class Moteur {
     }
     this.renderer.setScissorTest(false);
     this.renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
-    this.fond.mettreAJour(secondes, this.options.sources.niveau());
+    this.fond.mettreAJour(secondes * reglages.fond.vitesse, this.options.sources.niveau());
     this.renderer.render(this.fond.scene, this.fond.camera);
   };
 

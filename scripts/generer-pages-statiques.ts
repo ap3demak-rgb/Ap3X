@@ -5,7 +5,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { cheminImagePartage } from '../src/catalogue/pochettes.ts';
 import { CatalogueSchema, type Album, type Piste } from '../src/catalogue/schemas.ts';
-import { BASE_SITE, NOM_SITE, URL_SITE } from '../src/constantes.ts';
+import { BASE_SITE, URL_SITE } from '../src/constantes.ts';
+import { lireSite } from './site.ts';
 import { remplacerVariables } from '../src/i18n/variables.ts';
 import { lienAlbum, lienPiste } from '../src/routeur.ts';
 import {
@@ -26,6 +27,7 @@ import {
  * L'adresse publique du site se règle avec la variable d'environnement SITE_URL.
  */
 const dist = process.argv[2] ?? 'dist';
+const site = lireSite();
 const urlSite = (process.env['SITE_URL'] ?? URL_SITE).replace(/\/*$/, '/');
 const CLES_TRADUITES = [
   'partage.ouvrir',
@@ -105,7 +107,7 @@ function pagePiste(piste: Piste): string {
       grandeImage: false,
       route: lienPiste(piste.id),
       racine: '../../../',
-      nomSite: NOM_SITE,
+      nomSite: site.nom,
     },
     couleurs,
     textes,
@@ -133,7 +135,7 @@ function pageAlbum(album: Album, premierePochette: string | undefined): string {
       grandeImage: false,
       route: lienAlbum(album.id),
       racine: '../../../',
-      nomSite: NOM_SITE,
+      nomSite: site.nom,
     },
     couleurs,
     textes,

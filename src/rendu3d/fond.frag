@@ -10,6 +10,8 @@ uniform vec2 uResolution;
 uniform vec3 uFond;
 uniform vec3 uMax;
 uniform float uNiveau;
+// De 0 à 1 : part de la couleur maximale utilisée (réglage du site) ; la sortie reste entre uFond et uMax.
+uniform float uIntensite;
 
 varying vec2 vUv;
 
@@ -44,7 +46,7 @@ void main() {
   // Mouvement très lent : aucune variation rapide, donc aucun risque de clignotement.
   float t = uTemps * 0.02;
   float n = fbm(uv * 2.2 + vec2(t, -0.7 * t) + fbm(uv * 3.0 - t));
-  float intensite = smoothstep(0.3, 0.9, n) * (0.7 + 0.3 * uNiveau);
+  float intensite = smoothstep(0.3, 0.9, n) * (0.7 + 0.3 * uNiveau) * uIntensite;
   vec3 couleur = mix(uFond, uMax, intensite);
   gl_FragColor = vec4(clamp(couleur, min(uFond, uMax), max(uFond, uMax)), 1.0);
 }

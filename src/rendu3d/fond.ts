@@ -10,6 +10,7 @@ import {
   Vector2,
   Vector3,
 } from 'three';
+import { reglages } from '../site/reglages';
 import { jetonSrgb } from './couleurs';
 import fragment from './fond.frag?raw';
 import vertex from './fond.vert?raw';
@@ -34,6 +35,7 @@ export class Fond {
         uFond: { value: new Vector3(...jetonSrgb('--fond')) },
         uMax: { value: new Vector3(...jetonSrgb('--fond-3d-max')) },
         uNiveau: { value: 0 },
+        uIntensite: { value: reglages.fond.intensite },
       },
     });
     this.maillage = new Mesh(this.geometrie, this.materiau);

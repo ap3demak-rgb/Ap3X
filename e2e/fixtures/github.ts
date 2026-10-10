@@ -16,7 +16,26 @@ interface FichierSimule {
   contenu?: string;
 }
 
+/** Réglages du site tels qu'ils sont dans le dépôt simulé. */
+export const REGLAGES_DEPOT = {
+  version: 1,
+  nom: 'AP3X Records',
+  slogan: '',
+  description: 'Listen to AP3X Records.',
+  liens: [],
+  options: { telechargements: true, aleatoire: false },
+  accueil: { misesEnAvant: [] },
+  fond: { actif: true, intensite: 1, vitesse: 1, visualiseur: true },
+  menu: { masques: [] },
+};
+
 const FICHIERS: FichierSimule[] = [
+  { chemin: 'public/site.json', sha: 's-site', contenu: JSON.stringify(REGLAGES_DEPOT, null, 2) },
+  {
+    chemin: 'public/manifest.webmanifest',
+    sha: 's-manifeste',
+    contenu: JSON.stringify({ name: 'AP3X Records' }),
+  },
   { chemin: 'public/musique/ambient/brume.mp3', sha: 'm-brume' },
   { chemin: 'public/musique/ambient/brume.webp', sha: 'i-brume' },
   {
@@ -119,7 +138,55 @@ export interface DepotSimule {
   lecturesArbre: () => number;
 }
 
+/**
+ * Historique simulé : c3 modifie le réglage du site (annulable), c2 touche une fiche modifiée depuis
+ * (conflit), c1 est un commit de fusion (non annulable).
+ */
+function reponseHistorique(cle: string, racine: string): unknown {
+  const commit = (sha: string, message: string, parents: string[]) => ({
+    sha,
+    html_url: `https://github.com/ap3demak-rgb/Ap3X/commit/${sha}`,
+    commit: { message, author: { name: 'AP3X Records', date: '2026-10-10T10:00:00Z' } },
+    parents: parents.map((p) => ({ sha: p })),
+  });
+  if (cle === `GET ${racine}/commits?sha=main&per_page=20`) {
+    return [
+      commit('c3', 'modification: réglages du site', ['p3']),
+      commit('c2', 'ajout: piste « Brume »', ['p2']),
+      commit('c1', 'Merge branch', ['a1', 'b1']),
+    ];
+  }
+  if (cle === `GET ${racine}/commits/c3`) {
+    return {
+      ...commit('c3', 'modification: réglages du site', ['p3']),
+      files: [{ filename: 'public/site.json', status: 'modified', sha: 's-site' }],
+    };
+  }
+  if (cle === `GET ${racine}/commits/c2`) {
+    return {
+      ...commit('c2', 'ajout: piste « Brume »', ['p2']),
+      files: [
+        {
+          filename: 'public/musique/ambient/brume.json',
+          status: 'modified',
+          sha: 'f-brume-ancien',
+        },
+        { filename: 'public/musique/ambient/brume.mp3', status: 'added', sha: 'm-brume' },
+      ],
+    };
+  }
+  if (cle === `GET ${racine}/contents/public/site.json?ref=p3`) {
+    return { type: 'file', sha: 's-site-avant' };
+  }
+  if (cle === `GET ${racine}/contents/public/musique/ambient/brume.json?ref=p2`) {
+    return { type: 'file', sha: 'f-brume-avant' };
+  }
+  return undefined;
+}
+
 interface OptionsDepot {
+  /** Ajoute un historique de commits (un annulable, un en conflit, un de fusion). */
+  historique?: boolean;
   /** Ajoute une 2e piste à l'album Club et un brouillon d'album incomplet. */
   etendu?: boolean;
   /** Ajoute des fiches de catégories (ordre, couleur) et une catégorie vide. */
@@ -177,6 +244,22 @@ export async function simulerDepot(page: Page, options: OptionsDepot = {}): Prom
       return json({
         truncated: false,
         tree: fichiers.map((f) => ({ path: f.chemin, type: 'blob', sha: f.sha, size: 10 })),
+      });
+    }
+    if (options.historique === true) {
+      const reponse = reponseHistorique(cle, racine);
+      if (reponse !== undefined) return json(reponse);
+    }
+    const lectureContenu = /\/contents\/(.+)$/.exec(url.pathname);
+    if (requete.method() === 'GET' && lectureContenu !== null) {
+      const chemin = decodeURIComponent(lectureContenu[1] ?? '');
+      const fichier = fichiers.find((f) => f.chemin === chemin);
+      if (fichier === undefined) return json({}, 404);
+      return json({
+        type: 'file',
+        sha: fichier.sha,
+        content: base64(fichier.contenu ?? ''),
+        encoding: 'base64',
       });
     }
     const lectureBlob = /\/git\/blobs\/(.+)$/.exec(url.pathname);
@@ -276,7 +359,7 @@ export function pngDeTest(): Buffer {
 }
 
 /** Ouvre l'administration déjà connectée, sur la section demandée. */
-export async function ouvrirAdmin(page: Page, section: 'Tracks' | 'New track'): Promise<void> {
+export async function ouvrirAdmin(page: Page, section: string): Promise<void> {
   await page.goto('./#/admin');
   await page.evaluate((j) => sessionStorage.setItem('ap3x.admin.jeton', j), JETON_TEST);
   await page.reload();

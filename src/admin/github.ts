@@ -94,6 +94,33 @@ export interface ArbreDepot {
   tronque: boolean;
 }
 
+export interface CommitResume {
+  sha: string;
+  message: string;
+  date: string;
+  auteur: string;
+  url: string;
+  parents: string[];
+}
+
+export interface FichierCommit {
+  chemin: string;
+  /** `added`, `removed`, `modified`, `renamed`… (vocabulaire de GitHub). */
+  statut: string;
+  /** Empreinte du fichier après le commit. */
+  sha: string;
+  ancienChemin?: string;
+}
+
+export interface DetailCommit {
+  sha: string;
+  message: string;
+  parents: string[];
+  fichiers: FichierCommit[];
+  /** GitHub plafonne la liste à 300 fichiers : elle est peut-être incomplète. */
+  tronque: boolean;
+}
+
 export type EtatDeploiement = 'en_cours' | 'termine' | 'echec';
 
 export interface Deploiement {
@@ -380,6 +407,62 @@ export class ClientGitHub {
   async lireBlob(sha: string): Promise<Uint8Array> {
     const blob = await this.json<{ content: string }>(`${this.racine}/git/blobs/${sha}`);
     return depuisBase64(blob.content);
+  }
+
+  /** Derniers commits de la branche, du plus récent au plus ancien. */
+  async historique(nombre = 20): Promise<CommitResume[]> {
+    const donnees = await this.json<
+      {
+        sha: string;
+        html_url: string;
+        commit: { message: string; author?: { name?: string; date?: string } };
+        parents: { sha: string }[];
+      }[]
+    >(`${this.racine}/commits?sha=${this.depot.branche}&per_page=${nombre}`);
+    return donnees.map((c) => ({
+      sha: c.sha,
+      message: c.commit.message,
+      date: c.commit.author?.date ?? '',
+      auteur: c.commit.author?.name ?? '',
+      url: c.html_url,
+      parents: c.parents.map((p) => p.sha),
+    }));
+  }
+
+  /** Fichiers modifiés par un commit (GitHub en renvoie au plus 300). */
+  async detailCommit(sha: string): Promise<DetailCommit> {
+    const donnees = await this.json<{
+      sha: string;
+      commit: { message: string };
+      parents: { sha: string }[];
+      files?: { filename: string; status: string; sha: string; previous_filename?: string }[];
+    }>(`${this.racine}/commits/${sha}`);
+    const fichiers = (donnees.files ?? []).map((f) => ({
+      chemin: f.filename,
+      statut: f.status,
+      sha: f.sha,
+      ...(f.previous_filename !== undefined && { ancienChemin: f.previous_filename }),
+    }));
+    return {
+      sha: donnees.sha,
+      message: donnees.commit.message,
+      parents: donnees.parents.map((p) => p.sha),
+      fichiers,
+      tronque: fichiers.length >= 300,
+    };
+  }
+
+  /** Empreinte d'un fichier à une révision donnée, ou `undefined` s'il n'existait pas alors. */
+  async empreinteA(chemin: string, revision: string): Promise<string | undefined> {
+    try {
+      const donnees = await this.json<{ sha?: string; type?: string }>(
+        `${this.racine}/contents/${encoderChemin(chemin)}?ref=${revision}`,
+      );
+      return donnees.type === 'file' || donnees.type === undefined ? donnees.sha : undefined;
+    } catch (erreur) {
+      if (erreur instanceof ErreurGitHub && erreur.code === 'introuvable') return undefined;
+      throw erreur;
+    }
   }
 
   /** Dernière exécution du workflow de déploiement, ou `undefined` s'il n'y en a pas encore. */

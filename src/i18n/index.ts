@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import en from './en.json';
+import { reglages } from '../site/reglages';
 import { remplacerVariables } from './variables';
 
 export type CleI18n = keyof typeof en;
@@ -74,6 +75,8 @@ export async function definirLangue(langue: Langue): Promise<void> {
 
 /** Traduit une clé ; repli sur l'anglais si la clé manque dans la langue courante. */
 export function t(cle: CleI18n): string {
+  // Le nom du site est un réglage (public/site.json), le même dans toutes les langues.
+  if (cle === 'site.nom') return reglages.nom;
   return dictionnaireDe(langueCourante)[cle] ?? en[cle];
 }
 

@@ -36,6 +36,8 @@ export interface OptionsLecteur {
   economieDonnees?: () => boolean;
   /** Générateur aléatoire dans [0, 1[, remplaçable pour les tests. */
   aleatoire?: () => number;
+  /** Lecture aléatoire au premier passage, quand aucune préférence n'est mémorisée. */
+  aleatoireParDefaut?: boolean;
 }
 
 export interface EtatLecteur {
@@ -464,7 +466,12 @@ export class Lecteur extends EventTarget {
   }
 
   private lireMemoire(): Memoire {
-    const defaut: Memoire = { volume: 1, muet: false, aleatoire: false, repetition: 'aucune' };
+    const defaut: Memoire = {
+      volume: 1,
+      muet: false,
+      aleatoire: this.options.aleatoireParDefaut === true,
+      repetition: 'aucune',
+    };
     try {
       const brut = this.options.stockage?.getItem(CLE_STOCKAGE);
       if (brut === null || brut === undefined) return defaut;

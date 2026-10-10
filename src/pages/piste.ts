@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import { urlDuFichier } from '../catalogue/charger';
+import { reglages } from '../site/reglages';
 import { pistesDeAlbum, pistesSimilaires, type Donnees } from '../catalogue/donnees';
 import type { Piste } from '../catalogue/schemas';
 import { t } from '../i18n';
@@ -97,7 +98,7 @@ function detail(donnees: Donnees, piste: Piste, options: OptionsPagePiste): HTML
     actions,
     blocPartage({ type: 'piste', id: piste.id, titre: piste.titre, avecInstant: true }),
   );
-  if (piste.telechargement) {
+  if (piste.telechargement && reglages.options.telechargements) {
     const telecharger = lien(urlDuFichier(piste.fichier), t('piste.telecharger'), 'bouton');
     telecharger.setAttribute('download', '');
     actions.append(telecharger);

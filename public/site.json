@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "nom": "AP3X Records",
+  "slogan": "",
+  "description": "Listen to AP3X Records: tracks and albums released under a Creative Commons license.",
+  "liens": [],
+  "options": { "telechargements": true, "aleatoire": false },
+  "accueil": { "misesEnAvant": [] },
+  "fond": { "actif": true, "intensite": 1, "vitesse": 1, "visualiseur": true },
+  "menu": { "masques": [] }
+}

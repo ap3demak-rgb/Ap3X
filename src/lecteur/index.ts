@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import { chargerCatalogue, urlDuFichier } from '../catalogue/charger';
+import { reglages } from '../site/reglages';
 import type { Album, Catalogue, Piste } from '../catalogue/schemas';
 import { creerBarre, type Barre } from './barre';
 import { Lecteur } from './lecteur';
@@ -24,6 +25,7 @@ export const lecteur = new Lecteur({
   audio: elementAudio,
   prechargeur: new Audio(),
   resoudreUrl: urlDuFichier,
+  aleatoireParDefaut: reglages.options.aleatoire,
   economieDonnees: () => {
     const connexion = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
     return connexion?.saveData === true;

@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import { plusRecents } from '../catalogue/donnees';
+import { reglages } from '../site/reglages';
 import { hashtagsPopulaires, niveauNuage } from '../catalogue/navigation';
 import { t } from '../i18n';
 import { comptePistes } from '../i18n/format';
@@ -18,12 +19,34 @@ export function pageAccueil(): HTMLElement {
   const page = document.createElement('section');
   const intro = document.createElement('p');
   intro.textContent = t('accueil.intro');
-  page.append(titrePage(t('site.nom')), intro);
+  page.append(titrePage(t('site.nom')));
+  if (reglages.slogan !== '') {
+    const slogan = document.createElement('p');
+    slogan.className = 'slogan';
+    slogan.textContent = reglages.slogan;
+    page.append(slogan);
+  }
+  page.append(intro);
 
   remplirAvecCatalogue(page, (donnees) => {
     const { pistes, albums, categories } = donnees.catalogue;
     const recentes = plusRecents(pistes, NOMBRE_PISTES);
     const blocs: HTMLElement[] = [];
+
+    // Pistes et albums mis en avant par les réglages du site ; un identifiant inconnu est ignoré.
+    const pisteParId = new Map(pistes.map((p) => [p.id, p]));
+    const albumParId = new Map(albums.map((a) => [a.id, a]));
+    const vedettes = reglages.accueil.misesEnAvant.flatMap((id) => {
+      const piste = pisteParId.get(id);
+      if (piste !== undefined) return [cartePiste(donnees, piste, [piste])];
+      const album = albumParId.get(id);
+      return album !== undefined ? [carteAlbum(donnees, album)] : [];
+    });
+    if (vedettes.length > 0) {
+      const sectionVedettes = document.createElement('section');
+      sectionVedettes.append(sousTitre(t('accueil.mises_en_avant')), grille(vedettes));
+      blocs.push(sectionVedettes);
+    }
 
     const sectionPistes = document.createElement('section');
     sectionPistes.append(

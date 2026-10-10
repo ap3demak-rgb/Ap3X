@@ -62,6 +62,8 @@ export interface AnalyseDepot {
   categoriesDepot: CategorieDepot[];
   /** Tous les chemins de fichiers du dépôt (pour détecter les collisions). */
   chemins: ReadonlySet<string>;
+  /** Empreinte Git de chaque fichier du dépôt, par chemin. */
+  empreintes: ReadonlyMap<string, string>;
 }
 
 const extension = (nom: string): string => {
@@ -95,12 +97,16 @@ export function identifiantAlbumDepot(album: Pick<AlbumDepot, 'categorie' | 'dos
 export function analyserArbre(entrees: readonly EntreeArbre[]): AnalyseDepot {
   const prefixe = `${DOSSIER_MUSIQUE}/`;
   const chemins = new Set<string>();
+  const empreintes = new Map<string, string>();
   const categories = new Set<string>();
   const fichiers = new Map<string, FichierDepot>();
 
   for (const entree of entrees) {
     if (entree.type !== 'blob' && entree.type !== 'tree') continue;
-    if (entree.type === 'blob') chemins.add(entree.chemin);
+    if (entree.type === 'blob') {
+      chemins.add(entree.chemin);
+      empreintes.set(entree.chemin, entree.sha);
+    }
     if (!entree.chemin.startsWith(prefixe)) continue;
     const segments = entree.chemin.slice(prefixe.length).split('/');
     const [categorie] = segments;
@@ -176,5 +182,5 @@ export function analyserArbre(entrees: readonly EntreeArbre[]): AnalyseDepot {
       albums: albums.filter((a) => a.categorie === dossier),
     };
   });
-  return { categories: noms, pistes, albums, categoriesDepot, chemins };
+  return { categories: noms, pistes, albums, categoriesDepot, chemins, empreintes };
 }

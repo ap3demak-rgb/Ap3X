@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import { albumsLies, pistesDeAlbum, type Donnees } from '../catalogue/donnees';
+import { reglages } from '../site/reglages';
 import type { Album, Piste } from '../catalogue/schemas';
 import { t, tv } from '../i18n';
 import { comptePistes, formaterDate, formaterDuree } from '../i18n/format';
@@ -174,7 +175,9 @@ function detail(donnees: Donnees, album: Album): HTMLElement[] {
   infos.append(
     meta,
     actions,
-    ...(album.telechargement ? [blocTelechargement(donnees, album)] : []),
+    ...(album.telechargement && reglages.options.telechargements
+      ? [blocTelechargement(donnees, album)]
+      : []),
     blocPartage({ type: 'album', id: album.id, titre: album.titre }),
   );
   entete.append(pochette(album.pochette, 'pochette-grande'), infos);

@@ -26,6 +26,9 @@ import type { LigneAlbum } from './liste-albums';
 import { construireEditionAlbum, construireNouvelAlbum } from './ui-album';
 import { construireCategorie } from './ui-categorie';
 import { construireCategories } from './ui-categories';
+import { construireHistorique } from './ui-historique';
+import { construireJson } from './ui-json';
+import { construireSite } from './ui-site';
 import { construireAlbums } from './ui-albums';
 import { construireEdition } from './ui-edition';
 import { construireNouvelle } from './ui-nouvelle';
@@ -135,7 +138,16 @@ export function construireEcran(): HTMLElement {
   return racine;
 }
 
-type Section = 'tableau' | 'pistes' | 'nouvelle' | 'albums' | 'nouvelAlbum' | 'categories';
+type Section =
+  | 'tableau'
+  | 'pistes'
+  | 'nouvelle'
+  | 'albums'
+  | 'nouvelAlbum'
+  | 'categories'
+  | 'site'
+  | 'json'
+  | 'historique';
 
 const SECTIONS: { section: Section; libelle: CleI18n }[] = [
   { section: 'tableau', libelle: 'admin.nav.tableau' },
@@ -144,6 +156,9 @@ const SECTIONS: { section: Section; libelle: CleI18n }[] = [
   { section: 'albums', libelle: 'admin.nav.albums' },
   { section: 'nouvelAlbum', libelle: 'admin.nav.nouvel_album' },
   { section: 'categories', libelle: 'admin.nav.categories' },
+  { section: 'site', libelle: 'admin.nav.site' },
+  { section: 'json', libelle: 'admin.nav.json' },
+  { section: 'historique', libelle: 'admin.nav.historique' },
 ];
 
 function panneauSession(
@@ -223,6 +238,15 @@ function panneauSession(
             afficher('categories', undefined, undefined, undefined, categorie),
           termine: (message) => afficher('categories', message),
         }),
+      );
+    } else if (section === 'site' || section === 'json' || section === 'historique') {
+      const apres = (message: string): void => afficher(section, message);
+      blocs.push(
+        section === 'site'
+          ? construireSite(espace, apres)
+          : section === 'json'
+            ? construireJson(espace, apres)
+            : construireHistorique(espace, apres),
       );
     } else if (section === 'nouvelAlbum') {
       blocs.push(

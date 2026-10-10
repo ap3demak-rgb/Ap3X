@@ -2,20 +2,31 @@
 // © 2026 AP3X Records
 
 import { defineConfig, type Plugin } from 'vite';
-import { BASE_SITE, DESCRIPTION_SITE, NOM_SITE, URL_SITE } from './src/constantes.ts';
+import { BASE_SITE, URL_SITE } from './src/constantes.ts';
+import { baliseReglages, echapperHtml, lireSite } from './scripts/site.ts';
 
 /** Adresse publique du site (surchargeable avec SITE_URL), toujours terminée par « / ». */
 const urlSite = (process.env['SITE_URL'] ?? URL_SITE).replace(/\/*$/, '/');
 
-/** Insère dans index.html les constantes du site (adresse, nom, description) : source unique. */
+/**
+ * Insère dans index.html l'adresse du site et les réglages de `public/site.json` (nom, description, et le
+ * JSON complet dans une balise lue au démarrage). Un fichier de réglages invalide arrête le build.
+ */
 function constantesHtml(): Plugin {
   return {
     name: 'constantes-html',
-    transformIndexHtml: (html) =>
-      html
+    transformIndexHtml: (html) => {
+      const site = lireSite();
+      return html
         .replaceAll('%URL_SITE%', urlSite)
-        .replaceAll('%NOM_SITE%', NOM_SITE)
-        .replaceAll('%DESCRIPTION_SITE%', DESCRIPTION_SITE),
+        .replaceAll('%NOM_SITE%', echapperHtml(site.nom))
+        .replaceAll('%DESCRIPTION_SITE%', echapperHtml(site.description))
+        .replace(
+          '</head>',
+          `${baliseReglages(site)}
+  </head>`,
+        );
+    },
   };
 }
 

@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import { chargerCatalogue } from '../catalogue/charger';
+import { reglages, type EntreeMenu } from '../site/reglages';
 import { CATEGORIE_FAVORIS, CATEGORIE_TOUT } from '../catalogue/navigation';
 import { EMAIL_CONTACT } from '../constantes';
 import { LANGUES, definirLangue, obtenirLangue, t, type Langue } from '../i18n';
@@ -111,13 +112,19 @@ export function entete(): HTMLElement {
 
   const navigation = document.createElement('nav');
   navigation.setAttribute('aria-label', t('nav.principale'));
+  // Les entrées masquées par les réglages du site (`menu.masques`) ne sont pas affichées.
+  const entrees: [EntreeMenu, string, string][] = [
+    ['categories', '#/categories', t('nav.categories')],
+    ['albums', '#/albums', t('nav.albums')],
+    ['playlists', '#/playlists', t('nav.playlists')],
+    ['favoris', lienCategorie(CATEGORIE_FAVORIS), t('nav.favoris')],
+    ['licences', '#/licences', t('nav.licences')],
+  ];
   navigation.append(
     lien('#/', t('nav.accueil')),
-    lien('#/categories', t('nav.categories')),
-    lien('#/albums', t('nav.albums')),
-    lien('#/playlists', t('nav.playlists')),
-    lien(lienCategorie(CATEGORIE_FAVORIS), t('nav.favoris')),
-    lien('#/licences', t('nav.licences')),
+    ...entrees
+      .filter(([nom]) => !reglages.menu.masques.includes(nom))
+      .map(([, adresse, texte]) => lien(adresse, texte)),
     selecteurCategorie(),
   );
 
@@ -136,5 +143,17 @@ export function pied(): HTMLElement {
   const contact = document.createElement('p');
   contact.append(lien(`mailto:${EMAIL_CONTACT}`, `${t('pied.contact')} : ${EMAIL_CONTACT}`));
   bas.append(copyright, musique, code, contact);
+  if (reglages.liens.length > 0) {
+    const autres = document.createElement('ul');
+    autres.className = 'pied-liens';
+    for (const { nom, url } of reglages.liens) {
+      const item = document.createElement('li');
+      const adresse = lien(url, nom);
+      if (!url.startsWith('mailto:')) adresse.rel = 'noopener noreferrer';
+      item.append(adresse);
+      autres.append(item);
+    }
+    bas.append(autres);
+  }
   return bas;
 }

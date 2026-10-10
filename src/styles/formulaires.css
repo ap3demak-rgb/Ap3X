@@ -447,3 +447,18 @@
     }
   }
 }
+
+@layer composants {
+  .admin-json {
+    box-sizing: border-box;
+    width: 100%;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.9rem;
+    white-space: pre;
+    overflow: auto;
+  }
+
+  .admin-site output {
+    margin-inline-start: 0.5rem;
+  }
+}

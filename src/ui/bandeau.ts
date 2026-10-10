@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // © 2026 AP3X Records
 
+import { reglages } from '../site/reglages';
+
 export type ModeBandeau = 'cache' | 'reserve' | 'webgl' | 'css';
 
 /**
@@ -28,7 +30,8 @@ class Bandeau {
     this.element.append(this.canvas, this.niveau);
     // Mouvement réduit : jamais de visualiseur, donc aucune zone à réserver.
     const mouvementReduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.definirMode(mouvementReduit ? 'cache' : 'reserve');
+    const masque = mouvementReduit || !reglages.fond.actif || !reglages.fond.visualiseur;
+    this.definirMode(masque ? 'cache' : 'reserve');
   }
 
   definirMode(mode: ModeBandeau): void {

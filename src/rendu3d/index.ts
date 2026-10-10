@@ -2,6 +2,7 @@
 // © 2026 AP3X Records
 
 import { lecteur, elementAudio } from '../lecteur';
+import { reglages } from '../site/reglages';
 import { bandeau } from '../ui/bandeau';
 import { Analyseur } from './analyseur';
 import type { DemandeFenetre, Moteur } from './moteur';
@@ -22,6 +23,9 @@ interface DemandeEnAttente {
 
 const analyseur = new Analyseur(elementAudio);
 const mouvementReduit = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+/** Pas d'animation : demande du visiteur (mouvement réduit) ou réglage du site (`fond.actif`). */
+const sansAnimation = (): boolean => mouvementReduit.matches || !reglages.fond.actif;
 
 const sources: SourcesVue = {
   spectre: analyseur.spectre,
@@ -46,6 +50,7 @@ function activerAnalyse(): void {
 
 /** Repli sans WebGL : une barre de niveau en CSS, mise à jour tant que la page est visible. */
 function demarrerRepliCss(): void {
+  if (!reglages.fond.visualiseur) return;
   bandeau.definirMode('css');
   const image = (): void => {
     boucleCss = requestAnimationFrame(image);
@@ -82,14 +87,14 @@ async function activerFenetre(demande: DemandeEnAttente): Promise<void> {
 }
 
 async function lancer(): Promise<void> {
-  if (mouvementReduit.matches) {
+  if (sansAnimation()) {
     // Mouvement réduit : fond statique (dégradé CSS), ni visualiseur ni pochette animée.
     bandeau.definirMode('cache');
     return;
   }
   elementAudio.addEventListener('play', activerAnalyse);
   const { Moteur: ClasseMoteur } = await import('./moteur');
-  if (mouvementReduit.matches) return;
+  if (sansAnimation()) return;
   const instance = ClasseMoteur.creer({
     sources,
     surPerte: () => {
@@ -106,15 +111,19 @@ async function lancer(): Promise<void> {
   }
   moteur = instance;
   document.body.prepend(instance.canvas);
-  bandeau.definirMode('webgl');
   instance.demarrer();
-  void instance
-    .ajouterFenetre({ canvas: bandeau.canvas, type: 'visualiseur' })
-    .catch((erreur: unknown) => {
-      console.warn('Visualiseur non affiché :', erreur);
-      bandeau.definirMode('css');
-      demarrerRepliCss();
-    });
+  if (reglages.fond.visualiseur) {
+    bandeau.definirMode('webgl');
+    void instance
+      .ajouterFenetre({ canvas: bandeau.canvas, type: 'visualiseur' })
+      .catch((erreur: unknown) => {
+        console.warn('Visualiseur non affiché :', erreur);
+        bandeau.definirMode('css');
+        demarrerRepliCss();
+      });
+  } else {
+    bandeau.definirMode('cache');
+  }
   const demandes = enAttente;
   enAttente = [];
   await Promise.all(demandes.map(activerFenetre));
@@ -133,7 +142,7 @@ export function demarrerRendu3d(): void {
   demarre = true;
   void lancer();
   mouvementReduit.addEventListener('change', () => {
-    if (mouvementReduit.matches) {
+    if (sansAnimation()) {
       arreter();
     } else {
       void lancer();
@@ -151,7 +160,7 @@ export function fenetre3d(
   surEchec: () => void,
 ): void {
   const entree: DemandeEnAttente = { demande, surActive, surEchec };
-  if (mouvementReduit.matches) return;
+  if (sansAnimation()) return;
   if (moteur !== undefined) void activerFenetre(entree);
   else enAttente.push(entree);
 }
